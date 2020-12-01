@@ -2,13 +2,15 @@
 
 use crate::Day;
 
-// use crate::Problem;
+use crate::Problem;
+
+mod day01;
 
 /// Solve a problem in the year 2020
-pub fn solve(day: Day, _input: String) -> anyhow::Result<()> {
-    // match day.0 {
-    //     _ => return Err(anyhow::anyhow!("{} is not implemented", day)),
-    // }
-    // Ok(())
-    Err(anyhow::anyhow!("{} is not implemented", day))
+pub fn solve(day: Day, input: String) -> anyhow::Result<()> {
+    match day.0 {
+        1 => day01::Day01::parse_and_solve(input)?,
+        _ => return Err(anyhow::anyhow!("{} is not implemented", day)),
+    }
+    Ok(())
 }
