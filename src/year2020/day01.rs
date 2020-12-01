@@ -48,15 +48,18 @@ impl crate::Problem for Day01 {
 /// Option of the found elements as a tuple (first, second)
 fn find_sum(data: &[u64], wanted: u64, check_index: impl Fn(usize) -> bool) -> Option<(u64, u64)> {
     for (i, first) in data.iter().copied().enumerate() {
-        if check_index(i) {
-            for (j, second) in data.iter().copied().enumerate() {
-                if check_index(j) && i != j && first + second == wanted {
-                    return Some((first, second));
-                }
+        let to_find = if check_index(i) && first <= wanted {
+            wanted - first
+        } else {
+            continue;
+        };
+        for (j, second) in data.iter().copied().enumerate() {
+            if check_index(j) && i != j && second == to_find {
+                return Some((first, second));
             }
         }
     }
-    return None;
+    None
 }
 
 fn first_part(expenses: &[u64]) -> Option<(u64, u64)> {
@@ -65,11 +68,12 @@ fn first_part(expenses: &[u64]) -> Option<(u64, u64)> {
 
 fn second_part(expenses: &[u64]) -> Option<(u64, u64, u64)> {
     for (i, a) in expenses.iter().copied().enumerate() {
-        if let Some((b, c)) = find_sum(expenses, 2020 - a, |idx| i != idx) {
+        let wanted = if a <= 2020 { 2020 - a } else { continue };
+        if let Some((b, c)) = find_sum(expenses, wanted, |idx| i != idx) {
             return Some((a, b, c));
         }
     }
-    return None;
+    None
 }
 
 #[cfg(test)]
