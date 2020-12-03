@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
-pub struct Day03;
+pub struct Day;
 
-impl crate::Problem for Day03 {
+impl crate::Problem for Day {
     type Input = Forest;
     type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 3: Toboggan Trajectory";

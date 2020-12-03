@@ -5,9 +5,9 @@ use anyhow::anyhow;
 use crate::commons::grid::{Direction, Point};
 use crate::parse::{CommaSep, LineSep};
 
-pub struct Day03;
+pub struct Day;
 
-impl crate::Problem for Day03 {
+impl crate::Problem for Day {
     type Input = LineSep<CommaSep<String>>;
     type Err = anyhow::Error;
     const TITLE: &'static str = "Day 3: Crossed Wires";

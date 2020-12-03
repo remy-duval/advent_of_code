@@ -1,6 +1,6 @@
-pub struct Day01;
+pub struct Day;
 
-impl crate::Problem for Day01 {
+impl crate::Problem for Day {
     type Input = crate::parse::LineSep<i64>;
     type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 1 : The Tyranny of the Rocket Equation";
@@ -39,23 +39,17 @@ fn fuel_for_mass_all(mass: i64) -> i64 {
 
 #[cfg(test)]
 mod test {
-    use crate::commons::parse::LineSep;
-    use crate::commons::Problem;
+    use crate::Problem;
 
     use super::*;
 
     const DATA: &str = include_str!("test_resources/day01.txt");
 
     #[test]
-    fn solve_test() {
-        let masses: LineSep<i64> = DATA.parse().unwrap();
+    fn all_parts_test() {
+        let masses = Day::parse(DATA).unwrap();
         let (first, second) = solve(&masses.data);
         assert_eq!(3_256_794, first);
         assert_eq!(4_882_337, second);
-    }
-
-    #[test]
-    fn problem_test() {
-        Day01::parse_and_solve(DATA).unwrap();
     }
 }

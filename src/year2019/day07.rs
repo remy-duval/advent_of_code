@@ -1,27 +1,28 @@
-use std::error::Error;
-
 use itertools::Itertools;
 
-use aoc::generator::data_from_cli;
-use aoc::int_code::{parse_int_code, Processor, Status};
+use crate::Problem;
 
-const TITLE: &str = "Day 7: Amplification Circuit";
-const DATA: &str = include_str!("../resources/day07.txt");
+use super::int_code::{IntCodeInput, Processor, Status};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let memory = parse_int_code(&data)?;
-    println!(
-        "The best output with single cycle is {}",
-        single_loop(&memory)
-    );
-    println!(
-        "The best output with feedback loop is {}",
-        feedback_loop(&memory)
-    );
+pub struct Day;
 
-    Ok(())
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = anyhow::Error;
+    const TITLE: &'static str = "Day 7: Amplification Circuit";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        println!(
+            "The best output with single cycle is {}",
+            single_loop(&data.data)
+        );
+        println!(
+            "The best output with feedback loop is {}",
+            feedback_loop(&data.data)
+        );
+
+        Ok(())
+    }
 }
 
 /// Finds the maximum output with the single loop phases
@@ -78,6 +79,8 @@ fn amplifier(memory: &[i64], inputs: &[u8]) -> Option<i64> {
 mod test {
     use super::*;
 
+    const DATA: &str = include_str!("test_resources/day07.txt");
+
     #[test]
     fn first_part() {
         let one = [
@@ -114,11 +117,9 @@ mod test {
     }
 
     #[test]
-    fn solve_test() -> Result<(), Box<dyn Error>> {
-        let memory = parse_int_code(&DATA)?;
+    fn solve_test() {
+        let memory = Day::parse(DATA).unwrap().data;
         assert_eq!(11828, single_loop(&memory));
         assert_eq!(1_714_298, feedback_loop(&memory));
-
-        Ok(())
     }
 }

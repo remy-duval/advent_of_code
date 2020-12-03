@@ -2,9 +2,9 @@ use super::int_code;
 
 const WANTED: i64 = 19_690_720;
 
-pub struct Day02;
+pub struct Day;
 
-impl crate::Problem for Day02 {
+impl crate::Problem for Day {
     type Input = int_code::IntCodeInput;
     type Err = int_code::IntCodeError;
     const TITLE: &'static str = "Day 2: 1202 Program Alarm";
@@ -43,13 +43,15 @@ fn find_match(mem: &[i64], expected: i64) -> Option<(i64, i64)> {
 
 #[cfg(test)]
 mod test {
+    use crate::Problem;
+
     use super::*;
 
     const DATA: &str = include_str!("test_resources/day02.txt");
 
     #[test]
     fn solve_test() {
-        let memory: Vec<i64> = DATA.parse::<int_code::IntCodeInput>().unwrap().data;
+        let memory: Vec<i64> = Day::parse(DATA).unwrap().data;
         let first = run_one(&memory, 12, 2).expect("1202 program error");
         let (noun, verb) = find_match(&memory, WANTED).expect("Finding second program error");
 

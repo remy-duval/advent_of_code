@@ -1,32 +1,35 @@
 use std::collections::HashMap;
-use std::error::Error;
 use std::str::FromStr;
 
-use aoc::generator::data_from_cli;
-use aoc::maths::lcm;
+use crate::commons::math::lcm;
+use crate::Problem;
 
-const TITLE: &str = "Day 12: The N-Body Problem";
-const DATA: &str = include_str!("../resources/day12.txt");
 const DIMENSIONS: usize = 3;
 const MOONS: usize = 4;
 const STEPS: usize = 1000;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let mut moons: Moons = data.parse()?;
-    // First part
-    (0..STEPS).for_each(|_| moons.next());
-    let total_energy = moons.energy();
-    println!(
-        "The total energy of the system after {} steps is {}",
-        STEPS, total_energy
-    );
-    // Second part
-    let period = find_periodicity(moons);
-    println!("The moons periodicity is {}", period);
+pub struct Day;
 
-    Ok(())
+impl Problem for Day {
+    type Input = Moons;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 12: The N-Body Problem";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let mut moons: Moons = data;
+        // First part
+        (0..STEPS).for_each(|_| moons.next());
+        let total_energy = moons.energy();
+        println!(
+            "The total energy of the system after {} steps is {}",
+            STEPS, total_energy
+        );
+        // Second part
+        let period = find_periodicity(moons);
+        println!("The moons periodicity is {}", period);
+
+        Ok(())
+    }
 }
 
 /// Finds the period of the system movement.
@@ -51,11 +54,16 @@ fn find_periodicity(mut moons: Moons) -> i64 {
     }
 
     moons.clear();
-    lcm(lcm(x.unwrap(), y.unwrap()), z.unwrap())
+    if let Some(((a, b), c)) = x.zip(y).zip(z) {
+        lcm(lcm(a, b), c)
+    } else {
+        println!("Could not find the values of x, y and z");
+        0
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Moons {
+pub struct Moons {
     x: [i32; MOONS],
     y: [i32; MOONS],
     z: [i32; MOONS],
@@ -219,13 +227,14 @@ impl Moons {
 mod tests {
     use super::*;
 
-    const TEST_ONE: &str = include_str!("../test_resources/day12_1.txt");
-    const TEST_TWO: &str = include_str!("../test_resources/day12_2.txt");
+    const TEST_ONE: &str = include_str!("test_resources/day12_1.txt");
+    const TEST_TWO: &str = include_str!("test_resources/day12_2.txt");
+    const DATA: &str = include_str!("test_resources/day12_data.txt");
 
     #[test]
     fn parse_test() {
-        let first: Moons = TEST_ONE.parse().expect("Parse error should not happen");
-        let second: Moons = TEST_TWO.parse().expect("Parse error should not happen");
+        let first: Moons = TEST_ONE.parse().unwrap();
+        let second: Moons = TEST_TWO.parse().unwrap();
 
         assert_eq!(
             Moons::new([[-1, 0, 2], [2, -10, -7], [4, -8, 8], [3, 5, -1]]),
@@ -239,8 +248,8 @@ mod tests {
 
     #[test]
     fn energy_test() {
-        let mut first: Moons = TEST_ONE.parse().expect("Parse error should not happen");
-        let mut second: Moons = TEST_TWO.parse().expect("Parse error should not happen");
+        let mut first: Moons = TEST_ONE.parse().unwrap();
+        let mut second: Moons = TEST_TWO.parse().unwrap();
 
         (0..10).for_each(|_| first.next());
         assert_eq!(179, first.energy());
@@ -251,23 +260,21 @@ mod tests {
 
     #[test]
     fn periodicity_test() {
-        let first: Moons = TEST_ONE.parse().expect("Parse error should not happen");
-        let second: Moons = TEST_TWO.parse().expect("Parse error should not happen");
+        let first: Moons = TEST_ONE.parse().unwrap();
+        let second: Moons = TEST_TWO.parse().unwrap();
 
         assert_eq!(2772, find_periodicity(first));
         assert_eq!(4_686_774_924, find_periodicity(second));
     }
 
     #[test]
-    fn solve_test() -> Result<(), Box<dyn Error>> {
-        let mut moons: Moons = DATA.parse()?;
+    fn solve_test() {
+        let mut moons: Moons = Day::parse(DATA).unwrap();
         (0..STEPS).for_each(|_| moons.next());
         let total_energy = moons.energy();
         assert_eq!(9493, total_energy);
 
         let period = find_periodicity(moons);
         assert_eq!(326_365_108_375_488, period);
-
-        Ok(())
     }
 }

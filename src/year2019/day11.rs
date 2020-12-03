@@ -1,34 +1,34 @@
 use std::collections::HashMap;
-use std::error::Error;
 
 use itertools::Itertools;
 
-use aoc::generator::data_from_cli;
-use aoc::grid::{Direction, Point};
-use aoc::int_code::{parse_int_code, IntCodeError, Processor, Status};
+use crate::commons::grid::{Direction, Point};
+use crate::Problem;
 
-const TITLE: &str = "Day 11: Space Police";
-const DATA: &str = include_str!("../resources/day11.txt");
+use super::int_code::{IntCodeError, IntCodeInput, Processor, Status};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", aoc::CLEAR_COMMAND);
-    let memory = parse_int_code(&data)?;
-    println!("{}", TITLE);
-    // First part
-    let mut hull: HashMap<Point, u8> = HashMap::new();
-    let first_paint: String = paint_hull(&memory, &mut hull)?;
-    println!("{}{}", aoc::TO_TOP, first_paint);
-    println!("The robot painted {} tiles", hull.len());
+pub struct Day;
 
-    // Second part
-    println!("{}", aoc::CLEAR_COMMAND);
-    hull.clear();
-    hull.insert(Point::new(0, 0), 1);
-    let second_paint: String = paint_hull(&memory, &mut hull)?;
-    println!("{}{}", aoc::TO_TOP, second_paint);
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = IntCodeError;
+    const TITLE: &'static str = "Day 11: Space Police";
 
-    Ok(())
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let memory = data.data;
+        let mut hull: HashMap<Point, u8> = HashMap::new();
+        println!("\n{}\n", paint_hull(&memory, &mut hull)?);
+        println!("The robot painted {} tiles\n\n", hull.len());
+
+        hull.clear();
+        hull.insert(Point::new(0, 0), 1);
+        println!(
+            "The robot painted something:\n{}",
+            paint_hull(&memory, &mut hull)?
+        );
+
+        Ok(())
+    }
 }
 
 /// Run the IntCode processor given to paint the hull
@@ -106,8 +106,9 @@ fn hull_representation(
 
 #[cfg(test)]
 mod test {
-
     use super::*;
+
+    const DATA: &str = include_str!("test_resources/day11.txt");
 
     const EXPECTED: &str = " ###  #### ###  #### ###  ###  #  #  ##    \n \
                             #  #    # #  # #    #  # #  # # #  #  #   \n \
@@ -117,14 +118,12 @@ mod test {
                             #    #### #  # #    #    #  # #  #  ##    ";
 
     #[test]
-    fn solve_test() -> Result<(), Box<dyn Error>> {
-        let memory = parse_int_code(&DATA)?;
+    fn solve_test() {
+        let memory = Day::parse(DATA).unwrap().data;
         let mut hull: HashMap<Point, u8> = HashMap::new();
         hull.insert(Point::new(0, 0), 1);
-        let second_paint: String = paint_hull(&memory, &mut hull)?;
+        let second_paint: String = paint_hull(&memory, &mut hull).unwrap();
 
         assert_eq!(EXPECTED, &second_paint);
-
-        Ok(())
     }
 }

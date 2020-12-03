@@ -1,29 +1,30 @@
 use std::collections::HashMap;
-use std::error::Error;
 use std::rc::Rc;
 
-use aoc::generator::{data_from_cli, LineSep};
-use aoc::int_code::IntCodeError::Other;
+use crate::commons::parse::LineSep;
+use crate::Problem;
 
 type PlanetName = Rc<String>;
-
-const TITLE: &str = "Day 6: Universal Orbit Map";
-const DATA: &str = include_str!("../resources/day06.txt");
 const COM: &str = "COM";
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let orbits = parse_map(&data).ok_or_else(|| Box::new(Other("Parse map error !".into())))?;
-    let from_origin =
-        depth_first_search(COM, orbits).ok_or_else(|| Box::new(Other("DFS error !".into())))?;
-    let first = check_sum(&from_origin);
-    let second = shortest_path(&from_origin, "YOU", "SAN")
-        .ok_or_else(|| Box::new(Other("YOU or SAN not found !".into())))?;
+pub struct Day;
 
-    println!("The orbit check sum is {}", first);
-    println!("The shortest path from YOU to SAN is {}", second);
-    Ok(())
+impl Problem for Day {
+    type Input = LineSep<String>;
+    type Err = anyhow::Error;
+    const TITLE: &'static str = "Day 6: Universal Orbit Map";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let orbits = parse_map(&data.data).ok_or(anyhow::anyhow!("Parse map error !"))?;
+        let from_origin = depth_first_search(COM, orbits).ok_or(anyhow::anyhow!("DFS error !"))?;
+        let first = check_sum(&from_origin);
+        let second = shortest_path(&from_origin, "YOU", "SAN")
+            .ok_or(anyhow::anyhow!("YOU or SAN not found"))?;
+
+        println!("The orbit check sum is {}", first);
+        println!("The shortest path from YOU to SAN is {}", second);
+        Ok(())
+    }
 }
 
 /// Sums the length of all path in the DFS produced map.
@@ -72,11 +73,8 @@ fn depth_first_search(
 }
 
 /// Parse the data into a map of Planets -> All planets orbiting it directly
-fn parse_map(data: &str) -> Option<HashMap<PlanetName, Vec<PlanetName>>> {
+fn parse_map(data: &[String]) -> Option<HashMap<PlanetName, Vec<PlanetName>>> {
     let raw_values: Vec<(PlanetName, PlanetName)> = data
-        .parse::<LineSep<String>>()
-        .ok()?
-        .data
         .iter()
         .filter_map(|orbit_definition| {
             let mut split = orbit_definition.split(')').take(2);
@@ -103,44 +101,43 @@ fn parse_map(data: &str) -> Option<HashMap<PlanetName, Vec<PlanetName>>> {
 
 #[cfg(test)]
 mod tests {
+    use crate::Problem;
+
     use super::*;
 
+    const A: &str = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L";
+    const B: &str = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN";
+    const DATA: &str = include_str!("test_resources/day06.txt");
+
     #[test]
-    fn checked_sum() -> Result<(), Box<dyn Error>> {
-        let data: &str = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L";
-        let orbits = parse_map(&data).ok_or_else(|| Box::new(Other("Parse map error !".into())))?;
-        let from_origin =
-            depth_first_search(COM, orbits).ok_or_else(|| Box::new(Other("DFS error !".into())))?;
+    fn checked_sum() {
+        let data = Day::parse(A).unwrap();
+        let orbits = parse_map(&data.data).unwrap();
+        let from_origin = depth_first_search(COM, orbits).unwrap();
         let result = check_sum(&from_origin);
 
         assert_eq!(42, result);
-        Ok(())
     }
 
     #[test]
-    fn shortest_paths() -> Result<(), Box<dyn Error>> {
-        let data: &str = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN";
-        let orbits = parse_map(&data).ok_or_else(|| Box::new(Other("Parse map error !".into())))?;
-        let from_origin =
-            depth_first_search(COM, orbits).ok_or_else(|| Box::new(Other("DFS error !".into())))?;
-        let result = shortest_path(&from_origin, "YOU", "SAN")
-            .ok_or_else(|| Box::new(Other("YOU or SAN not found !".into())))?;
+    fn shortest_paths() {
+        let data = Day::parse(B).unwrap();
+        let orbits = parse_map(&data.data).unwrap();
+        let from_origin = depth_first_search(COM, orbits).unwrap();
+        let result = shortest_path(&from_origin, "YOU", "SAN").unwrap();
 
         assert_eq!(4, result);
-        Ok(())
     }
 
     #[test]
-    fn solve_test() -> Result<(), Box<dyn Error>> {
-        let orbits = parse_map(&DATA).ok_or_else(|| Box::new(Other("Parse map error !".into())))?;
-        let from_origin =
-            depth_first_search(COM, orbits).ok_or_else(|| Box::new(Other("DFS error !".into())))?;
+    fn solve_test() {
+        let data = Day::parse(DATA).unwrap();
+        let orbits = parse_map(&data.data).unwrap();
+        let from_origin = depth_first_search(COM, orbits).unwrap();
         let first = check_sum(&from_origin);
-        let second = shortest_path(&from_origin, "YOU", "SAN")
-            .ok_or_else(|| Box::new(Other("YOU or SAN not found !".into())))?;
+        let second = shortest_path(&from_origin, "YOU", "SAN").unwrap();
 
         assert_eq!(158_090, first);
         assert_eq!(241, second);
-        Ok(())
     }
 }

@@ -3,28 +3,31 @@ use std::str::FromStr;
 
 use itertools::Itertools;
 
-use aoc::generator::data_from_cli;
-use std::error::Error;
+use crate::Problem;
 
-const TITLE: &str = "Day 8: Space Image Format";
-const DATA: &str = include_str!("../resources/day08.txt");
 const WIDTH: usize = 25;
 const HEIGHT: usize = 6;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let mut image: Image = data.parse()?;
-    let (_, w, t) = image.check_sum();
-    image.build();
-    println!("Image checksum is {} * {} =  {}", w, t, w * t);
-    println!("{}", image);
+pub struct Day;
 
-    Ok(())
+impl Problem for Day {
+    type Input = Image;
+    type Err = anyhow::Error;
+    const TITLE: &'static str = "Day 8: Space Image Format";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let mut image = data;
+        let (_, w, t) = image.check_sum();
+        image.build();
+        println!("Image checksum is {} * {} =  {}", w, t, w * t);
+        println!("{}", image);
+
+        Ok(())
+    }
 }
 
 #[derive(Clone)]
-struct Image {
+pub struct Image {
     layers: Vec<[[u8; WIDTH]; HEIGHT]>,
     built_image: Option<[[u8; WIDTH]; HEIGHT]>,
 }
@@ -154,13 +157,13 @@ impl Image {
 mod tests {
     use super::*;
 
+    const DATA: &str = include_str!("test_resources/day08.txt");
+
     #[test]
-    fn solve_test() -> Result<(), Box<dyn Error>> {
-        let mut image: Image = DATA.parse()?;
+    fn solve_test() {
+        let mut image: Image = DATA.parse().unwrap();
         let (_, w, t) = image.check_sum();
         image.build();
-
         assert_eq!(2_375, w * t);
-        Ok(())
     }
 }

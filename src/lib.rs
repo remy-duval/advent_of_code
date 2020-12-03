@@ -1,16 +1,19 @@
 pub use commons::arguments::{Day, Year};
 pub use commons::parse;
-pub use commons::Problem;
+pub use commons::problem::Problem;
+pub use commons::problem::parse_and_solve;
+
+use crate::commons::arguments::AdventOfCode;
 
 pub mod commons;
 pub mod year2019;
 pub mod year2020;
 
 /// Solve a problem given its year, day and input
-pub fn solve(year: Year, day: Day, input: String) -> anyhow::Result<()> {
-    match year.0 {
-        2019 => year2019::solve(day, input),
-        2020 => year2020::solve(day, input),
-        _ => Err(anyhow::anyhow!("{} is not implemented", year)),
+pub fn solve(advent: AdventOfCode) -> anyhow::Result<()> {
+    match advent.year.0 {
+        2019 => year2019::solve(advent.day, advent.input),
+        2020 => year2020::solve(advent.day, advent.input),
+        _ => Err(anyhow::anyhow!("{} is not implemented", advent.year)),
     }
 }

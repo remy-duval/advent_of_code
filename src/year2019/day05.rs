@@ -1,22 +1,20 @@
-use std::error::Error;
+use super::int_code::{IntCodeInput, Processor, Status};
 
-use aoc::generator::data_from_cli;
-use aoc::int_code::{parse_int_code, IntCodeError::Other, Processor, Status};
+pub struct Day;
 
-const TITLE: &str = "Day 5: Sunny with a Chance of Asteroids";
-const DATA: &str = include_str!("../resources/day05.txt");
+impl crate::Problem for Day {
+    type Input = IntCodeInput;
+    type Err = anyhow::Error;
+    const TITLE: &'static str = "Day 5: Sunny with a Chance of Asteroids";
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let memory = parse_int_code(&data)?;
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let (first, second) =
+            solve(&data.data[..]).ok_or(anyhow::anyhow!("Program should not have crashed !"))?;
+        println!("Input 1 produced : {}", first);
+        println!("Input 5 produced : {}", second);
 
-    let (first, second) = solve(&memory[..])
-        .ok_or_else(|| Box::new(Other("Program should not have crashed !".into())))?;
-    println!("Input 1 produced : {}", first);
-    println!("Input 5 produced : {}", second);
-
-    Ok(())
+        Ok(())
+    }
 }
 
 fn solve(memory: &[i64]) -> Option<(i64, i64)> {
@@ -54,16 +52,16 @@ fn run(program: &[i64], input: i64) -> Option<i64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Problem;
+
+    const DATA: &str = include_str!("test_resources/day05.txt");
 
     #[test]
-    fn solve_test() -> Result<(), Box<dyn Error>> {
-        let memory = parse_int_code(&DATA)?;
-        let (first, second) = solve(&memory[..])
-            .ok_or_else(|| Box::new(Other("Program should not have crashed !".into())))?;
+    fn solve_test() {
+        let memory = Day::parse(&DATA).unwrap().data;
+        let (first, second) = solve(&memory[..]).unwrap();
 
         assert_eq!(15_386_262, first);
         assert_eq!(10_376_124, second);
-
-        Ok(())
     }
 }

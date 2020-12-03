@@ -1,31 +1,38 @@
-use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 use itertools::Itertools;
 
-use aoc::generator::data_from_cli;
-use aoc::int_code::{parse_int_code, Processor, Status};
+use crate::commons::{CLEAR_COMMAND, TO_TOP};
+use crate::Problem;
 
-const TITLE: &str = "Day 13: Care Package";
-const DATA: &str = include_str!("../resources/day13.txt");
-const FRAME_DELAY: u64 = 1;
+use super::int_code::{IntCodeInput, Processor, Status};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", aoc::CLEAR_COMMAND);
-    let mut memory = parse_int_code(&data)?;
-    memory[0] = 2;
-    let mut engine = Processor::new(&memory);
-    let mut state = GameState::default();
-    let (score, (remaining, total_blocks)) =
-        state.run_with_decider(&mut engine, true, simple_decider);
+/// The delay in milliseconds between printing each frame
+const FRAME_DELAY: u64 = 0;
 
-    println!(
-        "Final score: {} with {}/{} blocks remaining.",
-        score, remaining, total_blocks
-    );
+pub struct Day;
 
-    Ok(())
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 13: Care Package";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        println!("{}", CLEAR_COMMAND);
+        let mut memory = data.data;
+        memory[0] = 2;
+        let mut engine = Processor::new(&memory);
+        let mut state = GameState::default();
+        let (score, (remaining, total_blocks)) =
+            state.run_with_decider(&mut engine, true, simple_decider);
+
+        println!(
+            "Final score: {} with {}/{} blocks remaining.",
+            score, remaining, total_blocks
+        );
+
+        Ok(())
+    }
 }
 
 fn simple_decider(state: &GameState) -> i64 {
@@ -84,7 +91,7 @@ impl GameState {
             status = self.run(engine, false);
             if show {
                 std::thread::sleep(std::time::Duration::from_millis(FRAME_DELAY));
-                println!("{}{}", aoc::TO_TOP, &self);
+                println!("{}{}", TO_TOP, &self);
             }
         }
     }
@@ -100,7 +107,7 @@ impl GameState {
             }
             if show {
                 std::thread::sleep(std::time::Duration::from_millis(FRAME_DELAY));
-                println!("{}{}", aoc::TO_TOP, &self);
+                println!("{}{}", TO_TOP, &self);
             }
         }
     }
@@ -200,9 +207,11 @@ impl Tile {
 mod tests {
     use super::*;
 
+    const DATA: &str = include_str!("test_resources/day13.txt");
+
     #[test]
-    fn solve_test() -> Result<(), Box<dyn Error>> {
-        let mut memory = parse_int_code(&DATA)?;
+    fn solve_test() {
+        let mut memory = Day::parse(DATA).unwrap().data;
         memory[0] = 2;
         let mut engine = Processor::new(&memory);
         let mut state = GameState::default();
@@ -215,7 +224,5 @@ mod tests {
             "No blocks should remain after the game ends !"
         );
         assert_eq!(21415, score);
-
-        Ok(())
     }
 }

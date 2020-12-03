@@ -2,9 +2,9 @@ use std::str::FromStr;
 
 use crate::commons::parse::LineSep;
 
-pub struct Day02;
+pub struct Day;
 
-impl crate::Problem for Day02 {
+impl crate::Problem for Day {
     type Input = LineSep<Password>;
     type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 2: Password Philosophy";
@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn first_part_test_a() {
         let data = A
-            .parse::<<Day02 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parsing error");
 
         assert_eq!(2, first_part(&data.data));
@@ -123,7 +123,7 @@ mod tests {
     #[test]
     fn first_part_test_b() {
         let data = B
-            .parse::<<Day02 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parsing error");
 
         assert_eq!(600, first_part(&data.data));
@@ -132,7 +132,7 @@ mod tests {
     #[test]
     fn second_part_test_a() {
         let data = A
-            .parse::<<Day02 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parsing error");
 
         assert_eq!(1, second_part(&data.data));
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn second_part_test_b() {
         let data = B
-            .parse::<<Day02 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parsing error");
 
         assert_eq!(245, second_part(&data.data));

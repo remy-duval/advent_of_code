@@ -1,40 +1,46 @@
 use std::cmp::Ordering;
-use std::{
-    collections::HashSet,
-    f64::consts,
-    fmt::{Display, Formatter},
-    io::{stdout, BufWriter, Write},
-    str::FromStr,
-    time::Duration,
-};
+use std::collections::HashSet;
+use std::f64::consts;
+use std::fmt::{Display, Formatter};
+use std::io::{BufWriter, stdout, Write};
+use std::str::FromStr;
+use std::time::Duration;
 
+use anyhow::Context;
 use itertools::Itertools;
 
-use aoc::generator::{data_from_cli, LineSep};
-use aoc::grid::Point;
+use crate::commons::{CLEAR_COMMAND, math, TO_TOP};
+use crate::commons::grid::Point;
+use crate::commons::parse::LineSep;
+use crate::Problem;
 
-const TITLE: &str = "Day 10: Monitoring Station";
-const DATA: &str = include_str!("../resources/day10.txt");
+pub struct Day;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}{}", aoc::CLEAR_COMMAND, TITLE);
-    let mut asteroids: AsteroidField = data.parse().unwrap();
-    let (station, station_view) = asteroids
-        .find_surveillance_point()
-        .expect("Not found any surveillance point");
-    asteroids.set_station(station);
-    println!("{}", asteroids);
-    println!(
-        "The best view point is {} which has a view on {} asteroids",
-        station,
-        station_view.len()
-    );
-    let ordered = field_ordering(&station, station_view);
-    let two_hundredth = ordered[199];
-    asteroids.set_marked(two_hundredth);
-    visualize(&mut asteroids, ordered).unwrap();
-    println!("200th destroyed asteroid is {}", two_hundredth);
+impl Problem for Day {
+    type Input = AsteroidField;
+    type Err = anyhow::Error;
+    const TITLE: &'static str = "Day 10: Monitoring Station";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let mut asteroids = data;
+        let (station, station_view) = asteroids
+            .find_surveillance_point()
+            .ok_or(anyhow::anyhow!("Not found any surveillance point"))?;
+        asteroids.set_station(station);
+        println!("{}", asteroids);
+        println!(
+            "The best view point is {} which has a view on {} asteroids",
+            station,
+            station_view.len()
+        );
+        let ordered = field_ordering(&station, station_view);
+        let two_hundredth = ordered[199];
+        asteroids.set_marked(two_hundredth);
+        visualize(&mut asteroids, ordered).context("IO error during visualization")?;
+        println!("200th destroyed asteroid is {}", two_hundredth);
+
+        Ok(())
+    }
 }
 
 /// Orders the field around the given center point (the station)
@@ -64,17 +70,17 @@ fn visualize<T: IntoIterator<Item = Point>>(
     destroyed: T,
 ) -> std::io::Result<()> {
     let mut f = BufWriter::new(stdout());
-    write!(f, "{}", aoc::CLEAR_COMMAND)?;
+    write!(f, "{}", CLEAR_COMMAND)?;
     for point in destroyed {
         asteroids.field.remove(&point);
-        write!(f, "{}{}", aoc::TO_TOP, asteroids)?;
+        write!(f, "{}{}", TO_TOP, asteroids)?;
         f.flush()?;
         std::thread::sleep(Duration::from_millis(10));
     }
     Ok(())
 }
 
-struct AsteroidField {
+pub struct AsteroidField {
     max: (usize, usize),
     field: HashSet<Point>,
     station: Option<Point>,
@@ -82,11 +88,10 @@ struct AsteroidField {
 }
 
 impl FromStr for AsteroidField {
-    type Err = ();
+    type Err = std::convert::Infallible;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let field: HashSet<Point> = s
-            .parse::<LineSep<String>>()
-            .unwrap()
+            .parse::<LineSep<String>>()?
             .data
             .iter()
             .enumerate()
@@ -227,7 +232,7 @@ impl AsteroidField {
 
         let max = (self.max.0 as i64, self.max.1 as i64);
         let vector = *blockade - *point_of_view;
-        let unit = vector.divide(aoc::maths::gcd(vector.x, vector.y));
+        let unit = vector.divide(math::gcd(vector.x, vector.y));
 
         let mut current = *blockade;
         std::iter::from_fn(move || {
@@ -246,10 +251,11 @@ impl AsteroidField {
 mod tests {
     use super::*;
 
-    const TEST_ONE: &str = include_str!("../test_resources/day10_1.txt");
-    const TEST_TWO: &str = include_str!("../test_resources/day10_2.txt");
-    const TEST_THREE: &str = include_str!("../test_resources/day10_3.txt");
-    const TEST_FOUR: &str = include_str!("../test_resources/day10_4.txt");
+    const TEST_ONE: &str = include_str!("test_resources/day10_1.txt");
+    const TEST_TWO: &str = include_str!("test_resources/day10_2.txt");
+    const TEST_THREE: &str = include_str!("test_resources/day10_3.txt");
+    const TEST_FOUR: &str = include_str!("test_resources/day10_4.txt");
+    const DATA: &str = include_str!("test_resources/day10_data.txt");
 
     #[test]
     fn check_surveillance_point() {

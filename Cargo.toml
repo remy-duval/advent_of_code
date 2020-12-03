@@ -10,6 +10,7 @@ lto = 'thin'
 [dependencies]
 anyhow = "1.0.34"
 bitflags = "1.2.1"
+fs-err = "2.5.0"
 itertools = "0.9.0"
 structopt = "0.3.20"
 thiserror = "1.0.22"

@@ -1,38 +1,34 @@
-pub struct Day01;
+pub struct Day;
 
-impl crate::Problem for Day01 {
+impl crate::Problem for Day {
     type Input = crate::parse::LineSep<u64>;
     type Err = anyhow::Error;
     const TITLE: &'static str = "Day 1: Report Repair";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        match first_part(&data.data) {
-            None => {
-                return Err(anyhow::anyhow!(
-                    "No 2020 2-elements sum found in {:?}",
-                    data.data
-                ))
-            }
-            Some((first, second)) => {
-                println!("Found entries {} and {} that sum to 2020", first, second);
-                println!("Their product is {}", first * second);
-            }
-        }
-        match second_part(&data.data) {
-            None => {
-                return Err(anyhow::anyhow!(
-                    "No 2020 3-elements sum found in {:?}",
-                    data.data
-                ))
-            }
-            Some((first, second, third)) => {
-                println!(
-                    "Found entries {}, {} and {} that sum to 2020",
-                    first, second, third
-                );
-                println!("Their product is {}", first * second * third);
-            }
-        }
+        let (first, second) = first_part(&data.data).ok_or(anyhow::anyhow!(
+            "No 2020 2-elements sum found in {:?}",
+            data.data
+        ))?;
+        println!(
+            "2 expenses that sum to 2020: {a} * {b} = {product}",
+            a = first,
+            b = second,
+            product = first * second
+        );
+
+        let (first, second, third) = second_part(&data.data).ok_or(anyhow::anyhow!(
+            "No 2020 3-elements sum found in {:?}",
+            data.data
+        ))?;
+
+        println!(
+            "3 expenses that sum to 2020: {a} * {b} * {c} = {product}",
+            a = first,
+            b = second,
+            c = third,
+            product = first * second * third
+        );
         Ok(())
     }
 }
@@ -88,7 +84,7 @@ mod tests {
     #[test]
     fn first_part_test_first_data() {
         let data = FIRST_DATA
-            .parse::<<Day01 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parse error");
         let (first, second) = first_part(&data.data).expect("result should have been found");
         assert_eq!(first * second, 514579);
@@ -97,7 +93,7 @@ mod tests {
     #[test]
     fn first_part_test_second_data() {
         let data = SECOND_DATA
-            .parse::<<Day01 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parse error");
         let (first, second) = first_part(&data.data).expect("result should have been found");
         assert_eq!(first * second, 969024);
@@ -106,7 +102,7 @@ mod tests {
     #[test]
     fn second_part_test_first_data() {
         let data = FIRST_DATA
-            .parse::<<Day01 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parse error");
         let (first, second, third) =
             second_part(&data.data).expect("result should have been found");
@@ -116,7 +112,7 @@ mod tests {
     #[test]
     fn second_part_test_second_data() {
         let data = SECOND_DATA
-            .parse::<<Day01 as Problem>::Input>()
+            .parse::<<Day as Problem>::Input>()
             .expect("parse error");
         let (first, second, third) =
             second_part(&data.data).expect("result should have been found");

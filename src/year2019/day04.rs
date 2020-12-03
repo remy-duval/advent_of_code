@@ -1,11 +1,11 @@
 use std::str::FromStr;
 
-use itertools::Itertools;
 use anyhow::anyhow;
+use itertools::Itertools;
 
-pub struct Day04;
+pub struct Day;
 
-impl crate::Problem for Day04 {
+impl crate::Problem for Day {
     type Input = Between;
     type Err = anyhow::Error;
     const TITLE: &'static str = "Day 4: Secure Container";
@@ -38,7 +38,7 @@ impl FromStr for Between {
             let from: i32 = a.parse()?;
             let to: i32 = b.parse()?;
             if from >= to {
-                Err(anyhow!("{} >= {}",from, to))
+                Err(anyhow!("{} >= {}", from, to))
             } else {
                 Ok(Between { from, to })
             }
