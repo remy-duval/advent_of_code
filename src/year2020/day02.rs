@@ -34,42 +34,30 @@ fn second_part(data: &[Password]) -> usize {
         .count()
 }
 
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct Password {
-    policy: PasswordPolicy,
+    parameters: (u8, u8),
+    character: char,
     value: String,
 }
 
 impl Password {
-    /// Check that the policy is respected for this value
-    fn check_occurrence_policy(&self) -> bool {
-        self.policy.check_occurrence_policy(&self.value)
-    }
-
-    /// Check that the policy is respected for this value
-    fn check_position_policy(&self) -> bool {
-        self.policy.check_position_policy(&self.value)
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct PasswordPolicy {
-    parameters: (u8, u8),
-    character: char,
-}
-
-impl PasswordPolicy {
     /// Check that the occurrence policy is respected for this value
     /// The number of occurrence of the 'character' must be between the parameters
-    fn check_occurrence_policy(self, value: &str) -> bool {
-        let count = value.chars().filter(|char| *char == self.character).count();
+    fn check_occurrence_policy(&self) -> bool {
+        let count = self
+            .value
+            .chars()
+            .filter(|char| *char == self.character)
+            .count();
         count >= self.parameters.0 as usize && count <= self.parameters.1 as usize
     }
 
     /// Check that the occurrence policy is respected for this value
     /// The number of occurrence of the 'character' must be between the parameters
-    fn check_position_policy(self, value: &str) -> bool {
+    fn check_position_policy(&self) -> bool {
         let mut is_first_set: bool = false;
-        for (idx, char) in value.chars().enumerate() {
+        for (idx, char) in self.value.chars().enumerate() {
             let idx = idx + 1;
             if idx == self.parameters.0 as usize {
                 is_first_set = char == self.character;
@@ -83,55 +71,35 @@ impl PasswordPolicy {
     }
 }
 
-/// Collect two elements of a string iterator into a tuple
-fn collect_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
-    Some((iter.next()?, iter.next()?))
-}
-
-impl FromStr for PasswordPolicy {
-    type Err = PolicyParseError;
+impl FromStr for Password {
+    type Err = PasswordError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (occ, char) = collect_two(s.split_whitespace()).ok_or(PolicyParseError::MissingPart)?;
-        let (min, max) = collect_two(occ.split('-')).ok_or(PolicyParseError::MissingPart)?;
+        fn first_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
+            Some((iter.next()?, iter.next()?))
+        }
+
+        let (pol, pwd) = first_two(s.split(':')).ok_or(PasswordError::MissingPart)?;
+        let (occ, char) = first_two(pol.split_whitespace()).ok_or(PasswordError::MissingPart)?;
+        let (min, max) = first_two(occ.split('-')).ok_or(PasswordError::MissingPart)?;
         let a: u8 = min.trim().parse::<u8>()?;
         let b: u8 = max.trim().parse::<u8>()?;
-        let character = char.chars().next().ok_or(PolicyParseError::MissingPart)?;
-
-        Ok(PasswordPolicy {
-            parameters: (a.min(b), a.max(b)),
-            character,
-        })
-    }
-}
-
-impl FromStr for Password {
-    type Err = PasswordParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (pol, pwd) = collect_two(s.split(':')).ok_or(PasswordParseError::MissingPart)?;
+        let character = char.chars().next().ok_or(PasswordError::MissingPart)?;
 
         Ok(Password {
-            policy: pol.parse::<PasswordPolicy>()?,
+            parameters: (a.min(b), a.max(b)),
+            character,
             value: pwd.trim().into(),
         })
     }
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum PolicyParseError {
-    #[error("At least one part of the password policy is missing 'int-int char'")]
+pub enum PasswordError {
+    #[error("Part of the password is missing, the format is 'int-int char: password'")]
     MissingPart,
-    #[error("Could not parse one of the integer of the policy {0}")]
+    #[error("Could not parse one of the integer of the policy parameters {0}")]
     ParseIntError(#[from] std::num::ParseIntError),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum PasswordParseError {
-    #[error("Missing either the policy or the password")]
-    MissingPart,
-    #[error("Could not parse the password policy {0}")]
-    BadPolicy(#[from] PolicyParseError),
 }
 
 #[cfg(test)]
