@@ -1,0 +1,216 @@
+== Hull Breach ==
+You got in through a hole in the floor here. To keep your ship from also freezing, the hole has been sealed.
+
+Doors here lead:
+- east (Crew Quarters)
+- south (Hallway)
+- west (Holodeck)
+
+== Hallway ==
+This area has been optimized for something; you're just not quite sure what.
+
+Doors here lead:
+- north (Hull Breach)
+- east (Passages)
+- west (Observatory)
+
+== Passages ==
+They're a little twisty and starting to look all alike.
+
+Doors here lead:
+- west (Hallway)
+
+Items here:
+- boulder (TAKE)
+
+== Observatory ==
+There are a few telescopes; they're all bolted down, though.
+
+Doors here lead:
+- east (Hallway)
+
+Items here:
+- molten lava (DANGER)
+
+== Holodeck ==
+Someone seems to have left it on the Giant Grid setting.
+
+Doors here lead:
+- east (Hull Breach)
+- south (Corridor)
+- west (Stables)
+
+Items here:
+- hypercube (TAKE)
+
+== Corridor ==
+The metal walls and the metal floor are slightly different colors. Or are they?
+
+Doors here lead:
+- north (Holodeck)
+
+== Stables ==
+Reindeer-sized. They're all empty.
+
+Doors here lead:
+- east (Holodeck)
+- west (Sick Bay)
+
+Items here:
+- space law space brochure (TAKE)
+
+== Sick Bay ==
+Supports both Red-Nosed Reindeer medicine and regular reindeer medicine.
+
+Doors here lead:
+- north (Gift Wrapping Center)
+- east (Stables)
+- west (Navigation)
+
+Items here:
+- infinite loop (DANGER)
+
+== Navigation ==
+Status: Stranded. Please supply measurements from fifty stars to recalibrate.
+
+Doors here lead:
+- east (Sick Bay)
+
+Items here:
+- escape pod (DANGER)
+
+== Gift Wrapping Center ==
+How else do you wrap presents on the go?
+
+Doors here lead:
+- south (Sick Bay)
+- west (Engineering)
+
+Items here:
+- shell (TAKE)
+
+== Engineering ==
+You see a whiteboard with plans for Springdroid v2.
+
+Doors here lead:
+- east (Gift Wrapping Center)
+- south (Kitchen)
+
+Items here:
+- mug (TAKE)
+
+== Kitchen ==
+Everything's freeze-dried.
+
+Doors here lead:
+- north (Engineering)
+
+Items here:
+- festive hat (TAKE)
+
+== Crew Quarters ==
+The beds are all too small for you.
+
+Doors here lead:
+- north (Warp Drive Maintenance)
+- west (Hull Breach)
+
+Items here:
+- photons (DANGER)
+
+== Warp Drive Maintenance ==
+It appears to be working normally.
+
+Doors here lead:
+- south (Crew Quarters)
+- west (Science Lab)
+
+== Science Lab ==
+You see evidence here of prototype polymer design work.
+
+Doors here lead:
+- north (Arcade)
+- east (Warp Drive Maintenance)
+
+== Arcade ==
+None of the cabinets seem to have power.
+
+Doors here lead:
+- south (Science Lab)
+- west (Storage)
+
+Items here:
+- whirled peas (TAKE)
+
+== Storage ==
+The boxes just contain more boxes.  Recursively.
+
+Doors here lead:
+- east (Arcade)
+- west (Hot Chocolate Fountain)
+
+Items here:
+- giant electromagnet (DANGER)
+
+== Hot Chocolate Fountain ==
+Somehow, it's still working.
+
+Doors here lead:
+- east (Storage)
+- south (Security Checkpoint)
+
+Items here:
+- astronaut ice cream (TAKE)
+
+== Security Checkpoint ==
+In the next room, a pressure-sensitive floor will verify your identity.
+
+Doors here lead:
+- north (Hot Chocolate Fountain)
+- south (Pressure-Sensitive Floor -> OBJECTIVE)
+
+Walkthrough: #
+##############
+- Go to Hallway, then Passages, then take the 'boulder', then return to Hull Breach
+  - south
+  - east
+  - take boulder
+  - west
+  - north
+- Go to Holodeck and take the 'hypercube'
+  - west
+  - take hypercube
+- Go to Stables and take the 'space law space brochure'
+  - west
+  - take space law space brochure
+- Go to Sick Bay, then Gift Wrapping Center and take the 'shell'
+  - west
+  - north
+  - take shell
+- Go to Engineering and take the 'mug'
+  - west
+  - take mug
+- Go to Kitchen and take the 'festive hat'
+  - south
+  - take festive hat
+- return To Hull Breach
+  - north
+  - east
+  - south
+  - east
+  - east
+  - east
+- Go to Crew Quarters, then Warp Drive Maintenance, then Science Lab, then Arcade and take 'whirled peas'
+  - east
+  - north
+  - west
+  - north
+  - take whirled peas
+- Go to Storage, then Hot Chocolate Fountain and take 'astronaut ice cream'
+  - west
+  - west
+  - take astronaut ice cream
+- Go to Security Checkpoint and then try every combination when going to Pressure-Sensitive Floor
+  - south
+  - fiddle with items
+  - south

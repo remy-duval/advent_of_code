@@ -1,26 +1,33 @@
 use std::fmt::{Display, Formatter};
 
-use aoc::generator::data_from_cli;
-use aoc::int_code::{parse_int_code, Processor, Status};
+use crate::Problem;
 
-const TITLE: &str = "Day 23: Category Six";
-const DATA: &str = include_str!("../resources/day23.txt");
+use super::int_code::{IntCodeInput, Processor, Status};
+
 const NETWORK_SIZE: usize = 50;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let memory = parse_int_code(&data).expect("Parse Int code error !");
+pub struct Day;
 
-    // First part
-    let output = run_until_nat_packet(&memory).expect("No dead letters received");
-    println!("First NAT packet was : {}\n", output);
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = anyhow::Error;
+    const TITLE: &'static str = "Day 23: Category Six";
 
-    // Second part
-    println!("Starting network with NAT ON");
-    let output = run_until_duplicate_wakeup(&memory)
-        .expect("The network stopped before sending twice the same wakeup");
-    println!("Duplicate Y wake-up was : {}", output);
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let memory = data.data;
+        let output = run_until_nat_packet(&memory).ok_or(anyhow::anyhow!(
+            "No NAT packet received, but the network has stopped"
+        ))?;
+        println!("First NAT packet was : {}\n", output);
+
+        println!("Starting network with NAT ON");
+        let output = run_until_duplicate_wakeup(&memory).ok_or(anyhow::anyhow!(
+            "The network stopped before sending twice the same wakeup"
+        ))?;
+        println!("Duplicate Y wake-up was : {}", output);
+
+        Ok(())
+    }
 }
 
 /// Runs the network for first part.
@@ -134,7 +141,7 @@ fn send_packet(computers: &mut [Processor], packet: Packet) -> Result<(), Packet
 }
 
 /// Represent a packet in the network.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 struct Packet {
     destination: i64,
     x: i64,
@@ -154,5 +161,28 @@ impl Display for Packet {
 impl Packet {
     fn new((destination, x, y): (i64, i64, i64)) -> Self {
         Self { destination, x, y }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const DATA: &str = include_str!("test_resources/day23.txt");
+
+    #[test]
+    fn run_until_nat_packet_test() {
+        let memory = Day::parse(DATA).unwrap().data;
+        let packet = run_until_nat_packet(&memory).unwrap();
+
+        assert_eq!(Packet::new((255, 20771, 14834)), packet);
+    }
+
+    #[test]
+    fn run_until_duplicate_wakeup_test() {
+        let memory = Day::parse(DATA).unwrap().data;
+        let packet = run_until_duplicate_wakeup(&memory).unwrap();
+
+        assert_eq!(Packet::new((0, 20771, 10215)), packet);
     }
 }

@@ -3,12 +3,29 @@ use std::io;
 
 use itertools::Itertools;
 
-use aoc::generator::data_from_cli;
-use aoc::grid::Direction;
-use aoc::int_code::{parse_int_code, Processor};
+use crate::commons::grid::Direction;
+use crate::commons::CLEAR_COMMAND;
+use crate::Problem;
 
-const TITLE: &str = "Day 25: Cryostasis";
-const DATA: &str = include_str!("../resources/day25.txt");
+use super::int_code::{IntCodeInput, Processor};
+
+/// The path to take to gather all items
+/// Note that the take command are not present here, since they are done automatically
+/// Just be sure to add dangerous items to the [DANGEROUS_ITEMS](DANGEROUS_ITEMS) constant
+/// Else you will automatically pick them up and game over
+const AUTO_PATH: [&str; 23] = [
+    // Visit the south branch, taking its items
+    "south\n", "east\n", // Then return to Start
+    "west\n", "north\n", // Visit the west branch taking its items
+    "west\n", "west\n", "west\n", "north\n", "west\n", "south\n", // Return to Start
+    "north\n", "east\n", "south\n", "east\n", "east\n", "east\n",
+    // Visit the east branch, taking its items
+    "east\n", "north\n", "west\n", "north\n", "west\n", "west\n",
+    "south\n", // We are now right before the Weight test room (go south for that)
+];
+
+/// The list of items that if picked up will trigger some sort of game over
+/// They are thus excluded from the auto pick up functionality
 const DANGEROUS_ITEMS: [&str; 5] = [
     "giant electromagnet",
     "molten lava",
@@ -16,40 +33,53 @@ const DANGEROUS_ITEMS: [&str; 5] = [
     "infinite loop",
     "photons",
 ];
-const AUTO_PATH: [&str; 19] = [
-    "south\n", "south\n", "south\n", "south\n", "north\n", "north\n", "west\n", "north\n",
-    "north\n", "south\n", "south\n", "east\n", "north\n", "west\n", "north\n", "south\n", "west\n",
-    "west\n", "west\n",
-];
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let memory = parse_int_code(&data).expect("Parse Int code error !");
+/// The direction that the pressure door is from the last room
+/// The 'script' mode will try to take any possible item combination before going this way
+/// Over and over until it succeeds
+const TRY_COMBINATION: &str = "south\n";
 
-    loop {
-        println!("Mode ? (options are manual / script)");
+pub struct Day;
+
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = io::Error;
+    const TITLE: &'static str = "Day 25: Cryostasis";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
         let mut line = String::new();
-        io::stdin().read_line(&mut line).unwrap();
-        line = line.to_ascii_lowercase().trim_end_matches('\n').into();
-        match line.as_str() {
-            "manual" => return play_manually(&memory),
-            "script" => return auto_play(&memory),
-            _ => println!("Unrecognized : {}", line),
+        loop {
+            println!("Mode ? (options are manual / script)");
+            println!("Note that 'script' mode is only valid for my original input");
+            line.clear();
+            io::stdin().read_line(&mut line)?;
+            line = line.to_ascii_lowercase().trim().into();
+            match line.as_str() {
+                "manual" => return Ok(play_manually(&data.data)),
+                "script" => return Ok(auto_play(&data.data)),
+                _ => println!("Unrecognized : {}", line),
+            }
         }
     }
 }
 
+fn normalize_new_line(line: &mut String) {
+    if line.ends_with("\r\n") {
+        line.truncate(line.len() - 2);
+        line.push('\n');
+    }
+}
+
 /// You can play the game by typing in the console.
-/// This is pretty fun for something in IntCode, really nice job from the AOC designer
 fn play_manually(memory: &[i64]) {
-    println!("{}", aoc::CLEAR_COMMAND);
+    println!("{}", CLEAR_COMMAND);
     let mut processor: Processor = memory.into();
     processor.run_with_ascii_callbacks(
         0,
         |_| {
             let mut line: String = String::new();
             io::stdin().read_line(&mut line).ok()?;
+            normalize_new_line(&mut line);
             Some(line)
         },
         |_, line| {
@@ -73,14 +103,14 @@ fn auto_play(memory: &[i64]) {
                 format!(
                     "{}{}{}",
                     items.iter().map(|item| format!("drop {}\n", item)).join(""),
-                    "west\n",
+                    TRY_COMBINATION,
                     items.iter().map(|item| format!("take {}\n", item)).join("")
                 )
             })
             .join("")
     }
 
-    println!("{}", aoc::CLEAR_COMMAND);
+    println!("{}", CLEAR_COMMAND);
     let mut processor: Processor = memory.into();
     let mut inventory: Vec<String> = Vec::new();
     let mut initial_path = AUTO_PATH.iter().map(|&x| x.to_string());

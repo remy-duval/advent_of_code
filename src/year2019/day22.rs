@@ -1,44 +1,49 @@
 use std::str::FromStr;
 
-use aoc::generator::{data_from_cli, LineSep};
+use crate::parse::LineSep;
+use crate::Problem;
 
-const TITLE: &str = "Day 22: Slam Shuffle";
-const DATA: &str = include_str!("../resources/day22.txt");
 const DECK: i128 = 119_315_717_514_047;
 const REPEAT: i128 = 101_741_582_076_661;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let shuffles: Vec<Shuffle> = data
-        .parse::<LineSep<Shuffle>>()
-        .expect("Could not parse the shuffles")
-        .data;
+pub struct Day;
 
-    // First part
-    let lcf = LinearFunction::fold(shuffles.clone(), 10_007);
-    let first_position = lcf.apply(2019, 10_007);
-    println!(
-        "The final position of the 2019th card is {}",
-        first_position
-    );
+impl Problem for Day {
+    type Input = LineSep<Shuffle>;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 22: Slam Shuffle";
 
-    // Second part
-    let lcf = LinearFunction::fold(shuffles, DECK)
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        println!(
+            "The final position of the 2019th card is {}",
+            first_part(data.data.clone())
+        );
+
+        println!(
+            "The initial position of the 2020th card was {}",
+            second_part(data.data)
+        );
+
+        Ok(())
+    }
+}
+
+fn first_part(shuffles: Vec<Shuffle>) -> i128 {
+    LinearFunction::fold(shuffles, 10_007).apply(2019, 10_007)
+}
+
+fn second_part(shuffles: Vec<Shuffle>) -> i128 {
+    LinearFunction::fold(shuffles, DECK)
         .pow(REPEAT, DECK)
-        .inverse(DECK);
-    let second_position = lcf.apply(2020, DECK);
-    println!(
-        "The initial position of the 2020th card was {}",
-        second_position
-    );
+        .inverse(DECK)
+        .apply(2020, DECK)
 }
 
 /// The modulo operation which returns only positive numbers
 /// The remainder (%) operation of Rust is not entirely like a modulo
 /// If a is negative, then a % b is negative, whereas for modulo we need it positive.
 /// This functions dirty fixes that issue by re-implementing the modulo for i128.
-pub fn modulo(a: i128, m: i128) -> i128 {
+fn modulo(a: i128, m: i128) -> i128 {
     if a < 0 {
         a % m + m
     } else {
@@ -47,9 +52,8 @@ pub fn modulo(a: i128, m: i128) -> i128 {
 }
 
 /// Invert a number in the modulo space of Z/size.
-/// This uses the extend euclidian algorithm
-/// https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-pub fn modular_inverse(to_inverse: i128, size: i128) -> i128 {
+/// See https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+fn modular_inverse(to_inverse: i128, size: i128) -> i128 {
     let (mut inverse, mut temp_inv) = (0, 1);
     let (mut remainder, mut temp_rem) = (size, to_inverse);
 
@@ -221,22 +225,18 @@ impl From<Shuffle> for LinearFunction {
 mod tests {
     use super::*;
 
-    const TEST_ONE: &str = include_str!("../test_resources/day22_1.txt");
-    const TEST_TWO: &str = include_str!("../test_resources/day22_2.txt");
-    const TEST_THREE: &str = include_str!("../test_resources/day22_3.txt");
-    const TEST_FOUR: &str = include_str!("../test_resources/day22_4.txt");
+    const TEST_ONE: &str = include_str!("test_resources/day22_1.txt");
+    const TEST_TWO: &str = include_str!("test_resources/day22_2.txt");
+    const TEST_THREE: &str = include_str!("test_resources/day22_3.txt");
+    const TEST_FOUR: &str = include_str!("test_resources/day22_4.txt");
+    const DATA: &str = include_str!("test_resources/day22_data.txt");
 
     #[test]
     fn small_deck_test() {
         // Test that the shuffling with LCF produces the expected order (as per the examples)
         fn assertion(data: &str, expected: [i128; 10]) {
-            let shuffles: Vec<Shuffle> = data
-                .parse::<LineSep<Shuffle>>()
-                .expect("Could not parse the shuffles")
-                .data;
-
+            let shuffles = Day::parse(data).unwrap().data;
             let lcf = LinearFunction::fold(shuffles, 10);
-
             let mut result = [0; 10];
             for card in 0..10 {
                 let pos = lcf.apply(card, 10);
@@ -261,13 +261,8 @@ mod tests {
         // Test that the inverse function produced gives back [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         // When applied to the last positions of the shuffling (as per the examples)
         fn assertion(data: &str, last_position: [i128; 10]) {
-            let shuffles: Vec<Shuffle> = data
-                .parse::<LineSep<Shuffle>>()
-                .expect("Could not parse the shuffles")
-                .data;
-
+            let shuffles = Day::parse(data).unwrap().data;
             let lcf = LinearFunction::fold(shuffles, 10).inverse(10);
-
             let mut result = [0; 10];
             for (card, &last) in last_position.iter().enumerate() {
                 let pos = lcf.apply(card as i128, 10);
@@ -287,5 +282,17 @@ mod tests {
         assertion(TEST_TWO, [3, 0, 7, 4, 1, 8, 5, 2, 9, 6]);
         assertion(TEST_THREE, [6, 3, 0, 7, 4, 1, 8, 5, 2, 9]);
         assertion(TEST_FOUR, [9, 2, 5, 8, 1, 4, 7, 0, 3, 6]);
+    }
+
+    #[test]
+    fn first_part_test() {
+        let shuffles = Day::parse(DATA).unwrap().data;
+        assert_eq!(1_879, first_part(shuffles))
+    }
+
+    #[test]
+    fn second_part_test() {
+        let shuffles = Day::parse(DATA).unwrap().data;
+        assert_eq!(73_729_306_030_290, second_part(shuffles))
     }
 }

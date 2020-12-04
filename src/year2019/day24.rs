@@ -6,24 +6,25 @@ use std::{
 
 use itertools::Itertools;
 
-use aoc::generator::data_from_cli;
+use crate::Problem;
 
-const TITLE: &str = "Day 24: Planet of Discord";
-const DATA: &str = include_str!("../resources/day24.txt");
+pub struct Day;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let bugs = data.parse::<Bugs>().unwrap();
+impl Problem for Day {
+    type Input = Bugs;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 24: Planet of Discord";
 
-    // First part
-    let result = first_repeat(bugs);
-    println!("{}", result);
-    println!("Biodiversity rating is {}", result.biodiversity_rating());
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let result = first_repeat(data);
+        println!("{}", result);
+        println!("Biodiversity rating is {}", result.biodiversity_rating());
 
-    // Second part
-    let result = recursive_expansion(bugs, 200);
-    println!("The number of bugs after 200 minutes is {} (Yikes)", result);
+        let result = recursive_expansion(data, 200);
+        println!("The number of bugs after 200 minutes is {} (Yikes)", result);
+
+        Ok(())
+    }
 }
 
 /// Computes next states of the Bugs with no recursion until we get one we saw before.
@@ -86,12 +87,12 @@ fn recursive_expansion(start: Bugs, n: usize) -> usize {
 
 /// Represent a Bugs state for one minute
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
-struct Bugs {
+pub struct Bugs {
     bugs: [[bool; 5]; 5],
 }
 
 impl FromStr for Bugs {
-    type Err = ();
+    type Err = std::convert::Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut bugs = [[false; 5]; 5];
@@ -228,20 +229,37 @@ mod tests {
     use super::*;
 
     const TEST_ONE: &str = "....#\n#..#.\n#..##\n..#..\n#....";
+    const TEST_TWO: &str = include_str!("test_resources/day24.txt");
 
     #[test]
-    fn first_repeat_test() {
-        let bugs = TEST_ONE.parse::<Bugs>().unwrap();
+    fn first_repeat_test_a() {
+        let bugs = Day::parse(TEST_ONE).unwrap();
         let result = first_repeat(bugs);
 
         assert_eq!(2_129_920, result.biodiversity_rating());
     }
 
     #[test]
-    fn recursion_test() {
-        let bugs = TEST_ONE.parse::<Bugs>().unwrap();
+    fn first_repeat_test_b() {
+        let bugs = Day::parse(TEST_TWO).unwrap();
+        let result = first_repeat(bugs);
+
+        assert_eq!(12_129_040, result.biodiversity_rating());
+    }
+
+    #[test]
+    fn recursion_test_a() {
+        let bugs = Day::parse(TEST_ONE).unwrap();
         let result = recursive_expansion(bugs, 10);
 
         assert_eq!(99, result);
+    }
+
+    #[test]
+    fn recursion_test_b() {
+        let bugs = Day::parse(TEST_TWO).unwrap();
+        let result = recursive_expansion(bugs, 200);
+
+        assert_eq!(2109, result);
     }
 }

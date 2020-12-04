@@ -32,33 +32,42 @@
 //! AND T J -> Compute D && z
 //! RUN
 
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, stdout, Write};
 
-use aoc::generator::data_from_cli;
-use aoc::int_code::{parse_int_code, Processor};
+use crate::Problem;
 
-const TITLE: &str = "Day 21: Springdroid Adventure";
-const DATA: &str = include_str!("../resources/day21.txt");
+use super::int_code::{IntCodeInput, Processor, Status};
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let memory = parse_int_code(&data).expect("Parse Int code error !");
+pub struct Day;
+
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = std::io::Error;
+    const TITLE: &'static str = "Day 21: Springdroid Adventure";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        first_part(&data.data)?;
+        println!();
+        second_part(&data.data)
+    }
+}
+
+fn first_part(memory: &[i64]) -> std::io::Result<()> {
     let mut stdout = BufWriter::new(stdout());
-
-    // First Part
-    let mut robot: Processor = memory[..].into();
+    let mut robot: Processor = memory.into();
     robot.run_with_ascii_callbacks(
         [
             "NOT A T", "NOT B J", "OR J T", "NOT C J", "OR T J", "AND D J", "WALK",
         ]
         .iter(),
         |iterator| Some(format!("{}\n", iterator.next()?)),
-        |_, line| write!(stdout, "{}", line).map_err(|_| aoc::int_code::Status::Halted),
+        |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
     );
-    stdout.flush().unwrap();
+    stdout.flush()
+}
 
-    // Second Part
+fn second_part(memory: &[i64]) -> std::io::Result<()> {
+    let mut stdout = BufWriter::new(stdout());
     let mut robot: Processor = memory[..].into();
     robot.run_with_ascii_callbacks(
         [
@@ -67,7 +76,8 @@ fn main() {
         ]
         .iter(),
         |iterator| Some(format!("{}\n", iterator.next()?)),
-        |_, line| write!(stdout, "{}", line).map_err(|_| aoc::int_code::Status::Halted),
+        |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
     );
-    stdout.flush().unwrap();
+
+    stdout.flush()
 }

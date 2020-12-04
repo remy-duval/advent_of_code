@@ -1,34 +1,49 @@
-use std::collections::VecDeque;
 use std::collections::{HashMap, HashSet};
+use std::collections::VecDeque;
+use std::str::FromStr;
 
-use aoc::{
-    generator::data_from_cli,
-    grid::{Direction, Point},
-};
+use crate::commons::grid::{Direction, Point};
+use crate::Problem;
 
-const TITLE: &str = "Day 20: Donut Maze";
-const DATA: &str = include_str!("../resources/day20.txt");
+pub struct Day;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}\n{}", TITLE, &data);
-    let maze = Maze::parse(&data);
+#[derive(Debug, thiserror::Error)]
+#[error("Breadth first search error for {0}")]
+pub struct BfsError(&'static str);
 
-    // First part
-    let distance = maze.bfs("AA", "ZZ", true).expect("BFS failure");
-    println!(
-        "The distance from AA to ZZ with no recursion is {}",
-        distance
-    );
+impl Problem for Day {
+    type Input = Maze;
+    type Err = BfsError;
+    const TITLE: &'static str = "Day 20: Donut Maze";
 
-    // Second part
-    let distance = maze.bfs("AA", "ZZ", false).expect("Second BFS failure");
-    println!("The distance from AA to ZZ with recursion is {}", distance);
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        println!(
+            "The distance from AA to ZZ without recursion is {}",
+            first_part(&data)?
+        );
+
+        println!(
+            "The distance from AA to ZZ with recursion is {}",
+            second_part(&data)?
+        );
+
+        Ok(())
+    }
+}
+
+fn first_part(maze: &Maze) -> Result<usize, BfsError> {
+    maze.bfs("AA", "ZZ", true)
+        .ok_or(BfsError("Traversal without recursion"))
+}
+
+fn second_part(maze: &Maze) -> Result<usize, BfsError> {
+    maze.bfs("AA", "ZZ", false)
+        .ok_or(BfsError("Traversal with recursion"))
 }
 
 /// Represent the maze to traverse in this problem.
 #[derive(Debug, Clone)]
-struct Maze {
+pub struct Maze {
     graph: HashMap<Point, Vec<Transition>>,
     portals: HashMap<String, Portal>,
 }
@@ -73,7 +88,7 @@ impl Maze {
     }
 
     /// Parse the maze from a String slice.
-    pub fn parse(from: &str) -> Self {
+    fn parse(from: &str) -> Self {
         let mut dimensions: (i64, i64) = (0, 0);
         // Convert the maze to a Vec of Vec of chars for parsing easily the portal tags
         let vectored: Vec<Vec<char>> = from
@@ -215,6 +230,14 @@ impl Maze {
     }
 }
 
+impl FromStr for Maze {
+    type Err = std::convert::Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::parse(s))
+    }
+}
+
 /// Represent a transition to a neighbor in the maze.
 #[derive(Debug, Clone)]
 pub struct Transition {
@@ -341,32 +364,38 @@ impl std::ops::Add for Portal {
 mod tests {
     use super::*;
 
-    const TEST_ONE: &str = include_str!("../test_resources/day20_1.txt");
-    const TEST_TWO: &str = include_str!("../test_resources/day20_2.txt");
-    const TEST_THREE: &str = include_str!("../test_resources/day20_3.txt");
+    const TEST_ONE: &str = include_str!("test_resources/day20_1.txt");
+    const TEST_TWO: &str = include_str!("test_resources/day20_2.txt");
+    const TEST_THREE: &str = include_str!("test_resources/day20_3.txt");
+    const DATA: &str = include_str!("test_resources/day20_data.txt");
 
-    /// Util method to parse some maze and assert the BFS result.
-    fn assertion(data: &str, expected: usize, with_recursion: bool) {
-        let maze = Maze::parse(&data);
-        let distance = maze
-            .bfs("AA", "ZZ", !with_recursion)
-            .expect("The bfs should not fail");
-
-        assert_eq!(
-            expected, distance,
-            "The BFS should have produced a distance of {} and not {}",
-            expected, distance
-        );
+    #[test]
+    fn first_part_one() {
+        let maze: Maze = TEST_ONE.parse().unwrap();
+        assert_eq!(23, first_part(&maze).unwrap());
     }
 
     #[test]
-    fn no_recursion_tests() {
-        assertion(&TEST_ONE, 23, false);
-        assertion(&TEST_TWO, 58, false);
+    fn first_part_two() {
+        let maze: Maze = TEST_TWO.parse().unwrap();
+        assert_eq!(58, first_part(&maze).unwrap());
     }
 
     #[test]
-    fn with_recursion_tests() {
-        assertion(&TEST_THREE, 396, true);
+    fn first_part_three() {
+        let maze: Maze = DATA.parse().unwrap();
+        assert_eq!(552, first_part(&maze).unwrap());
+    }
+
+    #[test]
+    fn second_part_one() {
+        let maze: Maze = TEST_THREE.parse().unwrap();
+        assert_eq!(396, second_part(&maze).unwrap());
+    }
+
+    #[test]
+    fn second_part_two() {
+        let maze: Maze = DATA.parse().unwrap();
+        assert_eq!(6492, second_part(&maze).unwrap());
     }
 }
