@@ -1,43 +1,67 @@
-use aoc::generator::data_from_cli;
-use aoc::grid::{Direction, Point};
-use aoc::int_code::{parse_int_code, Processor, Status};
-use itertools::Itertools;
 use std::collections::{HashMap, HashSet, VecDeque};
 
-const TITLE: &str = "Day 15: Oxygen System";
-const DATA: &str = include_str!("../resources/day15.txt");
-const FRAME_DELAY: u64 = 1;
+use itertools::Itertools;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", aoc::CLEAR_COMMAND);
-    let memory = parse_int_code(&data).expect("Parse Int code error !");
-    let map = explore_map(&memory, true);
+use crate::commons::grid::{Direction, Point};
+use crate::commons::TO_TOP;
+use crate::Problem;
 
-    // First part
+use super::int_code::{IntCodeInput, Processor, Status};
+
+const FRAME_DELAY: u64 = 0;
+
+pub struct Day;
+
+#[derive(Debug, thiserror::Error)]
+#[error("Breadth first search failed for: {0}")]
+pub struct BfsError(&'static str);
+
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = BfsError;
+    const TITLE: &'static str = "Day 15: Oxygen System";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let memory = data.data;
+        let map = explore_map(&memory, true);
+
+        // First part
+        let (oxygen, path_length) = first_part(&map)?;
+        println!(
+            "The shortest path to the oxygen {} takes {} steps",
+            oxygen, path_length
+        );
+
+        // Second part
+        let path_length = second_part(&map, oxygen)?;
+        println!(
+            "The longest path from the oxygen is {length} steps long, so it would take {length} minutes to fill the area",
+            length = path_length
+        );
+
+        Ok(())
+    }
+}
+
+fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize), BfsError> {
     let path = Vec::from(
-        bfs(Point::default(), &map, |p, _| match map.get(&p) {
+        bfs(Point::default(), map, |p, _| match map.get(&p) {
             Some(Tile::OxygenSystem) => true,
             _ => false,
         })
-        .expect("Should have found a path to the oxygen !"),
+        .ok_or(BfsError("path to the oxygen "))?,
     );
     let oxygen = Direction::compute_movement(Point::default(), &path);
-    let path_length = path.len();
-    println!(
-        "The shortest path to the oxygen {} takes {} steps",
-        oxygen, path_length
-    );
 
-    // Second part
+    Ok((oxygen, path.len()))
+}
+
+fn second_part(map: &HashMap<Point, Tile>, oxygen: Point) -> Result<usize, BfsError> {
     let walkable_tiles = map.iter().filter(|(_, tile)| **tile != Tile::Wall).count();
     let path = bfs(oxygen, &map, |_, visited| visited.len() >= walkable_tiles)
-        .expect("Should have found a longest path !");
-    let path_length = path.len();
-    println!(
-        "The longest path from the oxygen is {length} steps long, so it would take {length} minutes to fill the area",
-        length = path_length
-    );
+        .ok_or(BfsError("The longest path to fill with oxygen"))?;
+
+    Ok(path.len())
 }
 
 /// The robot explores the maze until it finds no unexplored tiles adjacent to explored ones
@@ -168,7 +192,7 @@ fn print_map(current: Point, map: &HashMap<Point, Tile>, min: (i64, i64), max: (
         })
         .join("\n");
 
-    println!("{}{}", aoc::TO_TOP, display);
+    println!("{}{}", TO_TOP, display);
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -196,5 +220,25 @@ impl Tile {
             Tile::Wall => '#',
             Tile::OxygenSystem => 'O',
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const DATA: &str = include_str!("test_resources/day15.txt");
+
+    #[test]
+    fn solve_test() {
+        let memory = Day::parse(DATA).unwrap().data;
+        let map = explore_map(&memory, false);
+        let (oxygen, path_length) = first_part(&map).unwrap();
+
+        assert_eq!(Point { x: 16, y: 16 }, oxygen);
+        assert_eq!(424, path_length);
+
+        let longest_path = second_part(&map, oxygen).unwrap();
+        assert_eq!(446, longest_path);
     }
 }

@@ -1,55 +1,62 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{Display, Error, Formatter},
-    io::{stdout, BufWriter, Write},
+    io::{BufWriter, stdout, Write},
     str::FromStr,
 };
 
 use itertools::Itertools;
 
-use aoc::generator::data_from_cli;
-use aoc::grid::{Direction, Point};
-use aoc::int_code::{parse_int_code, Processor};
+use crate::commons::grid::{Direction, Point};
+use crate::Problem;
 
-const TITLE: &str = "Day 17: Set and Forget";
-const DATA: &str = include_str!("../resources/day17.txt");
+use super::int_code::{IntCodeInput, Processor, Status};
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", aoc::CLEAR_COMMAND);
-    let memory = parse_int_code(&data).expect("Parse Int code error !");
-    let scaffold = Scaffold::from_camera_program(&memory, true)
-        .expect("The camera program should have worked !");
+pub struct Day;
 
-    // First part
-    let calibration = scaffold.intersections_sum();
-    println!("The calibration sum is {}", calibration);
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = anyhow::Error;
+    const TITLE: &'static str = "Day 17: Set and Forget";
 
-    // Second part
-    let path = scaffold.straight_ahead_path();
-    println!("The path is {}", path.iter().join(","));
-    let (main, a, b, c) = compression(&path, (5, 20)).expect("The compression should succeed !");
-    println!(
-        "We can send it as {} with \nA = {}\nB = {} \nC = {}",
-        main, a, b, c
-    );
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let memory = data.data;
+        let scaffold = Scaffold::from_camera_program(&memory, true)
+            .ok_or(anyhow::anyhow!("The camera program should have worked !"))?;
 
-    // Run the robot with the path
-    let mut robot: Processor = {
-        let mut robot_mem = memory;
-        robot_mem[0] = 2;
-        robot_mem[..].into()
-    };
+        // First part
+        let calibration = scaffold.intersections_sum();
+        println!("The calibration sum is {}", calibration);
 
-    let mut stdout = BufWriter::new(stdout());
-    robot.run_with_ascii_callbacks(
-        [&main, &a, &b, &c, "n"].iter(),
-        |iterator| Some(format!("{}\n", iterator.next()?)),
-        |_, line| write!(stdout, "{}", line).map_err(|_| aoc::int_code::Status::Halted),
-    );
-    stdout.flush().unwrap();
+        // Second part
+        let path = scaffold.straight_ahead_path();
+        println!("The path is {}", path.iter().join(","));
+        let (main, a, b, c) = compression(&path, (5, 20))
+            .ok_or(anyhow::anyhow!("The compression should succeed !"))?;
+        println!(
+            "We can send it as {} with \nA = {}\nB = {} \nC = {}",
+            main, a, b, c
+        );
 
-    println!("The robot finished working, see above for last output.");
+        // Run the robot with the path
+        let mut robot: Processor = {
+            let mut robot_mem = memory;
+            robot_mem[0] = 2;
+            robot_mem[..].into()
+        };
+
+        let mut stdout = BufWriter::new(stdout());
+        robot.run_with_ascii_callbacks(
+            [&main, &a, &b, &c, "n"].iter(),
+            |iterator| Some(format!("{}\n", iterator.next()?)),
+            |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
+        );
+        stdout.flush()?;
+
+        println!("The robot finished working, see above for last output.");
+
+        Ok(())
+    }
 }
 
 /// Try to compress a full path into a combination of 3 smaller paths as a main path
@@ -306,8 +313,9 @@ impl Path {
 mod tests {
     use super::*;
 
-    const TEST_ONE: &str = include_str!("../test_resources/day17_1.txt");
-    const TEST_TWO: &str = include_str!("../test_resources/day17_2.txt");
+    const TEST_ONE: &str = include_str!("test_resources/day17_1.txt");
+    const TEST_TWO: &str = include_str!("test_resources/day17_2.txt");
+    const CODE: &str = include_str!("test_resources/day17_code.txt");
 
     #[test]
     fn parse_test() {
@@ -364,19 +372,24 @@ mod tests {
     }
 
     #[test]
-    fn calibration_test() {
+    fn calibration_test_a() {
         let scaffold: Scaffold = TEST_ONE.parse().expect("The parsing should work !");
         let calibration = scaffold.intersections_sum();
 
-        assert_eq!(
-            76, calibration,
-            "The calibration value should be 76, not {}",
-            calibration
-        );
+        assert_eq!(76, calibration);
     }
 
     #[test]
-    fn straight_path_test() {
+    fn calibration_test_b() {
+        let memory = Day::parse(CODE).unwrap().data;
+        let scaffold = Scaffold::from_camera_program(&memory, false).unwrap();
+        let calibration = scaffold.intersections_sum();
+
+        assert_eq!(8520, calibration);
+    }
+
+    #[test]
+    fn straight_path_test_a() {
         let scaffold: Scaffold = TEST_TWO.parse().expect("The parsing should work !");
         let path = scaffold.straight_ahead_path().iter().join(",");
 
@@ -387,10 +400,19 @@ mod tests {
     }
 
     #[test]
-    fn compression_test() {
-        let scaffold: Scaffold = TEST_TWO.parse().expect("The parsing should work !");
+    fn straight_path_test_b() {
+        let memory = Day::parse(CODE).unwrap().data;
+        let scaffold = Scaffold::from_camera_program(&memory, false).unwrap();
+        let path = scaffold.straight_ahead_path().iter().join(",");
+
+        assert_eq!(include_str!("test_resources/day17_path.txt"), path);
+    }
+
+    #[test]
+    fn compression_test_a() {
+        let scaffold: Scaffold = TEST_TWO.parse().unwrap();
         let path = scaffold.straight_ahead_path();
-        let (main, a, b, c) = compression(&path, (5, 20)).expect("The compression should workd !");
+        let (main, a, b, c) = compression(&path, (5, 20)).unwrap();
         let rebuilt = main.replace('A', &a).replace('B', &b).replace('C', &c);
 
         assert!(main.len() < 20);
@@ -400,6 +422,23 @@ mod tests {
         assert_eq!(
             "R,8,R,8,R,4,R,4,R,8,L,6,L,2,R,4,R,4,R,8,R,8,R,8,L,6,L,2",
             rebuilt
+        );
+    }
+
+    #[test]
+    fn compression_test_b() {
+        let memory = Day::parse(CODE).unwrap().data;
+        let scaffold = Scaffold::from_camera_program(&memory, false).unwrap();
+        let path = scaffold.straight_ahead_path();
+        let (main, a, b, c) = compression(&path, (5, 20)).unwrap();
+
+        assert_eq!("A,A,B,C,B,C,B,C,A,C", main);
+        assert_eq!("R,6,L,8,R,8", a);
+        assert_eq!("R,4,R,6,R,6,R,4,R,4", b);
+        assert_eq!("L,8,R,6,L,10,L,10", c);
+        assert_eq!(
+            include_str!("test_resources/day17_path.txt"),
+            main.replace('A', &a).replace('B', &b).replace('C', &c)
         );
     }
 }

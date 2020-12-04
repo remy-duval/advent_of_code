@@ -1,29 +1,34 @@
-use aoc::generator::data_from_cli;
-use aoc::grid::Point;
-use aoc::int_code::{parse_int_code, Processor};
+use crate::commons::grid::Point;
+use crate::Problem;
 
-const TITLE: &str = "Day 19: Tractor Beam";
-const DATA: &str = include_str!("../resources/day19.txt");
+use super::int_code::{IntCodeInput, Processor};
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let memory = parse_int_code(&data).expect("Parse Int code error !");
+pub struct Day;
 
-    // First part
-    let affected = count_pulled(&memory, Point::new(0, 0), Point::new(50, 50));
-    println!(
-        "{} tiles are affected by the beam in the (0,0) (49, 49) square",
-        affected
-    );
+impl Problem for Day {
+    type Input = IntCodeInput;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 19: Tractor Beam";
 
-    // Second part
-    let first = find_first_square(&memory, 100);
-    println!(
-        "The first point for the square is {}, with code {}",
-        first,
-        first.x * 10_000 + first.y
-    )
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let memory = data.data;
+        // First part
+        let affected = count_pulled(&memory, Point::new(0, 0), Point::new(50, 50));
+        println!(
+            "{} tiles are affected by the beam in the (0,0) (49, 49) square",
+            affected
+        );
+
+        // Second part
+        let first = find_first_square(&memory, 100);
+        println!(
+            "The first point for the square is {}, with code {}",
+            first,
+            first.x * 10_000 + first.y
+        );
+
+        Ok(())
+    }
 }
 
 /// Check a range of positive Points to get the number of affected tiles.
@@ -76,9 +81,34 @@ fn check_position(drone: &[i64], point: Point) -> bool {
     drone.write_int(point.x.max(0));
     drone.write_int(point.y.max(0));
 
-    let result = drone
-        .read_next()
-        .expect("The drone should not fail !");
+    match drone.read_next() {
+        Ok(result) => result == 1,
+        Err(status) => {
+            println!("The drone should not stop, but we got status {:?}", status);
+            false
+        }
+    }
+}
 
-    result == 1
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const DATA: &str = include_str!("test_resources/day19.txt");
+
+    #[test]
+    fn first_part() {
+        let memory = Day::parse(DATA).unwrap().data;
+        let affected = count_pulled(&memory, Point::new(0, 0), Point::new(50, 50));
+
+        assert_eq!(189, affected);
+    }
+
+    #[test]
+    fn second_part() {
+        let memory = Day::parse(DATA).unwrap().data;
+        let first = find_first_square(&memory, 100);
+
+        assert_eq!(Point { x: 762, y: 1042 }, first);
+    }
 }

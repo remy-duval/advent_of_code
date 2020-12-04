@@ -2,16 +2,16 @@ use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::f64::consts;
 use std::fmt::{Display, Formatter};
-use std::io::{BufWriter, stdout, Write};
+use std::io::{stdin, stdout, BufWriter, Write};
 use std::str::FromStr;
 use std::time::Duration;
 
 use anyhow::Context;
 use itertools::Itertools;
 
-use crate::commons::{CLEAR_COMMAND, math, TO_TOP};
 use crate::commons::grid::Point;
 use crate::commons::parse::LineSep;
+use crate::commons::{math, CLEAR_COMMAND, TO_TOP};
 use crate::Problem;
 
 pub struct Day;
@@ -29,10 +29,15 @@ impl Problem for Day {
         asteroids.set_station(station);
         println!("{}", asteroids);
         println!(
-            "The best view point is {} which has a view on {} asteroids",
+            "The best view point is {} which has a view on {} asteroids\n",
             station,
             station_view.len()
         );
+
+        // Wait for user input before destroying asteroids
+        println!("Press enter to continue");
+        stdin().read_line(&mut String::new())?;
+
         let ordered = field_ordering(&station, station_view);
         let two_hundredth = ordered[199];
         asteroids.set_marked(two_hundredth);

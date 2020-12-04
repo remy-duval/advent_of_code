@@ -1,6 +1,8 @@
+use crate::Problem;
+
 pub struct Day;
 
-impl crate::Problem for Day {
+impl Problem for Day {
     type Input = crate::parse::LineSep<i64>;
     type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 1 : The Tyranny of the Rocket Equation";
@@ -39,8 +41,6 @@ fn fuel_for_mass_all(mass: i64) -> i64 {
 
 #[cfg(test)]
 mod test {
-    use crate::Problem;
-
     use super::*;
 
     const DATA: &str = include_str!("test_resources/day01.txt");

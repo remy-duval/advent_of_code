@@ -1,34 +1,38 @@
 use std::ops::Add;
 
-use aoc::generator::data_from_cli;
-use aoc::grid::Point;
+use crate::commons::grid::Point;
+use crate::Problem;
 
-const TITLE: &str = "Day 18: Many-Worlds Interpretation";
-const DATA: &str = include_str!("../resources/day18.txt");
+pub struct Day;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}\n{}", TITLE, &data);
+impl Problem for Day {
+    type Input = String;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 18: Many-Worlds Interpretation";
 
-    // First part
-    let (start, keys, map) = parsers::parse_and_optimize_map(&data);
-    println!("Map size : {}", map.len());
-    let shortest = shortest_path::find_shortest_path(&map, start, keys);
-    println!("Shortest path is {} steps long", shortest);
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        // First part
+        let (start, keys, map) = parsers::parse_and_optimize_map(&data);
+        println!("Map size : {}", map.len());
+        let shortest = shortest_path::find_shortest_path(&map, start, keys);
+        println!("Shortest path is {} steps long", shortest);
 
-    // Second part
-    let split = parsers::split_maze_in_four(&data, start, true);
-    let shortest: usize = split
-        .iter()
-        .map(|data| {
-            let (start, keys, map) = parsers::parse_and_optimize_map(data);
-            // We need to subtract because for we add the start point on the middle line
-            // Which makes the path longer by 1 step for each robot
-            shortest_path::find_shortest_path(&map, start, keys) - 1
-        })
-        .sum();
+        // Second part
+        let split = parsers::split_maze_in_four(&data, start, true);
+        let shortest: usize = split
+            .iter()
+            .map(|data| {
+                let (start, keys, map) = parsers::parse_and_optimize_map(data);
+                // We need to subtract because for we add the start point on the middle line
+                // Which makes the path longer by 1 step for each robot
+                shortest_path::find_shortest_path(&map, start, keys) - 1
+            })
+            .sum();
 
-    println!("Shortest path is {} steps long", shortest);
+        println!("Shortest path is {} steps long", shortest);
+
+        Ok(())
+    }
 }
 
 /// A hallway in the maze
@@ -76,9 +80,11 @@ impl Add for Keys {
 
 /// All the methods for getting the shortest path on a maze
 pub mod shortest_path {
-    use super::{HallWay, Keys};
-    use aoc::grid::Point;
     use std::collections::{HashMap, HashSet};
+
+    use crate::commons::grid::Point;
+
+    use super::{HallWay, Keys};
 
     /// Finds the shortest with the following starting point in the map
     #[allow(clippy::implicit_hasher)]
@@ -229,9 +235,11 @@ pub mod parsers {
         fmt::{Display, Formatter},
     };
 
-    use super::{HallWay, Keys};
-    use aoc::grid::{Direction, Point};
     use itertools::Itertools;
+
+    use crate::commons::grid::{Direction, Point};
+
+    use super::{HallWay, Keys};
 
     /// Splits the maze in four at the middle point given.
     pub fn split_maze_in_four(data: &str, middle: Point, add_starts: bool) -> [String; 4] {
@@ -527,10 +535,11 @@ pub mod parsers {
 mod tests {
     use super::*;
 
-    const TEST_ONE: &str = include_str!("../test_resources/day18_1.txt");
-    const TEST_TWO: &str = include_str!("../test_resources/day18_2.txt");
-    const TEST_THREE: &str = include_str!("../test_resources/day18_3.txt");
-    const TEST_FOUR: &str = include_str!("../test_resources/day18_4.txt");
+    const TEST_ONE: &str = include_str!("test_resources/day18_1.txt");
+    const TEST_TWO: &str = include_str!("test_resources/day18_2.txt");
+    const TEST_THREE: &str = include_str!("test_resources/day18_3.txt");
+    const TEST_FOUR: &str = include_str!("test_resources/day18_4.txt");
+    const DATA: &str = include_str!("test_resources/day18_data.txt");
 
     #[test]
     fn shortest_test_one_player() {
@@ -544,11 +553,11 @@ mod tests {
         assertion(TEST_ONE, 132);
         assertion(TEST_TWO, 136);
         assertion(TEST_THREE, 81);
+        assertion(DATA, 5392);
     }
 
     #[test]
-    fn shortest_test_split() {
-        // Second part
+    fn shortest_test_split_a() {
         let split = parsers::split_maze_in_four(&TEST_FOUR, Point::new(7, 3), false);
         let shortest: usize = split
             .iter()
@@ -559,5 +568,20 @@ mod tests {
             .sum();
 
         assert_eq!(24, shortest);
+    }
+
+    #[test]
+    fn shortest_test_split_b() {
+        let (start, _, _) = parsers::parse_and_optimize_map(DATA);
+        let split = parsers::split_maze_in_four(DATA, start, true);
+        let shortest: usize = split
+            .iter()
+            .map(|data| {
+                let (start, keys, map) = parsers::parse_and_optimize_map(data);
+                shortest_path::find_shortest_path(&map, start, keys) - 1
+            })
+            .sum();
+
+        assert_eq!(1684, shortest);
     }
 }

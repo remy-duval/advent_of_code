@@ -2,40 +2,44 @@ use std::collections::HashMap;
 use std::iter::Iterator;
 use std::str::FromStr;
 
-use aoc::generator::{data_from_cli, LineSep};
+use crate::parse::LineSep;
+use crate::Problem;
 
-const TITLE: &str = "Day 14: Space Stoichiometry";
-const DATA: &str = include_str!("../resources/day14.txt");
 const ORE: &str = "ORE";
 const FUEL: &str = "FUEL";
 const TRILLION: u64 = 1_000_000_000_000;
 
-fn main() {
-    let data = data_from_cli(TITLE, DATA);
-    println!("{}", TITLE);
-    let reactions = parse_reactions(&data).expect("Could not parse the reactions");
-    // Part one
-    let cost_for_one_fuel = produce_fuel_from_ore(1, &reactions);
-    println!(
-        "To produce 1 {} we need {} {}",
-        FUEL, cost_for_one_fuel, ORE
-    );
+pub struct Day;
 
-    let maximum_amount = maximum_fuel_produced_from(TRILLION, &reactions);
-    println!(
-        "With {} {} we can produce {} {}",
-        TRILLION, ORE, maximum_amount, FUEL
-    );
+impl Problem for Day {
+    type Input = LineSep<Reaction>;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 14: Space Stoichiometry";
+
+    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let reactions = as_reaction_map(data.data);
+        // Part one
+        let cost_for_one_fuel = produce_fuel_from_ore(1, &reactions);
+        println!(
+            "To produce 1 {} we need {} {}",
+            FUEL, cost_for_one_fuel, ORE
+        );
+
+        let maximum_amount = maximum_fuel_produced_from(TRILLION, &reactions);
+        println!(
+            "With {} {} we can produce {} {}",
+            TRILLION, ORE, maximum_amount, FUEL
+        );
+
+        Ok(())
+    }
 }
 
-/// Parse the reactions string into a map of the produced component and its reaction
-fn parse_reactions(data: &str) -> Result<HashMap<String, Reaction>, &'static str> {
-    Ok(data
-        .parse::<LineSep<Reaction>>()?
-        .data
-        .into_iter()
+/// Group the reactions by name
+fn as_reaction_map(data: Vec<Reaction>) -> HashMap<String, Reaction> {
+    data.into_iter()
         .map(|reaction| (reaction.result.clone(), reaction))
-        .collect::<HashMap<_, _>>())
+        .collect()
 }
 
 /// Produces a certain amount of fuel from ore and a reaction list and returns ORE cost
@@ -102,19 +106,23 @@ fn binary_search<F>(bottom: u64, top: u64, expected: u64, function: F) -> u64
 where
     F: Fn(u64) -> u64,
 {
-    let middle = (bottom + top) / 2;
-    let result = function(middle);
-    if result == expected || bottom == middle {
-        middle
-    } else if result < expected {
-        binary_search(middle, top, expected, function)
-    } else {
-        binary_search(bottom, middle, expected, function)
+    let mut bottom = bottom;
+    let mut top = top;
+    loop {
+        let middle = (bottom + top) / 2;
+        let result = function(middle);
+        if result == expected || bottom == middle {
+            return middle;
+        } else if result < expected {
+            bottom = middle;
+        } else {
+            top = middle;
+        }
     }
 }
 
 #[derive(Debug)]
-struct Reaction {
+pub struct Reaction {
     result: String,
     times: u64,
     ingredients: HashMap<String, u64>,
@@ -155,16 +163,18 @@ impl FromStr for Reaction {
 mod tests {
     use super::*;
 
-    const TEST_ONE: &str = include_str!("../test_resources/day14_1.txt");
-    const TEST_TWO: &str = include_str!("../test_resources/day14_2.txt");
-    const TEST_THREE: &str = include_str!("../test_resources/day14_3.txt");
-    const TEST_FOUR: &str = include_str!("../test_resources/day14_4.txt");
-    const TEST_FIVE: &str = include_str!("../test_resources/day14_5.txt");
+    const TEST_ONE: &str = include_str!("test_resources/day14_1.txt");
+    const TEST_TWO: &str = include_str!("test_resources/day14_2.txt");
+    const TEST_THREE: &str = include_str!("test_resources/day14_3.txt");
+    const TEST_FOUR: &str = include_str!("test_resources/day14_4.txt");
+    const TEST_FIVE: &str = include_str!("test_resources/day14_5.txt");
+    const TEST_SIX: &str = include_str!("test_resources/day14_6.txt");
 
     #[test]
     fn single_fuel_production() {
         fn assertion(data: &str, requested_fuel: u64, expected_cost: u64) {
-            let reactions = parse_reactions(data).expect("Could not parse the reactions");
+            let parsed = Day::parse(data).expect("Could not parse");
+            let reactions = as_reaction_map(parsed.data);
             let times = produce_fuel_from_ore(requested_fuel, &reactions);
 
             assert_eq!(
@@ -184,12 +194,14 @@ mod tests {
         assertion(TEST_THREE, 1, 13312);
         assertion(TEST_FOUR, 1, 180_697);
         assertion(TEST_FIVE, 1, 2_210_736);
+        assertion(TEST_SIX, 1, 1_037_742);
     }
 
     #[test]
     fn maximum_fuel_production() {
         fn assertion(data: &str, available_ore: u64, expected_fuel: u64) {
-            let reactions = parse_reactions(data).expect("Could not parse the reactions");
+            let parsed = Day::parse(data).expect("Could not parse");
+            let reactions = as_reaction_map(parsed.data);
             let fuel = maximum_fuel_produced_from(available_ore, &reactions);
 
             assert_eq!(
@@ -207,5 +219,6 @@ mod tests {
         assertion(TEST_THREE, TRILLION, 82_892_753);
         assertion(TEST_FOUR, TRILLION, 5_586_022);
         assertion(TEST_FIVE, TRILLION, 460_664);
+        assertion(TEST_SIX, TRILLION, 1572358);
     }
 }

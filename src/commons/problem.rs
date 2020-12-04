@@ -44,12 +44,8 @@ where
     <<Day as Problem>::Input as FromStr>::Err: std::fmt::Display,
     <Day as Problem>::Err: std::fmt::Display,
 {
-    println!(
-        "{clear}{title}",
-        clear = super::CLEAR_COMMAND,
-        title = Day::TITLE
-    );
-    println!();
+    println!("{}", super::CLEAR_COMMAND);
+    println!("{}\n", Day::TITLE);
     let raw: String = fs_err::read_to_string(input).context("Reading input failure")?;
     match Day::parse(&raw) {
         Err(err) => Err(anyhow::anyhow!("Parsing failure: {}", err)),
