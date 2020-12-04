@@ -79,9 +79,9 @@ impl FromStr for Password {
             Some((iter.next()?, iter.next()?))
         }
 
-        let (pol, pwd) = first_two(s.split(':')).ok_or(PasswordError::MissingPart)?;
+        let (pol, pwd) = first_two(s.splitn(2, ':')).ok_or(PasswordError::MissingPart)?;
         let (occ, char) = first_two(pol.split_whitespace()).ok_or(PasswordError::MissingPart)?;
-        let (min, max) = first_two(occ.split('-')).ok_or(PasswordError::MissingPart)?;
+        let (min, max) = first_two(occ.splitn(2, '-')).ok_or(PasswordError::MissingPart)?;
         let a: u8 = min.trim().parse::<u8>()?;
         let b: u8 = max.trim().parse::<u8>()?;
         let character = char.chars().next().ok_or(PasswordError::MissingPart)?;
@@ -113,36 +113,28 @@ mod tests {
 
     #[test]
     fn first_part_test_a() {
-        let data = A
-            .parse::<<Day as Problem>::Input>()
-            .expect("parsing error");
+        let data = A.parse::<<Day as Problem>::Input>().expect("parsing error");
 
         assert_eq!(2, first_part(&data.data));
     }
 
     #[test]
     fn first_part_test_b() {
-        let data = B
-            .parse::<<Day as Problem>::Input>()
-            .expect("parsing error");
+        let data = B.parse::<<Day as Problem>::Input>().expect("parsing error");
 
         assert_eq!(600, first_part(&data.data));
     }
 
     #[test]
     fn second_part_test_a() {
-        let data = A
-            .parse::<<Day as Problem>::Input>()
-            .expect("parsing error");
+        let data = A.parse::<<Day as Problem>::Input>().expect("parsing error");
 
         assert_eq!(1, second_part(&data.data));
     }
 
     #[test]
     fn second_part_test_b() {
-        let data = B
-            .parse::<<Day as Problem>::Input>()
-            .expect("parsing error");
+        let data = B.parse::<<Day as Problem>::Input>().expect("parsing error");
 
         assert_eq!(245, second_part(&data.data));
     }
