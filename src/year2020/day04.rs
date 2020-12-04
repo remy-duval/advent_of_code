@@ -1,102 +1,56 @@
-use std::str::FromStr;
+use itertools::Itertools;
 
 use crate::Problem;
 
 pub struct Day;
 
 impl Problem for Day {
-    type Input = PassportBatch;
+    type Input = String;
     type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 4: Passport Processing";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
+        let batch = PassportBuilder::parse_many(&data);
         println!(
             "{count} passports have all required fields",
-            count = first_part(&data.0)
+            count = first_part(&batch)
         );
-        println!("{count} passports are valid", count = second_part(&data.0));
+        println!("{count} passports are valid", count = second_part(&batch));
 
         Ok(())
     }
 }
 
-fn first_part(passports: &[Passport]) -> usize {
+fn first_part(passports: &[Passport<'_>]) -> usize {
     passports.len()
 }
 
-fn second_part(passports: &[Passport]) -> usize {
+fn second_part(passports: &[Passport<'_>]) -> usize {
     passports
         .iter()
         .filter(|passport| passport.is_valid())
         .count()
 }
 
-/// A batch of passports
-pub struct PassportBatch(pub Vec<Passport>);
-
-impl FromStr for PassportBatch {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn first_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
-            Some((iter.next()?, iter.next()?))
-        }
-
-        let mut result = Vec::new();
-        let mut builder = PassportBuilder::default();
-        for line in s.lines() {
-            if line.is_empty() {
-                // If the line is empty, the current passport is complete
-                if let Some(passport) = std::mem::take(&mut builder).build() {
-                    result.push(passport);
-                }
-            } else {
-                // Else the line contains some data for the current passport
-                for kv in line.split_whitespace() {
-                    if let Some((key, value)) = first_two(kv.splitn(2, ':')) {
-                        match key {
-                            "pid" => builder.passport_id = Some(value.into()),
-                            "byr" => builder.birth = Some(value.into()),
-                            "iyr" => builder.issued = Some(value.into()),
-                            "eyr" => builder.expiration = Some(value.into()),
-                            "hgt" => builder.height = Some(value.into()),
-                            "hcl" => builder.hair_color = Some(value.into()),
-                            "ecl" => builder.eye_color = Some(value.into()),
-                            _ => {}
-                        }
-                    }
-                }
-            }
-        }
-
-        // Don't forget the last passport
-        if let Some(passport) = std::mem::take(&mut builder).build() {
-            result.push(passport);
-        }
-
-        Ok(PassportBatch(result))
-    }
-}
-
 /// A passport for the problem
-pub struct Passport {
+pub struct Passport<'a> {
     /// pid (Passport ID)
-    pub passport_id: String,
+    pub passport_id: &'a str,
     /// byr (Birth Year)
-    pub birth: String,
+    pub birth: &'a str,
     /// iyr (Issue Year)
-    pub issued: String,
+    pub issued: &'a str,
     /// eyr (Expiration Year)
-    pub expiration: String,
+    pub expiration: &'a str,
     /// hgt (Height)
-    pub height: String,
+    pub height: &'a str,
     /// hcl (Hair Color)
-    pub hair_color: String,
+    pub hair_color: &'a str,
     /// ecl (Eye Color)
-    pub eye_color: String,
+    pub eye_color: &'a str,
 }
 
-impl Passport {
+impl<'a> Passport<'a> {
     /// Check if all the passport data is valid
     pub fn is_valid(&self) -> bool {
         self.passport_id_valid()
@@ -156,7 +110,7 @@ impl Passport {
     /// ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
     fn eye_valid(&self) -> bool {
         matches!(
-            self.eye_color.as_str(),
+            self.eye_color,
             "amb" | "blu" | "brn" | "gry" | "grn" | "hzl" | "oth"
         )
     }
@@ -169,19 +123,60 @@ impl Passport {
 
 /// A builder for a Passport
 #[derive(Default)]
-pub struct PassportBuilder {
-    pub passport_id: Option<String>,
-    pub birth: Option<String>,
-    pub issued: Option<String>,
-    pub expiration: Option<String>,
-    pub height: Option<String>,
-    pub hair_color: Option<String>,
-    pub eye_color: Option<String>,
+struct PassportBuilder<'a> {
+    passport_id: Option<&'a str>,
+    birth: Option<&'a str>,
+    issued: Option<&'a str>,
+    expiration: Option<&'a str>,
+    height: Option<&'a str>,
+    hair_color: Option<&'a str>,
+    eye_color: Option<&'a str>,
 }
 
-impl PassportBuilder {
+impl<'a> PassportBuilder<'a> {
+    /// Parse many passports from a string slice
+    /// ### Arguments
+    /// * `string` - A string slice with all the passports, delimited by two consecutives new lines
+    ///
+    /// ### Returns
+    /// A Vector of passports, each containing string slices of the original slice
+    pub fn parse_many(string: &'a str) -> Vec<Passport> {
+        // Each passport is separated from the others by an empty new line
+        // Since Windows exists, splitting on "\n\n" isn't enough
+        string
+            .split_terminator("\r\n\r\n")
+            .flat_map(|s| s.split_terminator("\n\n"))
+            .filter_map(Self::parse_one)
+            .collect_vec()
+    }
+
+    /// Parse a passport from a string slice
+    /// ### Argumments
+    /// * `string` - A string slice with one passport
+    ///
+    /// ### Returns
+    /// A single passport, containg string slices of the original slice
+    pub fn parse_one(string: &'a str) -> Option<Passport<'a>> {
+        let mut builder = Self::default();
+        string
+            .split_whitespace()
+            .flat_map(|kv| kv.splitn(2, ':')) // key:value format
+            .tuples::<(_, _)>() // Group as (key, value) tuples
+            .for_each(|(key, value)| match key {
+                "pid" => builder.passport_id = Some(value),
+                "byr" => builder.birth = Some(value),
+                "iyr" => builder.issued = Some(value),
+                "eyr" => builder.expiration = Some(value),
+                "hgt" => builder.height = Some(value),
+                "hcl" => builder.hair_color = Some(value),
+                "ecl" => builder.eye_color = Some(value),
+                _ => {}
+            });
+        builder.build()
+    }
+
     /// Build the Passport from this builder if all the required fields are presents
-    fn build(self) -> Option<Passport> {
+    fn build(self) -> Option<Passport<'a>> {
         Some(Passport {
             passport_id: self.passport_id?,
             birth: self.birth?,
@@ -205,39 +200,39 @@ mod tests {
 
     #[test]
     fn first_part_test_a() {
-        let parsed: Vec<Passport> = Day::parse(A).unwrap().0;
+        let parsed = PassportBuilder::parse_many(A);
         assert_eq!(2, first_part(&parsed));
     }
 
     #[test]
     fn first_part_test_b() {
-        let parsed: Vec<Passport> = Day::parse(B).unwrap().0;
+        let parsed = PassportBuilder::parse_many(B);
         assert_eq!(200, first_part(&parsed));
     }
 
     #[test]
     fn invalid_passports() {
-        let parsed: Vec<Passport> = Day::parse(INVALID).unwrap().0;
+        let parsed = PassportBuilder::parse_many(INVALID);
         assert_eq!(4, parsed.len());
         assert!(parsed.iter().all(|passport| !passport.is_valid()));
     }
 
     #[test]
     fn valid_passports() {
-        let parsed: Vec<Passport> = Day::parse(VALID).unwrap().0;
+        let parsed = PassportBuilder::parse_many(VALID);
         assert_eq!(4, parsed.len());
         assert!(parsed.iter().all(|passport| passport.is_valid()));
     }
 
     #[test]
     fn second_part_a() {
-        let parsed: Vec<Passport> = Day::parse(A).unwrap().0;
+        let parsed = PassportBuilder::parse_many(A);
         assert_eq!(2, second_part(&parsed));
     }
 
     #[test]
     fn second_part_b() {
-        let parsed: Vec<Passport> = Day::parse(B).unwrap().0;
+        let parsed = PassportBuilder::parse_many(B);
         assert_eq!(116, second_part(&parsed));
     }
 }
