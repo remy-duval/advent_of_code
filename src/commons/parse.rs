@@ -4,8 +4,10 @@
 
 use std::str::FromStr;
 
+use itertools::Itertools;
+
 /// An intermediate struct to parse commas-separated input.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CommaSep<T> {
     /// The parsed data
     pub data: Vec<T>,
@@ -25,7 +27,7 @@ impl<T: FromStr> FromStr for CommaSep<T> {
 }
 
 /// An intermediate struct to parse lines separated input.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct LineSep<T> {
     /// The parsed data
     pub data: Vec<T>,
@@ -41,6 +43,27 @@ impl<T: FromStr> FromStr for LineSep<T> {
                 .map(|elt| elt.trim().parse::<T>())
                 .collect::<Result<_, _>>()?,
         })
+    }
+}
+
+/// An intermediate struct to parse lines separated input.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct SepByEmptyLine<T> {
+    pub data: Vec<T>,
+}
+
+impl<T: FromStr> FromStr for SepByEmptyLine<T> {
+    type Err = T::Err;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // Since Windows exists, splitting on "\n\n" isn't enough
+        let data: Vec<T> = s
+            .split_terminator("\r\n\r\n")
+            .flat_map(|part| part.split_terminator("\n\n"))
+            .map(|block| block.parse())
+            .try_collect()?;
+
+        Ok(SepByEmptyLine { data })
     }
 }
 
@@ -79,6 +102,33 @@ mod tests {
     fn line_sep_on_failure() {
         assert!("1 \n not an Int, definitely not \n4  "
             .parse::<LineSep<i64>>()
+            .is_err());
+    }
+
+    #[test]
+    /// Test that the parser is successfully parsing the inner values
+    fn sep_by_empty_line_successful() {
+        let first: SepByEmptyLine<LineSep<u8>> = "1\n2\n\n3\n4\n\n".parse().unwrap();
+        let second: SepByEmptyLine<LineSep<u8>> = "1\r\n2\r\n\r\n3\r\n4\r\n\r\n".parse().unwrap();
+
+        assert_eq!(
+            first.data,
+            vec![LineSep { data: vec![1, 2] }, LineSep { data: vec![3, 4] }]
+        );
+        assert_eq!(
+            second.data,
+            vec![LineSep { data: vec![1, 2] }, LineSep { data: vec![3, 4] }]
+        );
+    }
+
+    #[test]
+    /// Test that when a sub-element fails parsing the entire parsing fails with that error
+    fn sep_by_empty_line_failure() {
+        assert!("1\n2\n\nbad\n4\n\n"
+            .parse::<SepByEmptyLine<LineSep<u8>>>()
+            .is_err());
+        assert!("1\r\n2\r\n\r\nbad\r\n4\r\n\r\n"
+            .parse::<SepByEmptyLine<LineSep<u8>>>()
             .is_err());
     }
 }
