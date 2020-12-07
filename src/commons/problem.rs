@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::time::Instant;
 
 use anyhow::Context;
 
@@ -47,12 +48,14 @@ where
     println!("{}", super::CLEAR_COMMAND);
     println!("{}\n", Day::TITLE);
     let raw: String = fs_err::read_to_string(input).context("Reading input failure")?;
+    let time = Instant::now();
     match Day::parse(&raw) {
         Err(err) => Err(anyhow::anyhow!("Parsing failure: {}", err)),
         Ok(input) => {
             if let Err(err) = Day::solve(input) {
                 Err(anyhow::anyhow!("Solving failure: {}", err))
             } else {
+                println!("\n\nSolving took {} seconds", time.elapsed().as_secs_f64());
                 Ok(())
             }
         }

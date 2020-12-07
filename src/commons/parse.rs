@@ -21,7 +21,7 @@ impl<T: FromStr> FromStr for CommaSep<T> {
             data: s
                 .split(',')
                 .map(|elt| elt.trim().parse::<T>())
-                .collect::<Result<_, _>>()?,
+                .try_collect()?,
         })
     }
 }
@@ -41,7 +41,7 @@ impl<T: FromStr> FromStr for LineSep<T> {
             data: s
                 .lines()
                 .map(|elt| elt.trim().parse::<T>())
-                .collect::<Result<_, _>>()?,
+                .try_collect()?,
         })
     }
 }
