@@ -52,10 +52,17 @@ where
     match Day::parse(&raw) {
         Err(err) => Err(anyhow::anyhow!("Parsing failure: {}", err)),
         Ok(input) => {
+            let parsing = time.elapsed();
+            let solving = Instant::now();
             if let Err(err) = Day::solve(input) {
                 Err(anyhow::anyhow!("Solving failure: {}", err))
             } else {
-                println!("\n\nSolving took {} seconds", time.elapsed().as_secs_f64());
+                let solving = solving.elapsed();
+                let total = time.elapsed();
+                println!("\n");
+                println!("Parse: {:>6}μs", parsing.as_micros());
+                println!("Solve: {:>6}μs", solving.as_micros());
+                println!("Total: {:>6}μs", total.as_micros());
                 Ok(())
             }
         }
