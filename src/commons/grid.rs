@@ -31,6 +31,11 @@ impl Point {
         self.x.abs() + self.y.abs()
     }
 
+    /// Multiply all the coordinates of this point with the given value
+    pub fn multiply(&self, mul: i64) -> Point {
+        Point::new(self.x * mul, self.y * mul)
+    }
+
     /// Divide all the coordinates of this point with the divisor
     pub fn divide(&self, divisor: i64) -> Point {
         Point::new(self.x / divisor, self.y / divisor)

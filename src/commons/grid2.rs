@@ -132,6 +132,33 @@ impl<T: Default + Clone> Grid<T> {
     }
 }
 
+impl<T: Default> Grid<T> {
+    /// Add a new line to the Grid, filled with the type default value
+    /// and return a mutable to it
+    ///
+    /// ### Returns
+    /// A mutable slice of the inserted line
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use advent_of_code::commons::grid2::Grid;
+    /// let mut grid: Grid<usize> = Grid::new(5, 3);
+    /// grid.add_line();
+    /// grid.add_line();
+    /// let mut added_line = grid.add_line();
+    /// added_line[2] = 69;
+    ///
+    /// assert_eq!(
+    ///     grid.flattened(),
+    ///     &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 0, 0]
+    /// )
+    /// ```
+    pub fn add_line(&mut self) -> &mut [T] {
+        self.fill_line(|_| T::default())
+    }
+}
+
 impl<T> Grid<T> {
     /// The width of this Grid
     ///
@@ -315,6 +342,40 @@ impl<T> Grid<T> {
                 self.width
             );
         }
+    }
+
+    /// Add a new line to the Grid using a closure to compute each element
+    /// and return a mutable reference to it
+    ///
+    /// ### Arguments
+    /// * `produce` - A closure from the `x` value of the element in the line to its value
+    ///
+    /// ### Returns
+    /// A mutable slice of the inserted line
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use advent_of_code::commons::grid2::Grid;
+    /// let mut grid = Grid::new(5, 3);
+    /// grid.fill_line(|i| i);
+    /// grid.fill_line(|i| 2 * i);
+    /// let added_line = grid.fill_line(|i| 3 * i);
+    /// added_line[2] = 500;
+    ///
+    /// assert_eq!(
+    ///     grid.flattened(),
+    ///     &[0, 1, 2, 3, 4, 0, 2, 4, 6, 8, 0, 3, 500, 9, 12]
+    /// )
+    /// ```
+    pub fn fill_line(&mut self, mut produce: impl FnMut(usize) -> T) -> &mut [T] {
+        let start = self.storage.len();
+        self.storage.reserve(self.width as usize);
+        for i in 0..self.width {
+            self.storage.push(produce(i));
+        }
+
+        &mut self.storage[start..(start + self.width as usize)]
     }
 
     /// Add a new line to the Grid (if it is exactly `width` in length
