@@ -237,7 +237,7 @@ impl AsteroidField {
 
         let max = (self.max.0 as i64, self.max.1 as i64);
         let vector = *blockade - *point_of_view;
-        let unit = vector.divide(math::gcd(vector.x, vector.y));
+        let unit = vector.divide(math::gcd(vector.x, vector.y).abs());
 
         let mut current = *blockade;
         std::iter::from_fn(move || {

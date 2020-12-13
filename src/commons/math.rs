@@ -1,37 +1,35 @@
 //! Utilities for math operations:
-//! - [gcd](gcd): Greatest Common Divisor for i64
-//! - [lcm](lcm): Lowest Common Multiple for i64
+//! - [gcd](gcd): Greatest Common Divisor for any integer type
+//! - [lcm](lcm): Lowest Common Multiple for any integer type
+//! - [extended_gcd](extended_gcd): The extended euclidean algorithm for any signed integer type
 
-use std::fmt::Debug;
-use std::ops::{Add, Div, Mul, Rem, Sub};
+use std::ops::{Add, Div, Mul, Sub};
 
 /// A trait to factorize the basic numeric operations of integers necessary for GCD and LCM
 pub trait Integer:
-    Add<Output = Self>
-    + Sub<Output = Self>
-    + Mul<Output = Self>
-    + Div<Output = Self>
-    + Rem<Output = Self>
-    + Copy
-    + Debug
-    + Eq
+    Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Div<Output = Self> + Copy + Eq
 {
-    /// Return True if the numeric value is zero
-    fn is_zero(self) -> bool;
+    /// The zero value of the integer type
+    const ZERO: Self;
+    /// The one value of the integer type
+    const ONE: Self;
 
-    /// Return the absolute value of this number
-    fn absolute_value(self) -> Self;
+    /// The modulo of this number by another
+    fn remainder_euclid(self, rhs: Self) -> Self;
 }
+
+/// A marker trait that indicates an Integer is in fact signed
+pub trait SignedInteger: Integer {}
 
 /// Find the Greatest Common Divisor of two integers
 pub fn gcd<Int: Integer>(first: Int, second: Int) -> Int {
-    let mut dividend = first.absolute_value();
-    let mut divisor = second.absolute_value();
+    let mut dividend = first;
+    let mut divisor = second;
     loop {
-        if divisor.is_zero() {
+        if divisor == Int::ZERO {
             break dividend;
         } else {
-            let new_divisor = dividend % divisor;
+            let new_divisor = dividend.remainder_euclid(divisor);
             dividend = divisor;
             divisor = new_divisor;
         }
@@ -43,44 +41,79 @@ pub fn lcm<Int: Integer>(first: Int, second: Int) -> Int {
     (first * second) / gcd(first, second)
 }
 
-// Macro to implement the Integer trait for all actual integer types easily
+/// Compute the [extended gcd] of two numbers, returning the Bezout coefficients and gcd
+///
+/// ### Arguments
+/// * `first` - The first signed integer for which to compute the gcd
+/// * `second` - The second signed integer for which to compute the gcd
+///
+/// ### Returns
+/// (a, b, gcd) such that first * a + second * b = gcd
+///
+/// [extended gcd]: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+pub fn extended_gcd<Int: SignedInteger>(first: Int, second: Int) -> (Int, Int, Int) {
+    let (mut r0, mut r1) = (first, second);
+    let (mut s0, mut s1) = (Int::ONE, Int::ZERO);
+    let (mut t0, mut t1) = (Int::ZERO, Int::ONE);
+    while r1 != Int::ZERO {
+        let quotient = r0 / r1;
+        let temp = r0;
+        r0 = r1;
+        r1 = temp - quotient * r1;
+        let temp = s0;
+        s0 = s1;
+        s1 = temp - quotient * s1;
+        let temp = t0;
+        t0 = t1;
+        t1 = temp - quotient * t1;
+    }
+
+    (s0, t0, r0)
+}
+
+// Macro to implement the Integer trait easily
 macro_rules! impl_integer {
-    ($int:ty, abs = $abs:expr) => {
+    ($int:ty) => {
         impl Integer for $int {
-            fn is_zero(self) -> bool {
-                self == 0
-            }
-            fn absolute_value(self) -> Self {
-                $abs(self)
+            const ZERO: Self = 0;
+            const ONE: Self = 1;
+
+            fn remainder_euclid(self, rhs: Self) -> Self {
+                self.rem_euclid(rhs)
             }
         }
     };
 }
 
-/// The identity function for easily implementing the absolute value of an unsigned integer
-fn identity<T>(t: T) -> T {
-    t
+// Macro to implement the SignedInteger trait easily
+macro_rules! impl_signed_integer {
+    ($int:ty) => {
+        impl_integer!($int);
+        impl SignedInteger for $int {}
+    };
 }
 
-impl_integer!(u8, abs = identity);
-impl_integer!(i8, abs = i8::abs);
-impl_integer!(u16, abs = identity);
-impl_integer!(i16, abs = i16::abs);
-impl_integer!(u32, abs = identity);
-impl_integer!(i32, abs = i32::abs);
-impl_integer!(u64, abs = identity);
-impl_integer!(i64, abs = i64::abs);
-impl_integer!(u128, abs = identity);
-impl_integer!(i128, abs = i128::abs);
+impl_integer!(u8);
+impl_signed_integer!(i8);
+impl_integer!(u16);
+impl_signed_integer!(i16);
+impl_integer!(u32);
+impl_signed_integer!(i32);
+impl_integer!(u64);
+impl_signed_integer!(i64);
+impl_integer!(u128);
+impl_signed_integer!(i128);
 
 #[cfg(test)]
 mod tests {
+    use std::fmt::Debug;
+
     use super::*;
 
     #[test]
     /// Check that the GCD implementation works correctly
     fn test_gcd() {
-        fn helper<Int: Integer>(a: Int, b: Int, c: Int, result: Int) {
+        fn helper<Int: Integer + Debug>(a: Int, b: Int, c: Int, result: Int) {
             assert_eq!(result, gcd(a, gcd(b, c)));
             assert_eq!(result, gcd(gcd(a, b), c));
             assert_eq!(result, gcd(c, gcd(b, a)));
@@ -126,7 +159,7 @@ mod tests {
     #[test]
     /// Check that the LCM implementation works correctly
     fn test_lcm() {
-        fn helper<Int: Integer>(a: Int, b: Int, c: Int, result: Int) {
+        fn helper<Int: Integer + Debug>(a: Int, b: Int, c: Int, result: Int) {
             assert_eq!(result, lcm(a, lcm(b, c)));
             assert_eq!(result, lcm(lcm(a, b), c));
             assert_eq!(result, lcm(c, lcm(b, a)));
@@ -168,5 +201,28 @@ mod tests {
         helper::<i32>(8, 9, 21, 504);
         helper::<i64>(8, 9, 21, 504);
         helper::<i128>(8, 9, 21, 504);
+    }
+
+    #[test]
+    fn test_extended_gcd() {
+        // 1 * 4 + (-1) * 3 = 1
+        assert_eq!(extended_gcd(4i8, 3i8), (1, -1, 1));
+        assert_eq!(extended_gcd(4i16, 3i16), (1, -1, 1));
+        assert_eq!(extended_gcd(4i32, 3i32), (1, -1, 1));
+        assert_eq!(extended_gcd(4i64, 3i64), (1, -1, 1));
+        assert_eq!(extended_gcd(4i128, 3i128), (1, -1, 1));
+
+        // 5 * 5 + (-2) * 12 = 1
+        assert_eq!(extended_gcd(5i8, 12i8), (5, -2, 1));
+        assert_eq!(extended_gcd(5i16, 12i16), (5, -2, 1));
+        assert_eq!(extended_gcd(5i32, 12i32), (5, -2, 1));
+        assert_eq!(extended_gcd(5i64, 12i64), (5, -2, 1));
+        assert_eq!(extended_gcd(5i128, 12i128), (5, -2, 1));
+
+        // (-9) * 240 + 47 * 46 = 2
+        assert_eq!(extended_gcd(240i16, 46i16), (-9, 47, 2));
+        assert_eq!(extended_gcd(240i32, 46i32), (-9, 47, 2));
+        assert_eq!(extended_gcd(240i64, 46i64), (-9, 47, 2));
+        assert_eq!(extended_gcd(240i128, 46i128), (-9, 47, 2));
     }
 }
