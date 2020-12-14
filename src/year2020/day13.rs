@@ -5,6 +5,7 @@ use itertools::Itertools;
 use crate::commons::math::extended_gcd;
 use crate::Problem;
 
+pub type Timestamp = i128;
 pub struct Day;
 
 impl Problem for Day {
@@ -36,7 +37,7 @@ impl Problem for Day {
 }
 
 /// Find the earliest departure after the schedule timestamp
-fn earliest(schedule: &Schedule) -> Option<(i128, i128)> {
+fn earliest(schedule: &Schedule) -> Option<(Timestamp, Timestamp)> {
     schedule
         .lines
         .iter()
@@ -47,10 +48,10 @@ fn earliest(schedule: &Schedule) -> Option<(i128, i128)> {
 }
 
 /// Find the earliest timestamp such as each bus line will depart one minute after the other
-fn second_part(bus: &[Option<i128>]) -> Option<Result<i128, NotCoPrime>> {
+fn second_part(bus: &[Option<Timestamp>]) -> Option<Result<Timestamp, NotCoPrime>> {
     chinese_remainder_theorem(bus.iter().copied().enumerate().filter_map(|(index, bus)| {
         let bus = bus?;
-        let time_diff = (index as i128) * -1;
+        let time_diff = (index as Timestamp) * -1;
         Some((time_diff, bus))
     }))
 }
@@ -71,8 +72,8 @@ fn second_part(bus: &[Option<i128>]) -> Option<Result<i128, NotCoPrime>> {
 ///
 /// [`Chinese remainder theorem`]: https://en.wikipedia.org/wiki/Chinese_remainder_theorem
 fn chinese_remainder_theorem(
-    a_n: impl IntoIterator<Item = (i128, i128)>,
-) -> Option<Result<i128, NotCoPrime>> {
+    a_n: impl IntoIterator<Item = (Timestamp, Timestamp)>,
+) -> Option<Result<Timestamp, NotCoPrime>> {
     let mut a_n = a_n.into_iter();
     let first = a_n.next()?;
     let result = a_n.try_fold(first, |(a1, n1), (a2, n2)| {
@@ -92,9 +93,9 @@ fn chinese_remainder_theorem(
 ///
 /// [`Chinese remainder theorem`]: https://en.wikipedia.org/wiki/Chinese_remainder_theorem
 fn chinese_remainder_theorem_2(
-    (a1, a2): (i128, i128),
-    (n1, n2): (i128, i128),
-) -> Result<i128, NotCoPrime> {
+    (a1, a2): (Timestamp, Timestamp),
+    (n1, n2): (Timestamp, Timestamp),
+) -> Result<Timestamp, NotCoPrime> {
     let (m1, m2, gcd) = extended_gcd(n1, n2);
     if gcd != 1 {
         Err(NotCoPrime(n1, n2))
@@ -109,9 +110,9 @@ fn chinese_remainder_theorem_2(
 #[derive(Debug, Clone)]
 pub struct Schedule {
     /// The earliest timestamp at which we can depart
-    timestamp: i128,
+    timestamp: Timestamp,
     /// The bus lines (None means unavailable, Some(id) is bus that departs every id minutes)
-    lines: Vec<Option<i128>>,
+    lines: Vec<Option<Timestamp>>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -124,7 +125,7 @@ pub enum ScheduleParseError {
 
 #[derive(Debug, thiserror::Error)]
 #[error("Can't apply the chinese remainder theorem, as {0} and {1} are not co-prime")]
-pub struct NotCoPrime(i128, i128);
+pub struct NotCoPrime(Timestamp, Timestamp);
 
 impl FromStr for Schedule {
     type Err = ScheduleParseError;
@@ -135,15 +136,15 @@ impl FromStr for Schedule {
             .collect_tuple::<(_, _)>()
             .ok_or_else(|| ScheduleParseError::BadFormat(s.into()))?;
 
-        let timestamp: i128 = first
+        let timestamp: Timestamp = first
             .parse()
             .map_err(|err| ScheduleParseError::NumberParseError(first.into(), err))?;
 
-        let lines: Vec<Option<i128>> = second
+        let lines: Vec<Option<Timestamp>> = second
             .split(',')
             .map(|elt| match elt.trim() {
                 "x" => Ok(None),
-                number => match number.parse::<i128>() {
+                number => match number.parse::<Timestamp>() {
                     Ok(number) => Ok(Some(number)),
                     Err(err) => Err(ScheduleParseError::NumberParseError(first.into(), err)),
                 },
