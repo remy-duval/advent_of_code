@@ -6,6 +6,8 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::ops::{Index, IndexMut};
 
+pub mod iter;
+
 /// A basic 2 dimension Vec for representing a grid
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Grid<T> {
@@ -43,7 +45,7 @@ impl<T> Grid<T> {
     ///
     /// ### Arguments
     /// * `width` - The width of a line in the Grid
-    /// * `height_capacity` - The number of lines to create
+    /// * `height` - The number of lines to create
     /// * `f` - The function to compute the element for the index (x, y)
     ///
     /// ### Examples
@@ -144,9 +146,9 @@ impl<T: Default> Grid<T> {
     /// ```
     /// use advent_of_code::commons::grid2::Grid;
     /// let mut grid: Grid<usize> = Grid::new(5, 3);
-    /// grid.add_line();
-    /// grid.add_line();
-    /// let mut added_line = grid.add_line();
+    /// grid.insert_default_line();
+    /// grid.insert_default_line();
+    /// let mut added_line = grid.insert_default_line();
     /// added_line[2] = 69;
     ///
     /// assert_eq!(
@@ -154,8 +156,8 @@ impl<T: Default> Grid<T> {
     ///     &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 0, 0]
     /// )
     /// ```
-    pub fn add_line(&mut self) -> &mut [T] {
-        self.fill_line(|_| T::default())
+    pub fn insert_default_line(&mut self) -> &mut [T] {
+        self.insert_filled_line(|_| T::default())
     }
 }
 
@@ -358,9 +360,9 @@ impl<T> Grid<T> {
     /// ```
     /// use advent_of_code::commons::grid2::Grid;
     /// let mut grid = Grid::new(5, 3);
-    /// grid.fill_line(|i| i);
-    /// grid.fill_line(|i| 2 * i);
-    /// let added_line = grid.fill_line(|i| 3 * i);
+    /// grid.insert_filled_line(|i| i);
+    /// grid.insert_filled_line(|i| 2 * i);
+    /// let added_line = grid.insert_filled_line(|i| 3 * i);
     /// added_line[2] = 500;
     ///
     /// assert_eq!(
@@ -368,7 +370,7 @@ impl<T> Grid<T> {
     ///     &[0, 1, 2, 3, 4, 0, 2, 4, 6, 8, 0, 3, 500, 9, 12]
     /// )
     /// ```
-    pub fn fill_line(&mut self, mut produce: impl FnMut(usize) -> T) -> &mut [T] {
+    pub fn insert_filled_line(&mut self, mut produce: impl FnMut(usize) -> T) -> &mut [T] {
         let start = self.storage.len();
         self.storage.reserve(self.width as usize);
         for i in 0..self.width {
@@ -427,7 +429,7 @@ impl<T> Grid<T> {
         self.storage.iter_mut()
     }
 
-    /// An iterator on the lines of the Grid
+    /// An iterator on the lines of the Grid as slices
     ///
     /// ### Examples
     ///
@@ -442,14 +444,30 @@ impl<T> Grid<T> {
     /// assert_eq!(lines.next().unwrap(), &[15, 16, 17, 18, 19]);
     /// assert_eq!(lines.next(), None);
     /// ```
-    pub fn lines(&self) -> LineIterator<'_, T> {
-        LineIterator {
-            inner: &self,
-            current: 0,
-        }
+    pub fn lines(&self) -> iter::LineIterator<'_, T> {
+        iter::LineIterator::new(self)
     }
 
-    /// An iterator on the points in the Grid
+    /// An iterator over the points in the Grid
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use advent_of_code::commons::grid2::Grid;
+    /// let vec: Grid<u8> = Grid::with_default(2, 2);
+    /// let mut keys = vec.keys();
+    ///
+    /// assert_eq!(keys.next(), Some((0, 0)));
+    /// assert_eq!(keys.next(), Some((1, 0)));
+    /// assert_eq!(keys.next(), Some((0, 1)));
+    /// assert_eq!(keys.next(), Some((1, 1)));
+    /// assert_eq!(keys.next(), None);
+    /// ```
+    pub fn keys(&self) -> iter::Keys {
+        iter::Keys::new(self)
+    }
+
+    /// An iterator on the points and their values in the Grid
     ///
     /// ### Examples
     ///
@@ -464,13 +482,8 @@ impl<T> Grid<T> {
     /// assert_eq!(keys.next(), Some(((1, 1), &0)));
     /// assert_eq!(keys.next(), None);
     /// ```
-    pub fn key_values(&self) -> KeyValues<'_, T> {
-        KeyValues {
-            inner: self.iter(),
-            x: 0,
-            y: 0,
-            width: self.width as isize,
-        }
+    pub fn key_values(&self) -> iter::KeyValues<'_, T> {
+        iter::KeyValues::new(self)
     }
 
     /// An iterator on the points in the Grid that belong to a given half line
@@ -478,6 +491,9 @@ impl<T> Grid<T> {
     /// ### Arguments
     /// * `from` - The first point of the half-line
     /// * `step` - The increment to apply to get the following point from the previous one
+    ///
+    /// ### Panics
+    /// If `increment` is (0, 0) as this would be an infinite iterator
     ///
     /// ### Examples
     ///
@@ -491,71 +507,15 @@ impl<T> Grid<T> {
     /// assert_eq!(points.next(), Some(((4, 0), &4)));
     /// assert_eq!(points.next(), None);
     /// ```
-    pub fn half_line(&self, from: (isize, isize), step: (isize, isize)) -> HalfLine<'_, T> {
-        HalfLine {
-            inner: &self,
-            current: from,
-            increment: step,
-        }
-    }
-}
-
-/// An iterator over the lines of the Grid
-pub struct LineIterator<'a, T> {
-    inner: &'a Grid<T>,
-    current: isize,
-}
-
-impl<'a, T> Iterator for LineIterator<'a, T> {
-    type Item = &'a [T];
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.current += 1;
-        self.inner.get_line(self.current - 1)
-    }
-}
-
-/// An iterator over the points of a Grid
-pub struct KeyValues<'a, T> {
-    inner: std::slice::Iter<'a, T>,
-    x: isize,
-    y: isize,
-    width: isize,
-}
-
-impl<'a, T> Iterator for KeyValues<'a, T> {
-    type Item = ((isize, isize), &'a T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let found = self.inner.next()?;
-        let current = (self.x, self.y);
-        self.x += 1;
-        if self.x >= self.width {
-            self.x = 0;
-            self.y += 1;
-        }
-
-        Some((current, found))
-    }
-}
-
-/// An iterator on a Grid that yields points on an half-line on it
-pub struct HalfLine<'a, T> {
-    inner: &'a Grid<T>,
-    current: (isize, isize),
-    increment: (isize, isize),
-}
-
-impl<'a, T> Iterator for HalfLine<'a, T> {
-    type Item = ((isize, isize), &'a T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let found = self.inner.get(self.current)?;
-        let current = self.current;
-        self.current.0 += self.increment.0;
-        self.current.1 += self.increment.1;
-
-        Some((current, found))
+    ///
+    /// It will panic if the increment happens to be (0, 0)
+    /// ```should_panic
+    /// use advent_of_code::commons::grid2::Grid;
+    /// let vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
+    /// let mut points = vec.half_line((2, 2), (0, 0));
+    /// ```
+    pub fn half_line(&self, from: (isize, isize), step: (isize, isize)) -> iter::HalfLine<'_, T> {
+        iter::HalfLine::new(self, from, step)
     }
 }
 
