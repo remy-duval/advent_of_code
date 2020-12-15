@@ -455,7 +455,7 @@ impl<T> Grid<T> {
     /// ```
     /// use advent_of_code::commons::grid2::Grid;
     /// let vec: Grid<u8> = Grid::with_default(2, 2);
-    /// let mut keys = vec.keys();
+    /// let mut keys = vec.indices();
     ///
     /// assert_eq!(keys.next(), Some((0, 0)));
     /// assert_eq!(keys.next(), Some((1, 0)));
@@ -463,8 +463,8 @@ impl<T> Grid<T> {
     /// assert_eq!(keys.next(), Some((1, 1)));
     /// assert_eq!(keys.next(), None);
     /// ```
-    pub fn keys(&self) -> iter::Keys {
-        iter::Keys::new(self)
+    pub fn indices(&self) -> iter::Indices {
+        iter::Indices::new(self)
     }
 
     /// An iterator on the points and their values in the Grid
@@ -474,7 +474,7 @@ impl<T> Grid<T> {
     /// ```
     /// use advent_of_code::commons::grid2::Grid;
     /// let vec: Grid<u8> = Grid::with_default(2, 2);
-    /// let mut keys = vec.key_values();
+    /// let mut keys = vec.indexed_values();
     ///
     /// assert_eq!(keys.next(), Some(((0, 0), &0)));
     /// assert_eq!(keys.next(), Some(((1, 0), &0)));
@@ -482,8 +482,8 @@ impl<T> Grid<T> {
     /// assert_eq!(keys.next(), Some(((1, 1), &0)));
     /// assert_eq!(keys.next(), None);
     /// ```
-    pub fn key_values(&self) -> iter::KeyValues<'_, T> {
-        iter::KeyValues::new(self)
+    pub fn indexed_values(&self) -> iter::IndexedValues<'_, T> {
+        iter::IndexedValues::new(self)
     }
 
     /// An iterator on the points in the Grid that belong to a given half line

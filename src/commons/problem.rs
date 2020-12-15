@@ -60,9 +60,9 @@ where
                 let solving = solving.elapsed();
                 let total = time.elapsed();
                 println!("\n");
-                println!("Parse: {:>6}μs", parsing.as_micros());
-                println!("Solve: {:>6}μs", solving.as_micros());
-                println!("Total: {:>6}μs", total.as_micros());
+                println!("Parse: {:>7}μs", parsing.as_micros());
+                println!("Solve: {:>7}μs", solving.as_micros());
+                println!("Total: {:>7}μs", total.as_micros());
                 Ok(())
             }
         }

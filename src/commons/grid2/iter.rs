@@ -21,13 +21,13 @@ impl<'a, T> LineIterator<'a, T> {
 }
 
 /// An iterator over the points of the Grid
-pub struct Keys {
+pub struct Indices {
     start: (isize, isize),
     end: (isize, isize),
     width: isize,
 }
 
-impl Keys {
+impl Indices {
     pub fn new<T>(grid: &Grid<T>) -> Self {
         Self {
             start: (0, 0),
@@ -38,15 +38,15 @@ impl Keys {
 }
 
 /// An iterator over the points of a Grid
-pub struct KeyValues<'a, T> {
-    keys: Keys,
+pub struct IndexedValues<'a, T> {
+    keys: Indices,
     values: std::slice::Iter<'a, T>,
 }
 
-impl<'a, T> KeyValues<'a, T> {
+impl<'a, T> IndexedValues<'a, T> {
     pub fn new(grid: &'a Grid<T>) -> Self {
         Self {
-            keys: Keys::new(grid),
+            keys: Indices::new(grid),
             values: grid.iter(),
         }
     }
@@ -60,7 +60,6 @@ pub struct HalfLine<'a, T> {
 }
 
 impl<'a, T> HalfLine<'a, T> {
-
     /// Build a new iterator that will iterate from points at start by increments
     ///
     /// ### Arguments
@@ -70,7 +69,10 @@ impl<'a, T> HalfLine<'a, T> {
     /// ### Panics
     /// If `increment` is (0, 0) as this would be an infinite iterator
     pub fn new(inner: &'a Grid<T>, start: (isize, isize), increment: (isize, isize)) -> Self {
-        assert!(increment.0 != 0 || increment.1 != 0, "Increment for an half-line can't be (0, 0)");
+        assert!(
+            increment.0 != 0 || increment.1 != 0,
+            "Increment for an half-line can't be (0, 0)"
+        );
         Self {
             inner,
             start,
@@ -124,7 +126,7 @@ impl<'a, T> DoubleEndedIterator for LineIterator<'a, T> {
 
 impl<'a, T> ExactSizeIterator for LineIterator<'a, T> {}
 
-impl Keys {
+impl Indices {
     /// True if there are no remaining elements in this iterator
     fn check_empty(&self) -> bool {
         match self.start.1.cmp(&self.end.1) {
@@ -144,7 +146,7 @@ impl Keys {
     }
 }
 
-impl Iterator for Keys {
+impl Iterator for Indices {
     type Item = (isize, isize);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -175,7 +177,7 @@ impl Iterator for Keys {
     }
 }
 
-impl DoubleEndedIterator for Keys {
+impl DoubleEndedIterator for Indices {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.check_empty() {
             None
@@ -196,9 +198,9 @@ impl DoubleEndedIterator for Keys {
     }
 }
 
-impl ExactSizeIterator for Keys {}
+impl ExactSizeIterator for Indices {}
 
-impl<'a, T> Iterator for KeyValues<'a, T> {
+impl<'a, T> Iterator for IndexedValues<'a, T> {
     type Item = ((isize, isize), &'a T);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -214,7 +216,7 @@ impl<'a, T> Iterator for KeyValues<'a, T> {
     }
 }
 
-impl<'a, T> DoubleEndedIterator for KeyValues<'a, T> {
+impl<'a, T> DoubleEndedIterator for IndexedValues<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.keys.next_back().zip(self.values.next_back())
     }
@@ -224,7 +226,7 @@ impl<'a, T> DoubleEndedIterator for KeyValues<'a, T> {
     }
 }
 
-impl<'a, T> ExactSizeIterator for KeyValues<'a, T> {}
+impl<'a, T> ExactSizeIterator for IndexedValues<'a, T> {}
 
 impl<'a, T> Iterator for HalfLine<'a, T> {
     type Item = ((isize, isize), &'a T);
@@ -317,11 +319,11 @@ mod tests {
     }
 
     #[test]
-    fn keys_iterator() {
+    fn indices_iterator() {
         let grid = Grid::tabulate(2, 2, |(x, y)| x + y);
 
         // Testing the next iteration
-        let mut keys = grid.keys();
+        let mut keys = grid.indices();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.next(), Some((0, 0)));
         assert_eq!(keys.len(), 3);
@@ -335,7 +337,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Testing the nth optimization
-        let mut keys = grid.keys();
+        let mut keys = grid.indices();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.nth(3), Some((1, 1)));
         assert_eq!(keys.len(), 0);
@@ -343,7 +345,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // If nth goes past the end
-        let mut keys = grid.keys();
+        let mut keys = grid.indices();
         assert_eq!(keys.len(), 4);
         assert!(keys.nth(4).is_none());
         assert_eq!(keys.len(), 0);
@@ -351,7 +353,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Testing the next back iteration
-        let mut keys = grid.keys();
+        let mut keys = grid.indices();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.next_back(), Some((1, 1)));
         assert_eq!(keys.len(), 3);
@@ -365,7 +367,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Testing nth_back
-        let mut keys = grid.keys();
+        let mut keys = grid.indices();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.nth_back(3), Some((0, 0)));
         assert_eq!(keys.len(), 0);
@@ -373,7 +375,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // If nth_back goes past the end of the array
-        let mut keys = grid.keys();
+        let mut keys = grid.indices();
         assert_eq!(keys.len(), 4);
         assert!(keys.nth_back(4).is_none());
         assert_eq!(keys.len(), 0);
@@ -381,7 +383,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Mixing next and next_back should not produce inconsistent results
-        let mut keys = grid.keys();
+        let mut keys = grid.indices();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.next_back(), Some((1, 1)));
         assert_eq!(keys.len(), 3);
@@ -395,14 +397,21 @@ mod tests {
         assert_eq!(keys.len(), 0);
         assert_eq!(keys.next_back(), None);
         assert_eq!(keys.len(), 0);
+
+        // Using the returned keys to index the Grid
+        let mut keys = grid.indices();
+        assert_eq!(grid[keys.next_back().unwrap()], 2);
+        assert_eq!(grid[keys.next().unwrap()], 0);
+        assert_eq!(grid[keys.next_back().unwrap()], 1);
+        assert_eq!(grid[keys.next_back().unwrap()], 1);
     }
 
     #[test]
-    fn key_values_iterator() {
+    fn indexed_values_iterator() {
         let grid = Grid::tabulate(2, 2, |(x, y)| x + y);
 
         // Testing the next iteration
-        let mut keys = grid.key_values();
+        let mut keys = grid.indexed_values();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.next(), Some(((0, 0), &0)));
         assert_eq!(keys.len(), 3);
@@ -416,7 +425,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Testing the nth optimization
-        let mut keys = grid.key_values();
+        let mut keys = grid.indexed_values();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.nth(3), Some(((1, 1), &2)));
         assert_eq!(keys.len(), 0);
@@ -424,7 +433,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // If nth goes past the end
-        let mut keys = grid.key_values();
+        let mut keys = grid.indexed_values();
         assert_eq!(keys.len(), 4);
         assert!(keys.nth(4).is_none());
         assert_eq!(keys.len(), 0);
@@ -432,7 +441,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Testing the next back iteration
-        let mut keys = grid.key_values();
+        let mut keys = grid.indexed_values();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.next_back(), Some(((1, 1), &2)));
         assert_eq!(keys.len(), 3);
@@ -446,7 +455,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Testing nth_back
-        let mut keys = grid.key_values();
+        let mut keys = grid.indexed_values();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.nth_back(3), Some(((0, 0), &0)));
         assert_eq!(keys.len(), 0);
@@ -454,7 +463,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // If nth_back goes past the end of the array
-        let mut keys = grid.key_values();
+        let mut keys = grid.indexed_values();
         assert_eq!(keys.len(), 4);
         assert!(keys.nth_back(4).is_none());
         assert_eq!(keys.len(), 0);
@@ -462,7 +471,7 @@ mod tests {
         assert_eq!(keys.len(), 0);
 
         // Mixing next and next_back should not produce inconsistent results
-        let mut keys = grid.key_values();
+        let mut keys = grid.indexed_values();
         assert_eq!(keys.len(), 4);
         assert_eq!(keys.next_back(), Some(((1, 1), &2)));
         assert_eq!(keys.len(), 3);

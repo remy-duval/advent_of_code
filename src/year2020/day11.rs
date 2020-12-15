@@ -131,7 +131,7 @@ impl Ferry {
         adjacent_full_seat: impl Fn(&Grid<Tile>, (isize, isize), (isize, isize)) -> bool,
     ) -> usize {
         let mut changes = 0;
-        for (point, tile) in self.0.key_values() {
+        for (point, tile) in self.0.indexed_values() {
             if !tile.is_nothing() {
                 let adjacent = DIRECTIONS
                     .iter()
