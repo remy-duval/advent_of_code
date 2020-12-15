@@ -1,7 +1,8 @@
+#[forbid(unsafe_code)]
 pub use commons::arguments::{Day, Year};
 pub use commons::parse;
-pub use commons::problem::Problem;
 pub use commons::problem::parse_and_solve;
+pub use commons::problem::Problem;
 
 use crate::commons::arguments::AdventOfCode;
 
