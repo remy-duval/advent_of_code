@@ -4,8 +4,8 @@ use std::time::Instant;
 use crate::parse::CommaSep;
 use crate::Problem;
 
-const FIRST_TURNS: usize = 2020;
-const SECOND_TURNS: usize = 30000000;
+const FIRST_TURNS: u32 = 2020;
+const SECOND_TURNS: u32 = 30000000;
 
 /// This day is based on the [Van Eck sequence](https://www.numberphile.com/videos/van-eck-sequence)
 ///
@@ -20,7 +20,7 @@ const SECOND_TURNS: usize = 30000000;
 pub struct Day;
 
 impl Problem for Day {
-    type Input = CommaSep<usize>;
+    type Input = CommaSep<u32>;
     type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 15: Rambunctious Recitation";
 
@@ -59,18 +59,22 @@ impl Problem for Day {
 /// For any `number`, the value at the index `number` means:
 /// 0 => number was never spoken,
 /// t => number was spoken on turn n
-fn nth_via_vector(prefix: &[usize], turns: usize) -> usize {
+fn nth_via_vector(prefix: &[u32], turns: u32) -> u32 {
+    // Compute the appropriate size for the spoken array
     let size = prefix.iter().copied().max().unwrap_or_default().max(turns);
-    let mut spoken: Vec<usize> = vec![0; size + 1];
+    let mut spoken: Vec<u32> = vec![0; (size as usize) + 1];
+
     let mut current = 0;
-    for (initial_turn, number) in prefix.iter().copied().enumerate() {
-        spoken[number] = initial_turn + 1;
+    let mut index = 1;
+    for number in prefix.iter().copied() {
+        spoken[number as usize] = index;
         current = number;
+        index += 1;
     }
 
-    for turn in prefix.len()..turns {
-        let spoken_at = spoken[current];
-        spoken[current] = turn;
+    for turn in (prefix.len() as u32)..turns {
+        let spoken_at = spoken[current as usize];
+        spoken[current as usize] = turn;
         if spoken_at == 0 {
             current = 0;
         } else {
@@ -81,21 +85,21 @@ fn nth_via_vector(prefix: &[usize], turns: usize) -> usize {
     current
 }
 
-/// Compute the nth term using an HashMap as the backing memoization:
-///
-/// Use a Vec of fixed length max of (prefix values, turns) + 1
-/// For any `number`, the value at the index `number` means:
-/// 0 => number was never spoken,
-/// t => number was spoken on turn n
-fn nth_via_hash_map(prefix: &[usize], turns: usize) -> usize {
-    let mut spoken = HashMap::with_capacity(turns / 10000);
+/// Compute the nth term using an HashMap as the backing memoization
+fn nth_via_hash_map(prefix: &[u32], turns: u32) -> u32 {
+    let mut spoken = HashMap::new();
+    spoken.reserve((turns as usize) / 10000); // Allocate some memory up front
+
     let mut current = 0;
-    for (initial_turn, number) in prefix.iter().copied().enumerate() {
-        spoken.insert(number, initial_turn + 1);
+    let mut index = 1;
+    for number in prefix.iter().copied() {
+        spoken.insert(number, index);
         current = number;
+        index += 1;
     }
 
-    for turn in prefix.len()..turns {
+    for turn in (prefix.len() as u32)..turns {
+        // Insert will return the previous element if there was one
         current = match spoken.insert(current, turn) {
             Some(previous) => turn - previous,
             None => 0,
