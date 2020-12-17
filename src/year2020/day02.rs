@@ -75,7 +75,7 @@ impl FromStr for Password {
     type Err = PasswordError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn first_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
+        fn first_two<'a>(mut iter: impl Iterator<Item=&'a str>) -> Option<(&'a str, &'a str)> {
             Some((iter.next()?, iter.next()?))
         }
 

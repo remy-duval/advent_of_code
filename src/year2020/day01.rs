@@ -64,7 +64,7 @@ fn first_part(expenses: &[u64]) -> Option<(u64, u64)> {
 
 fn second_part(expenses: &[u64]) -> Option<(u64, u64, u64)> {
     for (i, a) in expenses.iter().copied().enumerate() {
-        let wanted = if a <= 2020 { 2020 - a } else { continue };
+        let wanted = if a <= 2020 { 2020 - a } else { continue; };
         if let Some((b, c)) = find_sum(expenses, wanted, |idx| i != idx) {
             return Some((a, b, c));
         }

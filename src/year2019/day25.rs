@@ -1,10 +1,10 @@
-use std::collections::HashSet;
 use std::io;
 
+use hashbrown::HashSet;
 use itertools::Itertools;
 
-use crate::commons::grid::Direction;
 use crate::commons::CLEAR_COMMAND;
+use crate::commons::grid::Direction;
 use crate::Problem;
 
 use super::int_code::{IntCodeInput, Processor};
@@ -127,10 +127,10 @@ fn auto_play(memory: &[i64]) {
                 let command = format!("take {}\n", take);
                 print!("{}", command);
                 Some(command)
-            // If there are no items to collect in the room, we follow the rest of the path
+                // If there are no items to collect in the room, we follow the rest of the path
             } else if let Some(next) = initial_path.next() {
                 Some(next)
-            // Then when we arrive in the last room, time to brute-force the item weight puzzle !
+                // Then when we arrive in the last room, time to brute-force the item weight puzzle !
             } else {
                 Some(brute_force_command(&inventory))
             }

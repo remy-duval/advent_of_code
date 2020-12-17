@@ -260,9 +260,9 @@ impl Processor {
         mut when_input: I,
         mut on_output: O,
     ) -> Status
-    where
-        I: FnMut(&mut State) -> Option<i64>,
-        O: FnMut(&mut State, i64) -> Result<(), Status>,
+        where
+            I: FnMut(&mut State) -> Option<i64>,
+            O: FnMut(&mut State, i64) -> Result<(), Status>,
     {
         loop {
             match self.run() {
@@ -299,9 +299,9 @@ impl Processor {
         mut when_input: I,
         mut on_output: O,
     ) -> Status
-    where
-        I: FnMut(&mut State) -> Option<String>,
-        O: FnMut(&mut State, &str) -> Result<(), Status>,
+        where
+            I: FnMut(&mut State) -> Option<String>,
+            O: FnMut(&mut State, &str) -> Result<(), Status>,
     {
         loop {
             let (out, status_opt) = self.read_next_line();

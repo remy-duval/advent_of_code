@@ -1,6 +1,7 @@
-use std::collections::{HashMap, HashSet};
 use std::collections::VecDeque;
 use std::str::FromStr;
+
+use hashbrown::{HashMap, HashSet};
 
 use crate::commons::grid::{Direction, Point};
 use crate::Problem;
@@ -116,7 +117,7 @@ impl Maze {
                             .entry(name)
                             .and_modify(|current| {
                                 if let Some(combined) =
-                                    current.clone() + Portal::new(point, dimensions)
+                                current.clone() + Portal::new(point, dimensions)
                                 {
                                     *current = combined;
                                 }

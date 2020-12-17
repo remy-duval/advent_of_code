@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use hashbrown::HashMap;
 use itertools::Itertools;
 
 use crate::commons::grid::{Direction, Point};

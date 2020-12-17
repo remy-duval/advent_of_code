@@ -1,6 +1,6 @@
-use std::collections::HashSet;
 use std::str::FromStr;
 
+use hashbrown::HashSet;
 use itertools::Itertools;
 
 use crate::parse::LineSep;

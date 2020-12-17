@@ -1,5 +1,4 @@
-use std::collections::{HashMap, HashSet};
-
+use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
 use crate::Problem;
@@ -119,7 +118,7 @@ fn count_bags_inside<'a>(
 }
 
 fn parse_rules<'a>(raw: &'a str) -> Result<Rules<'a>, RuleParseError> {
-    fn first_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
+    fn first_two<'a>(mut iter: impl Iterator<Item=&'a str>) -> Option<(&'a str, &'a str)> {
         Some((iter.next()?.trim(), iter.next()?.trim()))
     }
 

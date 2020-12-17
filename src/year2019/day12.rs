@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use std::str::FromStr;
+
+use hashbrown::HashMap;
 
 use crate::commons::math::lcm;
 use crate::Problem;

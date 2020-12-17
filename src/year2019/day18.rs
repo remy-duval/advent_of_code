@@ -80,7 +80,7 @@ impl Add for Keys {
 
 /// All the methods for getting the shortest path on a maze
 pub mod shortest_path {
-    use std::collections::{HashMap, HashSet};
+    use hashbrown::{HashMap, HashSet};
 
     use crate::commons::grid::Point;
 
@@ -229,12 +229,10 @@ pub mod shortest_path {
 
 /// All the methods for interpreting the map in a suitable way for the shortest path finding
 pub mod parsers {
-    use std::{
-        collections::HashMap,
-        convert::TryFrom,
-        fmt::{Display, Formatter},
-    };
+    use std::convert::TryFrom;
+    use std::fmt::{Display, Formatter};
 
+    use hashbrown::HashMap;
     use itertools::Itertools;
 
     use crate::commons::grid::{Direction, Point};

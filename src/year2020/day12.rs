@@ -39,7 +39,7 @@ fn first_part(instructions: &[Instruction]) -> Point {
         instructions,
         |ship, offset| ship.position = ship.position + offset,
     )
-    .position
+        .position
 }
 
 /// Move will move the waypoint
@@ -49,7 +49,7 @@ fn second_part(instructions: &[Instruction]) -> Point {
         instructions,
         |ship, offset| ship.waypoint = ship.waypoint + offset,
     )
-    .position
+        .position
 }
 
 /// Rotate a point by 90 degree right around the center
@@ -69,8 +69,8 @@ pub fn rotate_left(point: Point) -> Point {
 /// * `instructions` - The instructions to follow
 /// * `on_move` - The action to execute on a Move instruction with (mutable Ship, movement)
 pub fn move_ship<F>(initial: Ship, instructions: &[Instruction], mut on_move: F) -> Ship
-where
-    F: FnMut(&mut Ship, Point),
+    where
+        F: FnMut(&mut Ship, Point),
 {
     let mut ship = initial;
     instructions.iter().for_each(|inst| match *inst {

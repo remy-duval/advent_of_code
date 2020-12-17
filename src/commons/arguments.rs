@@ -6,9 +6,9 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
-    name = "Advent of Code",
-    author = "Remy Duval",
-    about = "Solutions for the advent of code problems"
+name = "Advent of Code",
+author = "Remy Duval",
+about = "Solutions for the advent of code problems"
 )]
 pub struct AdventOfCode {
     #[structopt(short, long)]

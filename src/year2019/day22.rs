@@ -201,9 +201,9 @@ impl LinearFunction {
     /// Fold the given collection of LCF into one single LCF.
     /// This is used to fuse the whole shuffling into one linear function.
     pub fn fold<I, A>(shuffles: I, size: i128) -> LinearFunction
-    where
-        A: Into<Self>,
-        I: IntoIterator<Item = A>,
+        where
+            A: Into<Self>,
+            I: IntoIterator<Item=A>,
     {
         shuffles.into_iter().fold(Self::default(), |current, next| {
             current.compose_with(next.into(), size)

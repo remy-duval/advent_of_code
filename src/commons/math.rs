@@ -7,7 +7,7 @@ use std::ops::{Add, Div, Mul, Sub};
 
 /// A trait to factorize the basic numeric operations of integers necessary for GCD and LCM
 pub trait Integer:
-    Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Div<Output = Self> + Copy + Eq
+Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> + Copy + Eq
 {
     /// The zero value of the integer type
     const ZERO: Self;

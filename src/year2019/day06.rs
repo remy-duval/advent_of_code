@@ -1,10 +1,12 @@
-use std::collections::HashMap;
 use std::rc::Rc;
+
+use hashbrown::HashMap;
 
 use crate::commons::parse::LineSep;
 use crate::Problem;
 
 type PlanetName = Rc<String>;
+
 const COM: &str = "COM";
 
 pub struct Day;

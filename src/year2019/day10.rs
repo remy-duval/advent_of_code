@@ -1,17 +1,17 @@
 use std::cmp::Ordering;
-use std::collections::HashSet;
 use std::f64::consts;
 use std::fmt::{Display, Formatter};
-use std::io::{stdin, stdout, BufWriter, Write};
+use std::io::{BufWriter, stdin, stdout, Write};
 use std::str::FromStr;
 use std::time::Duration;
 
 use anyhow::Context;
+use hashbrown::HashSet;
 use itertools::Itertools;
 
+use crate::commons::{CLEAR_COMMAND, math, TO_TOP};
 use crate::commons::grid::Point;
 use crate::commons::parse::LineSep;
-use crate::commons::{math, CLEAR_COMMAND, TO_TOP};
 use crate::Problem;
 
 pub struct Day;
@@ -49,7 +49,7 @@ impl Problem for Day {
 }
 
 /// Orders the field around the given center point (the station)
-fn field_ordering<T: IntoIterator<Item = Point>>(center: &Point, field: T) -> Vec<Point> {
+fn field_ordering<T: IntoIterator<Item=Point>>(center: &Point, field: T) -> Vec<Point> {
     let (_, reference_angle) = Point::new(0, -center.y).polar_coordinates();
     let order = move |point: &Point| {
         let (_, theta) = (*point - *center).polar_coordinates();
@@ -70,7 +70,7 @@ fn field_ordering<T: IntoIterator<Item = Point>>(center: &Point, field: T) -> Ve
 }
 
 /// Visualize the destruction of the asteroid field by printing each state to the console.
-fn visualize<T: IntoIterator<Item = Point>>(
+fn visualize<T: IntoIterator<Item=Point>>(
     asteroids: &mut AsteroidField,
     destroyed: T,
 ) -> std::io::Result<()> {
@@ -248,7 +248,7 @@ impl AsteroidField {
                 None
             }
         })
-        .collect::<HashSet<_>>()
+            .collect::<HashSet<_>>()
     }
 }
 

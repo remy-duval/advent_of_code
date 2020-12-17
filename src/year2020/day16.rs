@@ -1,7 +1,7 @@
-use std::collections::HashMap;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
+use hashbrown::HashMap;
 use itertools::Itertools;
 
 use crate::commons::grid2::Grid;

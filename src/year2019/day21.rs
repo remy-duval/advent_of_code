@@ -59,7 +59,7 @@ fn first_part(memory: &[i64]) -> std::io::Result<()> {
         [
             "NOT A T", "NOT B J", "OR J T", "NOT C J", "OR T J", "AND D J", "WALK",
         ]
-        .iter(),
+            .iter(),
         |iterator| Some(format!("{}\n", iterator.next()?)),
         |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
     );
@@ -74,7 +74,7 @@ fn second_part(memory: &[i64]) -> std::io::Result<()> {
             "NOT A T", "NOT B J", "OR J T", "NOT C J", "OR T J", "OR E T", "OR H T", "AND D T",
             "AND T J", "RUN",
         ]
-        .iter(),
+            .iter(),
         |iterator| Some(format!("{}\n", iterator.next()?)),
         |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
     );

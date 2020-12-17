@@ -51,8 +51,9 @@ fn run(program: &[i64], input: i64) -> Option<i64> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::Problem;
+
+    use super::*;
 
     const DATA: &str = include_str!("test_resources/day05.txt");
 

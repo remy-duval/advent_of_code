@@ -1,5 +1,6 @@
-use std::collections::HashSet;
 use std::str::FromStr;
+
+use hashbrown::HashSet;
 
 use crate::parse::SepByEmptyLine;
 use crate::Problem;

@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use anyhow::anyhow;
+use hashbrown::HashMap;
 
 use crate::commons::grid::{Direction, Point};
 use crate::parse::{CommaSep, LineSep};

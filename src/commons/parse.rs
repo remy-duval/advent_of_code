@@ -38,10 +38,7 @@ impl<T: FromStr> FromStr for LineSep<T> {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self {
-            data: s
-                .lines()
-                .map(|elt| elt.trim().parse::<T>())
-                .try_collect()?,
+            data: s.lines().map(|elt| elt.trim().parse::<T>()).try_collect()?,
         })
     }
 }

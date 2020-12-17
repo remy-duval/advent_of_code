@@ -1,12 +1,13 @@
-use std::collections::HashMap;
 use std::str::FromStr;
 
+use hashbrown::HashMap;
 use itertools::Itertools;
 
 use crate::parse::LineSep;
 use crate::Problem;
 
 pub type Value = u64;
+
 pub struct Day;
 
 impl Problem for Day {
@@ -104,7 +105,7 @@ impl FloatingMasks {
     }
 
     /// Apply the floating bit mask to the current value to get all the possible values
-    pub fn apply(&self, value: Value) -> impl Iterator<Item = Value> + '_ {
+    pub fn apply(&self, value: Value) -> impl Iterator<Item=Value> + '_ {
         self.possibilities.iter().map(move |mask| mask.apply(value))
     }
 

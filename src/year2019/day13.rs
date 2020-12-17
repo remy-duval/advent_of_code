@@ -78,8 +78,8 @@ impl GameState {
         show: bool,
         decider: F,
     ) -> (i64, (u64, u64))
-    where
-        F: Fn(&Self) -> i64,
+        where
+            F: Fn(&Self) -> i64,
     {
         let mut status = self.run(engine, show);
         let blocks = self.blocks;

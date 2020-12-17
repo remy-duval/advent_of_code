@@ -40,10 +40,10 @@ pub trait Problem {
 /// ### Returns
 /// Result containing any error that happened during the parsing + solving process
 pub fn parse_and_solve<Day>(input: PathBuf) -> Result<(), anyhow::Error>
-where
-    Day: Problem,
-    <<Day as Problem>::Input as FromStr>::Err: std::fmt::Display,
-    <Day as Problem>::Err: std::fmt::Display,
+    where
+        Day: Problem,
+        <<Day as Problem>::Input as FromStr>::Err: std::fmt::Display,
+        <Day as Problem>::Err: std::fmt::Display,
 {
     println!("{}", super::CLEAR_COMMAND);
     println!("{}\n", Day::TITLE);

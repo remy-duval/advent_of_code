@@ -6,6 +6,7 @@ use crate::commons::math::extended_gcd;
 use crate::Problem;
 
 pub type Timestamp = i128;
+
 pub struct Day;
 
 impl Problem for Day {
@@ -72,7 +73,7 @@ fn second_part(bus: &[Option<Timestamp>]) -> Option<Result<Timestamp, NotCoPrime
 ///
 /// [`Chinese remainder theorem`]: https://en.wikipedia.org/wiki/Chinese_remainder_theorem
 fn chinese_remainder_theorem(
-    a_n: impl IntoIterator<Item = (Timestamp, Timestamp)>,
+    a_n: impl IntoIterator<Item=(Timestamp, Timestamp)>,
 ) -> Option<Result<Timestamp, NotCoPrime>> {
     let mut a_n = a_n.into_iter();
     let first = a_n.next()?;

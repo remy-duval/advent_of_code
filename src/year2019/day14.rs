@@ -1,6 +1,7 @@
-use std::collections::HashMap;
 use std::iter::Iterator;
 use std::str::FromStr;
+
+use hashbrown::HashMap;
 
 use crate::parse::LineSep;
 use crate::Problem;
@@ -103,8 +104,8 @@ fn maximum_fuel_produced_from(ore: u64, reactions: &HashMap<String, Reaction>) -
 
 /// Simple binary search for an expected result
 fn binary_search<F>(bottom: u64, top: u64, expected: u64, function: F) -> u64
-where
-    F: Fn(u64) -> u64,
+    where
+        F: Fn(u64) -> u64,
 {
     let mut bottom = bottom;
     let mut top = top;
