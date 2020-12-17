@@ -61,11 +61,13 @@ impl Tickets {
         }
 
         // Then assign the actual headers one by one
-        // By repeatedly assigning the column that have only one possibility and removing them
         let mut headers: Vec<Option<&str>> = vec![None; width];
         loop {
-            let mut changes = 0; // Break the loop once no possibility remains
+            let mut changes = 0;
             for i in 0..width {
+                // This relies on the assumption that there will never be 2+ headers that are
+                // Equally possible for a column with no tie breaker in other columns
+                // This should be faster than computing arrangements until we find one that works
                 if possibilities[i].len() == 1 {
                     changes += 1;
                     let ok = possibilities[i][0];
@@ -76,6 +78,8 @@ impl Tickets {
                 }
             }
 
+            // Break the loop if no header has been assigned this pass
+            // This should trigger only when everything has been assigned (see assumption above)
             if changes == 0 {
                 break;
             }
