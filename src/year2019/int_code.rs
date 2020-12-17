@@ -28,13 +28,13 @@
 //! ```
 //!
 
+use std::convert::TryInto;
 use std::{
     collections::VecDeque,
     convert::TryFrom,
     error::Error,
     fmt::{Display, Formatter},
 };
-use std::convert::TryInto;
 
 /// The type to use when parsing int code inputs
 pub type IntCodeInput = crate::parse::CommaSep<i64>;
@@ -260,9 +260,9 @@ impl Processor {
         mut when_input: I,
         mut on_output: O,
     ) -> Status
-        where
-            I: FnMut(&mut State) -> Option<i64>,
-            O: FnMut(&mut State, i64) -> Result<(), Status>,
+    where
+        I: FnMut(&mut State) -> Option<i64>,
+        O: FnMut(&mut State, i64) -> Result<(), Status>,
     {
         loop {
             match self.run() {
@@ -298,10 +298,10 @@ impl Processor {
         mut state: State,
         mut when_input: I,
         mut on_output: O,
-    ) -> Status
-        where
-            I: FnMut(&mut State) -> Option<String>,
-            O: FnMut(&mut State, &str) -> Result<(), Status>,
+    ) -> (Status, State)
+    where
+        I: FnMut(&mut State) -> Option<String>,
+        O: FnMut(&mut State, &str) -> Result<(), Status>,
     {
         loop {
             let (out, status_opt) = self.read_next_line();
@@ -310,16 +310,16 @@ impl Processor {
                 Some(Status::RequireInput) => {
                     let input: String = match when_input(&mut state) {
                         Some(str) => str,
-                        None => return Status::RequireInput,
+                        None => return (Status::RequireInput, state),
                     };
                     self.write_text(&input);
                 }
-                Some(status) => return status,
+                Some(status) => return (status, state),
                 None => {}
             }
             // Feed the output to the function
             if let Err(status) = on_output(&mut state, &out) {
-                return status;
+                return (status, state);
             }
         }
     }
