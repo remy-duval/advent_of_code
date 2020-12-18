@@ -78,7 +78,7 @@ macro_rules! impl_integer {
             const ZERO: Self = 0;
             const ONE: Self = 1;
 
-            fn remainder_euclid(self, rhs: Self) -> Self {
+            #[inline] fn remainder_euclid(self, rhs: Self) -> Self {
                 self.rem_euclid(rhs)
             }
         }
