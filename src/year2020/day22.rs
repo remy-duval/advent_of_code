@@ -5,6 +5,7 @@ use std::str::FromStr;
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
+use crate::parse::sep_by_empty_lines;
 use crate::Problem;
 
 pub struct Day;
@@ -168,8 +169,7 @@ impl FromStr for Game {
     type Err = GameParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (first_player, second_player) = s
-            .split_terminator("\r\n\r\n")
+        let (first_player, second_player) = sep_by_empty_lines(s)
             .flat_map(|blk| blk.split_terminator("\n\n"))
             .map(|block| {
                 block

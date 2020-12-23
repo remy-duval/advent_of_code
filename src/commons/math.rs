@@ -37,8 +37,9 @@ pub fn gcd<Int: Integer>(first: Int, second: Int) -> Int {
 }
 
 /// Find the Lowest Common Multiple of two integers (using [gcd](gcd))
+#[inline]
 pub fn lcm<Int: Integer>(first: Int, second: Int) -> Int {
-    (first * second) / gcd(first, second)
+    (first / gcd(first, second)) * second
 }
 
 /// Compute the [extended gcd] of two numbers, returning the Bezout coefficients and gcd

@@ -1,7 +1,8 @@
 use std::str::FromStr;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use hashbrown::{HashMap, HashSet};
-use itertools::Itertools;
+use itertools::iproduct;
 
 use crate::Problem;
 
@@ -44,10 +45,8 @@ impl Problem for Day {
 }
 
 fn first_part(mut main: ConwayCubes) -> usize {
-    let neighbours: Vec<Point> = (-1..2)
-        .cartesian_product(-1..2)
-        .cartesian_product(-1..2)
-        .filter_map(|((x, y), z)| {
+    let neighbours: Vec<Point> = iproduct!(-1..2, -1..2, -1..2)
+        .filter_map(|(x, y, z)| {
             if x == 0 && y == 0 && z == 0 {
                 None
             } else {
@@ -61,11 +60,8 @@ fn first_part(mut main: ConwayCubes) -> usize {
 }
 
 fn second_part(mut main: ConwayCubes) -> usize {
-    let neighbours: Vec<Point> = (-1..2)
-        .cartesian_product(-1..2)
-        .cartesian_product(-1..2)
-        .cartesian_product(-1..2)
-        .filter_map(|(((x, y), z), w)| {
+    let neighbours: Vec<Point> = iproduct!(-1..2, -1..2, -1..2, -1..2)
+        .filter_map(|(x, y, z, w)| {
             if x == 0 && y == 0 && z == 0 && w == 0 {
                 None
             } else {
@@ -155,8 +151,8 @@ impl ConwayCubes {
     }
 }
 
-impl std::fmt::Display for ConwayCubes {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for ConwayCubes {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let (min, max) = self.occupied_space();
         let mut line = String::with_capacity((max.0 - min.0) as usize);
         for w in min.3..(max.3 + 1) {

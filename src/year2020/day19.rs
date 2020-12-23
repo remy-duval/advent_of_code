@@ -6,6 +6,7 @@ use std::str::FromStr;
 use hashbrown::HashMap;
 use itertools::Itertools;
 
+use crate::parse::sep_by_empty_lines;
 use crate::Problem;
 
 type BoxedParser = Rc<dyn Parser<()>>;
@@ -127,9 +128,7 @@ impl FromStr for RulesAndWords {
     type Err = std::convert::Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut blocks = s
-            .split_terminator("\r\n\r\n")
-            .flat_map(|block| block.split_terminator("\n\n"));
+        let mut blocks = sep_by_empty_lines(s);
 
         let rules = blocks.next().map_or_else(
             || HashMap::new(),

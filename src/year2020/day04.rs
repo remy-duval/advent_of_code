@@ -1,5 +1,6 @@
 use itertools::Itertools;
 
+use crate::parse::sep_by_empty_lines;
 use crate::Problem;
 
 pub struct Day;
@@ -143,9 +144,7 @@ impl<'a> PassportBuilder<'a> {
     pub fn parse_many(string: &'a str) -> Vec<Passport> {
         // Each passport is separated from the others by an empty new line
         // Since Windows exists, splitting on "\n\n" isn't enough
-        string
-            .split_terminator("\r\n\r\n")
-            .flat_map(|s| s.split_terminator("\n\n"))
+        sep_by_empty_lines(string)
             .filter_map(Self::parse_one)
             .collect_vec()
     }

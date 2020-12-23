@@ -8,6 +8,7 @@ use std::str::FromStr;
 use hashbrown::HashMap;
 use itertools::Itertools;
 
+use crate::parse::sep_by_empty_lines;
 use crate::Problem;
 
 const IMAGE_WIDTH: usize = 12;
@@ -117,7 +118,7 @@ fn second_part(image: FullImage) -> usize {
                 None
             }
         })
-        .unwrap_or(0)
+        .unwrap_or_default()
 }
 
 /// Create a mapping of tile to their neighbour, then assemble an ordered array of them
@@ -315,9 +316,7 @@ impl FromStr for JigsawImage {
     type Err = ImageParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let results: Vec<_> = s
-            .split_terminator("\r\n\r\n")
-            .flat_map(|blk| blk.split_terminator("\n\n"))
+        let results: Vec<_> = sep_by_empty_lines(s)
             .map(|blk| {
                 let mut lines = blk.lines();
                 let id = lines

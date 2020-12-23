@@ -43,6 +43,12 @@ impl<T: FromStr> FromStr for LineSep<T> {
     }
 }
 
+/// An iterator over the parts of the string that are separated by empty new lines
+pub fn sep_by_empty_lines(s: &str) -> impl Iterator<Item = &str> {
+    s.split_terminator("\r\n\r\n")
+        .flat_map(|blk| blk.split_terminator("\n\n"))
+}
+
 /// An intermediate struct to parse lines separated input.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SepByEmptyLine<T> {
@@ -54,9 +60,7 @@ impl<T: FromStr> FromStr for SepByEmptyLine<T> {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // Since Windows exists, splitting on "\n\n" isn't enough
-        let data: Vec<T> = s
-            .split_terminator("\r\n\r\n")
-            .flat_map(|part| part.split_terminator("\n\n"))
+        let data: Vec<T> = sep_by_empty_lines(s)
             .map(|block| block.parse())
             .try_collect()?;
 

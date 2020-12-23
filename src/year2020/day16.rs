@@ -5,6 +5,7 @@ use hashbrown::HashMap;
 use itertools::Itertools;
 
 use crate::commons::grid2::Grid;
+use crate::parse::sep_by_empty_lines;
 use crate::Problem;
 
 pub struct Day;
@@ -173,9 +174,7 @@ impl FromStr for Tickets {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (rule_section, ticket, others) = s
-            .split("\n\n")
-            .flat_map(|blk| blk.split("\r\n\r\n"))
+        let (rule_section, ticket, others) = sep_by_empty_lines(s)
             .collect_tuple::<(_, _, _)>()
             .ok_or_else(|| ParseError::MissingBlock(s.into()))?;
 

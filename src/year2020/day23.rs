@@ -1,4 +1,3 @@
-use std::convert::TryInto;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
@@ -16,10 +15,10 @@ impl Problem for Day {
     fn solve(cups: Self::Input) -> Result<(), Self::Err> {
         println!(
             "Part 1: The order after 100 moves is '{}'",
-            first_part(&cups)
+            first_part(&cups.0)
         );
 
-        let (first, second) = second_part(&cups);
+        let (first, second) = second_part(&cups.0);
         println!(
             "Part 2: The cups to the right of 1 are {} and {}, with a product of {}",
             first,
@@ -31,13 +30,13 @@ impl Problem for Day {
     }
 }
 
-fn first_part(cups: &TenCups) -> String {
+fn first_part(cups: &[usize]) -> String {
     let mut cups = CupRing::new(cups, 9);
     cups.nth(100);
     cups.to_string()
 }
 
-fn second_part(cups: &TenCups) -> (usize, usize) {
+fn second_part(cups: &[usize]) -> (usize, usize) {
     let mut cups = CupRing::new(cups, 1_000_000);
     cups.nth(10_000_000);
     let first = cups.storage[0];
@@ -48,35 +47,27 @@ fn second_part(cups: &TenCups) -> (usize, usize) {
 }
 
 /// The input cups arrangement
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub struct TenCups([usize; 9]);
+#[derive(Debug, Clone)]
+pub struct TenCups(Vec<usize>);
 
+/// An error when parsing cups labels
 #[derive(Debug, thiserror::Error)]
-pub enum CupParseError {
-    #[error("'{0}' is not a valid base 10 digit")]
-    BadDigit(char),
-    #[error("Expected 9 cups, got {0} instead")]
-    BadLength(usize),
-}
+#[error("'{0}' is not a valid base 10 digit")]
+pub struct CupParseError(char);
 
 impl FromStr for TenCups {
     type Err = CupParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let digits: [usize; 9] = s
-            .trim()
-            .chars()
-            .map(|c| {
-                c.to_digit(10)
-                    .map_or_else(|| Err(CupParseError::BadDigit(c)), |ok| Ok(ok as usize - 1))
-            })
-            .collect::<Result<Vec<usize>, CupParseError>>()
-            .and_then(|digits| {
-                let digits: Result<[usize; 9], Vec<usize>> = digits.try_into();
-                digits.map_err(|vec| CupParseError::BadLength(vec.len()))
-            })?;
-
-        Ok(Self(digits))
+        Ok(Self(
+            s.trim()
+                .chars()
+                .map(|c| {
+                    c.to_digit(10)
+                        .map_or_else(|| Err(CupParseError(c)), |ok| Ok(ok as usize - 1))
+                })
+                .collect::<Result<Vec<usize>, CupParseError>>()?,
+        ))
     }
 }
 
@@ -102,23 +93,23 @@ impl CupRing {
     /// ### Arguments
     /// * `cups` - The original cups
     /// * `width` - The amount of cups in total
-    fn new(cups: &TenCups, width: usize) -> Self {
+    fn new(cups: &[usize], width: usize) -> Self {
+        assert!(!cups.is_empty(), "There should be at least one cup");
         assert!(
-            width >= 9,
+            width >= cups.len(),
             "The width should be at least the ten starting cups"
         );
 
         let mut storage = vec![0; width];
-        cups.0
-            .iter()
+        cups.iter()
             .copied() // The 9 first cup are in the given order
-            .chain(cups.0.len()..width) // Then growing from 10 to width
-            .chain(std::iter::once(cups.0[0])) // Loop to start
+            .chain(cups.len()..width) // Then growing from 10 to width
+            .chain(std::iter::once(cups[0])) // Loop to start
             .tuple_windows::<(_, _)>()
             .for_each(|(from, to)| storage[from] = to);
 
         Self {
-            current: cups.0[0],
+            current: cups[0],
             storage,
         }
     }
@@ -146,10 +137,9 @@ impl CupRing {
         };
 
         // Swap the elements around
-        let next_after = self.storage[destination];
         self.storage[current] = self.storage[three];
+        self.storage[three] = self.storage[destination];
         self.storage[destination] = one;
-        self.storage[three] = next_after;
 
         // Set the next current cup (the one right after the current one in the ring)
         self.current = self.storage[current];
@@ -165,6 +155,7 @@ impl CupRing {
     }
 }
 
+/// Display the 8 cups after the Cup 1 (for part 1)
 impl Display for CupRing {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let mut current = 0;
@@ -187,7 +178,7 @@ mod tests {
 
     #[test]
     fn first_part_example_a() {
-        let cups = Day::parse(EXAMPLE).unwrap();
+        let cups = Day::parse(EXAMPLE).unwrap().0;
         let mut ring = CupRing::new(&cups, 9);
         ring.nth(10);
         assert_eq!(ring.to_string(), "92658374");
@@ -195,28 +186,28 @@ mod tests {
 
     #[test]
     fn first_part_example_b() {
-        let cups = Day::parse(EXAMPLE).unwrap();
+        let cups = Day::parse(EXAMPLE).unwrap().0;
         let result = first_part(&cups);
         assert_eq!(result, "67384529");
     }
 
     #[test]
     fn first_part_main() {
-        let cups = Day::parse(MAIN).unwrap();
+        let cups = Day::parse(MAIN).unwrap().0;
         let result = first_part(&cups);
         assert_eq!(result, "54327968");
     }
 
     #[test]
     fn second_part_example() {
-        let cups = Day::parse(EXAMPLE).unwrap();
+        let cups = Day::parse(EXAMPLE).unwrap().0;
         let (first, second) = second_part(&cups);
         assert_eq!(first * second, 149_245_887_792);
     }
 
     #[test]
     fn second_part_main() {
-        let cups = Day::parse(MAIN).unwrap();
+        let cups = Day::parse(MAIN).unwrap().0;
         let (first, second) = second_part(&cups);
         assert_eq!(first * second, 157_410_423_276);
     }
