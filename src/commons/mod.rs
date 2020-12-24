@@ -8,6 +8,5 @@ pub const CLEAR_COMMAND: &str = concat!("\u{001b}[2J", "\u{001b}[H");
 pub mod arguments;
 pub mod grid;
 pub mod grid2;
-pub mod math;
 pub mod parse;
 pub mod problem;

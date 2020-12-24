@@ -29,6 +29,7 @@ mod day21;
 mod day22;
 mod day23;
 mod day24;
+mod day25;
 
 /// Solve a problem in the year 2020
 pub fn solve(day: Day, input: PathBuf) -> anyhow::Result<()> {
@@ -57,7 +58,8 @@ pub fn solve(day: Day, input: PathBuf) -> anyhow::Result<()> {
         22 => parse_and_solve::<day22::Day>(input)?,
         23 => parse_and_solve::<day23::Day>(input)?,
         24 => parse_and_solve::<day24::Day>(input)?,
-        _ => return Err(anyhow::anyhow!("{} is not implemented", day)),
+        25 => parse_and_solve::<day25::Day>(input)?,
+        _ => return Err(anyhow::anyhow!("{} is not implemented for year 2020", day)),
     }
     Ok(())
 }

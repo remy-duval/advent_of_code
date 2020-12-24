@@ -60,7 +60,7 @@ pub fn solve(day: Day, input: PathBuf) -> anyhow::Result<()> {
         23 => parse_and_solve::<day23::Day>(input)?,
         24 => parse_and_solve::<day24::Day>(input)?,
         25 => parse_and_solve::<day25::Day>(input)?,
-        _ => return Err(anyhow::anyhow!("{} is not implemented", day)),
+        _ => return Err(anyhow::anyhow!("{} is not implemented for year 2019", day)),
     }
     Ok(())
 }

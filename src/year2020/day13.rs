@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
 use itertools::Itertools;
+use num_integer::{ExtendedGcd, Integer};
 
-use crate::commons::math::extended_gcd;
 use crate::Problem;
 
 pub type Timestamp = i128;
@@ -73,7 +73,7 @@ fn second_part(bus: &[Option<Timestamp>]) -> Option<Result<Timestamp, NotCoPrime
 ///
 /// [`Chinese remainder theorem`]: https://en.wikipedia.org/wiki/Chinese_remainder_theorem
 fn chinese_remainder_theorem(
-    a_n: impl IntoIterator<Item=(Timestamp, Timestamp)>,
+    a_n: impl IntoIterator<Item = (Timestamp, Timestamp)>,
 ) -> Option<Result<Timestamp, NotCoPrime>> {
     let mut a_n = a_n.into_iter();
     let first = a_n.next()?;
@@ -97,13 +97,15 @@ fn chinese_remainder_theorem_2(
     (a1, a2): (Timestamp, Timestamp),
     (n1, n2): (Timestamp, Timestamp),
 ) -> Result<Timestamp, NotCoPrime> {
-    let (m1, m2, gcd) = extended_gcd(n1, n2);
+    let ExtendedGcd {
+        gcd, x: m1, y: m2, ..
+    } = n1.extended_gcd(&n2);
     if gcd != 1 {
         Err(NotCoPrime(n1, n2))
     } else {
         let n = n1 * n2;
         let x = a1 * m2 * n2 + a2 * m1 * n1;
-        Ok(if x < 0 { x % n + n } else { x % n })
+        Ok(x.mod_floor(&n))
     }
 }
 
@@ -190,35 +192,35 @@ mod tests {
 
     #[test]
     fn second_part_example_a() {
-        let values = [Some(17i128), None, Some(13), Some(19)];
+        let values = [Some(17 as Timestamp), None, Some(13), Some(19)];
         let result = second_part(&values).unwrap().unwrap();
         assert_eq!(result, 3_417);
     }
 
     #[test]
     fn second_part_example_b() {
-        let values = [Some(67i128), Some(7), Some(59), Some(61)];
+        let values = [Some(67 as Timestamp), Some(7), Some(59), Some(61)];
         let result = second_part(&values).unwrap().unwrap();
         assert_eq!(result, 754_018);
     }
 
     #[test]
     fn second_part_example_c() {
-        let values = [Some(67i128), None, Some(7), Some(59), Some(61)];
+        let values = [Some(67 as Timestamp), None, Some(7), Some(59), Some(61)];
         let result = second_part(&values).unwrap().unwrap();
         assert_eq!(result, 779_210);
     }
 
     #[test]
     fn second_part_example_d() {
-        let values = [Some(67i128), Some(7), None, Some(59), Some(61)];
+        let values = [Some(67 as Timestamp), Some(7), None, Some(59), Some(61)];
         let result = second_part(&values).unwrap().unwrap();
         assert_eq!(result, 1_261_476);
     }
 
     #[test]
     fn second_part_example_e() {
-        let values = [Some(1789i128), Some(37), Some(47), Some(1889)];
+        let values = [Some(1789 as Timestamp), Some(37), Some(47), Some(1889)];
         let result = second_part(&values).unwrap().unwrap();
         assert_eq!(result, 1_202_161_486);
     }

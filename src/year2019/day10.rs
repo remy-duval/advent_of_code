@@ -8,8 +8,9 @@ use std::time::Duration;
 use anyhow::Context;
 use hashbrown::HashSet;
 use itertools::Itertools;
+use num_integer::gcd;
 
-use crate::commons::{CLEAR_COMMAND, math, TO_TOP};
+use crate::commons::{CLEAR_COMMAND, TO_TOP};
 use crate::commons::grid::Point;
 use crate::commons::parse::LineSep;
 use crate::Problem;
@@ -237,7 +238,7 @@ impl AsteroidField {
 
         let max = (self.max.0 as i64, self.max.1 as i64);
         let vector = *blockade - *point_of_view;
-        let unit = vector.divide(math::gcd(vector.x, vector.y).abs());
+        let unit = vector.divide(gcd(vector.x, vector.y));
 
         let mut current = *blockade;
         std::iter::from_fn(move || {

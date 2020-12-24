@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
 use hashbrown::HashMap;
+use num_integer::lcm;
 
-use crate::commons::math::lcm;
 use crate::Problem;
 
 const DIMENSIONS: usize = 3;
