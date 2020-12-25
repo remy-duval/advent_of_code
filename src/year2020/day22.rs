@@ -87,18 +87,16 @@ impl Game {
                 // Check if a round already happened. If it did make the P1 win
                 if !played_turns.insert(hashed(self, played_turns.hasher())) {
                     self.second_player.clear(); // Should be enough to force P1 win
-                } else {
-                    if let Some((first, second)) = self.draw() {
-                        let win = self.recursive_deck(first, second).map_or_else(
-                            || first > second,
-                            |mut inner| inner.play_recursively(known_games),
-                        );
+                } else if let Some((first, second)) = self.draw() {
+                    let win = self.recursive_deck(first, second).map_or_else(
+                        || first > second,
+                        |mut inner| inner.play_recursively(known_games),
+                    );
 
-                        if win {
-                            self.on_first_win(first, second);
-                        } else {
-                            self.on_second_win(first, second);
-                        }
+                    if win {
+                        self.on_first_win(first, second);
+                    } else {
+                        self.on_second_win(first, second);
                     }
                 }
             }

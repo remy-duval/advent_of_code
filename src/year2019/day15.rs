@@ -46,11 +46,10 @@ impl Problem for Day {
 
 fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize), BfsError> {
     let path = Vec::from(
-        bfs(Point::default(), map, |p, _| match map.get(&p) {
-            Some(Tile::OxygenSystem) => true,
-            _ => false,
+        bfs(Point::default(), map, |p, _| {
+            matches!(map.get(&p), Some(Tile::OxygenSystem))
         })
-            .ok_or(BfsError("path to the oxygen "))?,
+        .ok_or(BfsError("path to the oxygen "))?,
     );
     let oxygen = Direction::compute_movement(Point::default(), &path);
 
@@ -135,8 +134,8 @@ fn explore_map(memory: &[i64], show: bool) -> HashMap<Point, Tile> {
 /// # Returns
 /// Option of the first path that satisfies the `done` function (None if we reach the end before)
 fn bfs<Done>(start: Point, map: &HashMap<Point, Tile>, done: Done) -> Option<VecDeque<Direction>>
-    where
-        Done: Fn(Point, &HashSet<Point>) -> bool,
+where
+    Done: Fn(Point, &HashSet<Point>) -> bool,
 {
     let mut queue: VecDeque<(VecDeque<Direction>, Point)> = VecDeque::new();
     let mut visited = HashSet::new();

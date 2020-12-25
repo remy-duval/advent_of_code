@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::str::FromStr;
 
 use hashbrown::{HashMap, HashSet};
 use itertools::iproduct;
@@ -155,25 +155,24 @@ impl Display for ConwayCubes {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let (min, max) = self.occupied_space();
         let mut line = String::with_capacity((max.0 - min.0) as usize);
-        for w in min.3..(max.3 + 1) {
-            for z in min.2..(max.2 + 1) {
+        (min.3..(max.3 + 1)).try_for_each(|w| {
+            (min.2..(max.2 + 1)).try_for_each(|z| {
                 writeln!(f, "z = {}, w = {}", z, w)?;
-                for y in min.1..(max.1 + 1) {
-                    for x in min.0..(max.0 + 1) {
+                (min.1..(max.1 + 1)).try_for_each(|y| {
+                    line.clear();
+                    (min.0..(max.0 + 1)).for_each(|x| {
                         line.push(if self.cubes.contains(&(x, y, z, w)) {
                             '#'
                         } else {
                             '.'
                         });
-                    }
-                    writeln!(f, "{}", line)?;
-                    line.clear();
-                }
-                writeln!(f)?;
-            }
-        }
+                    });
 
-        Ok(())
+                    writeln!(f, "{}", line)
+                })?;
+                writeln!(f)
+            })
+        })
     }
 }
 

@@ -1,7 +1,7 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{Display, Error, Formatter},
-    io::{BufWriter, stdout, Write},
+    io::{stdout, BufWriter, Write},
     str::FromStr,
 };
 
@@ -22,7 +22,7 @@ impl Problem for Day {
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
         let memory = data.data;
         let scaffold = Scaffold::from_camera_program(&memory, true)
-            .ok_or(anyhow::anyhow!("The camera program should have worked !"))?;
+            .ok_or_else(|| anyhow::anyhow!("The camera program should have worked !"))?;
 
         // First part
         let calibration = scaffold.intersections_sum();
@@ -32,7 +32,7 @@ impl Problem for Day {
         let path = scaffold.straight_ahead_path();
         println!("The path is {}", path.iter().join(","));
         let (main, a, b, c) = compression(&path, (5, 20))
-            .ok_or(anyhow::anyhow!("The compression should succeed !"))?;
+            .ok_or_else(|| anyhow::anyhow!("The compression should succeed !"))?;
         println!(
             "We can send it as {} with \nA = {}\nB = {} \nC = {}",
             main, a, b, c

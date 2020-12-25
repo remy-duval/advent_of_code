@@ -130,21 +130,17 @@ impl FromStr for RulesAndWords {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut blocks = sep_by_empty_lines(s);
 
-        let rules = blocks.next().map_or_else(
-            || HashMap::new(),
-            |block| {
-                block
-                    .lines()
-                    .filter_map(|line| line.splitn(2, ':').collect_tuple::<(_, _)>())
-                    .map(|(key, value)| (key.trim().to_owned(), value.trim().to_owned()))
-                    .collect::<HashMap<_, _>>()
-            },
-        );
+        let rules = blocks.next().map_or_else(HashMap::new, |block| {
+            block
+                .lines()
+                .filter_map(|line| line.splitn(2, ':').collect_tuple::<(_, _)>())
+                .map(|(key, value)| (key.trim().to_owned(), value.trim().to_owned()))
+                .collect::<HashMap<_, _>>()
+        });
 
-        let words = blocks.next().map_or_else(
-            || Vec::new(),
-            |block| block.lines().map(|line| line.to_owned()).collect(),
-        );
+        let words = blocks.next().map_or_else(Vec::new, |block| {
+            block.lines().map(|line| line.to_owned()).collect()
+        });
 
         Ok(Self { rules, words })
     }

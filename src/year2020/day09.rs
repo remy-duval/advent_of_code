@@ -38,14 +38,15 @@ impl Problem for Day {
 
 /// Find the first element in `data` that is not a sum of the `from_previous` previous elements
 fn first_not_sum(data: &[u64], from_previous: usize) -> Option<u64> {
-    for end in from_previous..data.len() {
+    (from_previous..data.len()).find_map(|end| {
         let start = end - from_previous;
         let value = data[end];
         if !is_sum(&data[start..end], value) {
-            return Some(value);
+            Some(value)
+        } else {
+            None
         }
-    }
-    None
+    })
 }
 
 /// Find the first contiguous set that sum up to `wanted` in `data` and get its min and max
@@ -58,39 +59,39 @@ fn second_part(data: &[u64], wanted: u64) -> Option<(u64, u64)> {
 
 /// Find the first contiguous set of at least 2 elements in `data` that sum up to `wanted`
 fn contiguous_set(data: &[u64], wanted: u64) -> Option<&[u64]> {
-    if data.len() > 0 {
-        let mut start = 0;
-        let mut sum = data[0];
-        for end in 1..data.len() {
-            sum += data[end];
-            while sum > wanted && start < (end - 1) {
-                sum -= data[start];
-                start += 1;
-            }
-            if sum == wanted {
-                return Some(&data[start..(end + 1)]);
-            }
-        }
+    if data.is_empty() {
+        return None;
     }
 
-    None
+    let mut start = 0;
+    let mut sum = data[0];
+    (1..data.len()).find_map(|end| {
+        sum += data[end];
+        while sum > wanted && start < (end - 1) {
+            sum -= data[start];
+            start += 1;
+        }
+        if sum == wanted {
+            Some(&data[start..(end + 1)])
+        } else {
+            None
+        }
+    })
 }
 
 /// Tell if the `wanted` number is a sum of any two numbers in `inside`
 fn is_sum(inside: &[u64], wanted: u64) -> bool {
-    for (i, first) in inside.iter().copied().enumerate() {
-        let to_find = if first <= wanted {
-            wanted - first
+    inside.iter().enumerate().any(|(i, &first)| {
+        if first <= wanted {
+            let to_find = wanted - first;
+            inside
+                .iter()
+                .enumerate()
+                .any(|(j, &second)| i != j && second == to_find)
         } else {
-            continue;
-        };
-        for (j, second) in inside.iter().copied().enumerate() {
-            if i != j && second == to_find {
-                return true;
-            }
+            false
         }
-    }
-    false
+    })
 }
 
 #[cfg(test)]

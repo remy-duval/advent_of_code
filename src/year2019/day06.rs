@@ -17,11 +17,12 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 6: Universal Orbit Map";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        let orbits = parse_map(&data.data).ok_or(anyhow::anyhow!("Parse map error !"))?;
-        let from_origin = depth_first_search(COM, orbits).ok_or(anyhow::anyhow!("DFS error !"))?;
+        let orbits = parse_map(&data.data).ok_or_else(|| anyhow::anyhow!("Parse map error !"))?;
+        let from_origin =
+            depth_first_search(COM, orbits).ok_or_else(|| anyhow::anyhow!("DFS error !"))?;
         let first = check_sum(&from_origin);
         let second = shortest_path(&from_origin, "YOU", "SAN")
-            .ok_or(anyhow::anyhow!("YOU or SAN not found"))?;
+            .ok_or_else(|| anyhow::anyhow!("YOU or SAN not found"))?;
 
         println!("The orbit check sum is {}", first);
         println!("The shortest path from YOU to SAN is {}", second);

@@ -48,7 +48,7 @@ fn first_part<'a>(all_rules: &Rules<'a>) -> usize {
     let mut all: HashSet<Bag<'a>> = HashSet::new();
     let mut current: HashSet<Bag<'a>> = HashSet::new();
     current.insert(WANTED_BAG);
-    while current.len() != 0 {
+    while !current.is_empty() {
         current = bag_containing(all_rules, &current, &all);
         all.extend(current.iter());
     }
@@ -117,8 +117,8 @@ fn count_bags_inside<'a>(
     }
 }
 
-fn parse_rules<'a>(raw: &'a str) -> Result<Rules<'a>, RuleParseError> {
-    fn first_two<'a>(mut iter: impl Iterator<Item=&'a str>) -> Option<(&'a str, &'a str)> {
+fn parse_rules(raw: &str) -> Result<Rules<'_>, RuleParseError> {
+    fn first_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
         Some((iter.next()?.trim(), iter.next()?.trim()))
     }
 
@@ -128,7 +128,7 @@ fn parse_rules<'a>(raw: &'a str) -> Result<Rules<'a>, RuleParseError> {
             let (bag, rules) = first_two(line.splitn(2, "bags contain"))
                 .ok_or_else(|| RuleParseError::MissingElement(line.to_owned()))?;
 
-            let rules: BagRule<'a> = if rules == "no other bags" {
+            let rules = if rules == "no other bags" {
                 HashMap::new()
             } else {
                 rules

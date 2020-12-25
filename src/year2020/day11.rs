@@ -160,25 +160,21 @@ impl FromStr for Ferry {
     type Err = std::convert::Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let height = s.lines().count();
         let mut lines = s.lines().map(|line| {
-            line.trim()
-                .chars()
-                .map(|char| match char {
-                    'L' => Tile::EmptySeat,
-                    '#' => Tile::FullSeat,
-                    _ => Tile::Nothing,
-                })
-                .collect_vec()
+            line.trim().chars().map(|char| match char {
+                'L' => Tile::EmptySeat,
+                '#' => Tile::FullSeat,
+                _ => Tile::Nothing,
+            })
         });
 
         if let Some(first) = lines.next() {
+            let first = first.collect_vec();
             let width = first.len();
-            let mut grid = Grid::new(width, height);
-            grid.push_line(first);
-            for line in lines {
-                grid.push_line(line);
-            }
+            let mut grid = Grid::from_vec(width, first);
+            lines.for_each(|mut line| {
+                grid.insert_filled_line(|_| line.next().unwrap_or(Tile::Nothing));
+            });
 
             Ok(Ferry(grid))
         } else {

@@ -58,8 +58,7 @@ fn first_part(adapters: &SortedAdapters) -> (usize, usize) {
         adapters
             .0
             .iter()
-            .copied()
-            .fold((0, 1, 0), |(ones, threes, current), next| {
+            .fold((0, 1, 0), |(ones, threes, current), &next| {
                 let difference = next - current;
                 let ones = if difference == 1 { ones + 1 } else { ones };
                 let threes = if difference == 3 { threes + 1 } else { threes };
@@ -81,11 +80,11 @@ fn second_part(adapters: SortedAdapters) -> usize {
     if let Some(maximum) = adapters.0.last() {
         let mut memoized = vec![0; maximum + 1];
         memoized[0] = 1;
-        for voltage in adapters.0 {
+        adapters.0.into_iter().for_each(|voltage| {
             memoized[voltage] = memoized[voltage.saturating_sub(3)..voltage].iter().sum();
-        }
+        });
 
-        memoized.last().map_or(0, |last| *last)
+        memoized.last().copied().unwrap_or_default()
     } else {
         0
     }

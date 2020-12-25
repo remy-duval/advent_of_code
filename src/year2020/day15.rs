@@ -44,11 +44,11 @@ fn nth_spoken_number(prefix: &[u32], n: u32) -> u32 {
 
     let mut current = 0;
     let mut index = 0;
-    for number in prefix {
+    prefix.iter().for_each(|&number| {
         index += 1;
-        spoken[*number as usize] = index;
-        current = *number;
-    }
+        spoken[number as usize] = index;
+        current = number;
+    });
 
     (index..n).for_each(|turn| {
         if let Some(last) = spoken.get_mut(current as usize) {

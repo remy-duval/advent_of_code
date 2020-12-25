@@ -24,7 +24,10 @@ impl Problem for Day {
             std::io::stdin().read_line(&mut line)?;
             line = line.to_ascii_lowercase().trim().into();
             match line.as_str() {
-                "manual" => return Ok(play_manually(&data.data)),
+                "manual" => {
+                    play_manually(&data.data);
+                    return Ok(());
+                }
                 "script" => {
                     let timer = std::time::Instant::now();
                     return if let Some(code) = auto_play(&data.data) {
@@ -104,7 +107,10 @@ fn auto_play(memory: &[i64]) -> Option<u64> {
             },
         ),
         main_loop,
-        |(_, state), line| Ok(state.buffer.push_str(line)),
+        |(_, state), line| {
+            state.buffer.push_str(line);
+            Ok(())
+        },
     );
 
     if let Some(message) = last_state.buffer.split("\n\n").last() {

@@ -47,17 +47,17 @@ fn second_part(containers: HashMap<&str, &str>) -> String {
 fn find_containers(recipes: &[Recipe]) -> HashMap<&str, &str> {
     let mut allergens: HashMap<&str, HashSet<&str>> = HashMap::with_capacity(recipes.len());
     // Fill the mappings between allergens and the food that can contain them
-    for recipe in recipes {
+    recipes.iter().for_each(|recipe| {
         let ingredients: HashSet<_> = recipe.ingredients.iter().map(|s| s.as_str()).collect();
-        for allergen in &recipe.allergens {
+        recipe.allergens.iter().for_each(|allergen| {
             allergens
                 .entry(allergen.as_str())
                 .and_modify(|current| {
                     *current = current.intersection(&ingredients).copied().collect();
                 })
                 .or_insert_with(|| ingredients.clone());
-        }
-    }
+        });
+    });
 
     let mut mappings = HashMap::with_capacity(allergens.len());
     // Since each food can contain at most one allergen
@@ -100,17 +100,15 @@ impl FromStr for Recipe {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut elements = s.splitn(2, "(contains");
-        let ingredients = elements.next().map_or_else(
-            || Vec::new(),
-            |list| list.split_whitespace().map(|ing| ing.to_owned()).collect(),
-        );
+        let ingredients = elements.next().map_or_else(Vec::new, |list| {
+            list.split_whitespace().map(|ing| ing.to_owned()).collect()
+        });
         let allergens = elements
             .next()
             .and_then(|allergens| allergens.strip_suffix(')'))
-            .map_or_else(
-                || Vec::new(),
-                |list| list.split(',').map(|all| all.trim().to_owned()).collect(),
-            );
+            .map_or_else(Vec::new, |list| {
+                list.split(',').map(|all| all.trim().to_owned()).collect()
+            });
 
         Ok(Self {
             ingredients,

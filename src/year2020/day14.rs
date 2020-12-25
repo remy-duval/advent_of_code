@@ -105,43 +105,39 @@ impl FloatingMasks {
     }
 
     /// Apply the floating bit mask to the current value to get all the possible values
-    pub fn apply(&self, value: Value) -> impl Iterator<Item=Value> + '_ {
+    pub fn apply(&self, value: Value) -> impl Iterator<Item = Value> + '_ {
         self.possibilities.iter().map(move |mask| mask.apply(value))
     }
 
     /// Compute the new floating masks from the given mask
     /// Re-uses the internal buffer instead of allocating new one
     pub fn compute(&mut self, mask: Mask) {
-        fn bit(at: u8) -> Value {
-            1 << at
-        }
-
         self.possibilities.clear(); // Re-use an already allocated vec
         self.possibilities.push(Mask { ones: 0, zeros: 0 });
-        for i in (0..Self::BIT_RANGE).rev().map(bit) {
+        (0..Self::BIT_RANGE).rev().for_each(|bit| {
             // If the bitmask bit is 0, the corresponding memory address bit is unchanged.
             // If the bitmask bit is 1, the corresponding memory address bit is overwritten with 1.
             // If the bitmask bit is X, the corresponding memory address bit is floating.
+            let i: Value = 1 << bit;
             let is_one = mask.ones & i != 0;
             let is_float = mask.zeros & i != 0 && !is_one;
-            for current in &mut self.possibilities {
+            self.possibilities.iter_mut().for_each(|current| {
                 current.ones = current.ones * 2 + if is_one { 1 } else { 0 };
                 current.zeros = current.zeros * 2 + if !is_float { 1 } else { 0 };
-            }
+            });
             // If bitmask X, duplicate each bitmask to account for the 2 possibilities
             // The duplicated mask will have its values at the given bit the reverse of the original
             if is_float {
                 self.buffer.clear(); // Re-use an already allocated vec
                 self.buffer.reserve(self.possibilities.len());
-                for mask in &self.possibilities {
-                    self.buffer.push(Mask {
+                self.buffer
+                    .extend(self.possibilities.iter().map(|mask| Mask {
                         zeros: mask.zeros + 1,
                         ones: mask.ones + 1,
-                    });
-                }
+                    }));
                 self.possibilities.extend_from_slice(self.buffer.as_slice());
             }
-        }
+        });
     }
 }
 

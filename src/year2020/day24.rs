@@ -40,34 +40,34 @@ fn initial_state(paths: Vec<Path>) -> HashSet<Point> {
 /// Compute the nth next state of the points (game of life)
 fn compute_next_state(mut current: HashSet<Point>, n: usize) -> HashSet<Point> {
     let mut destination: HashSet<Point> = HashSet::with_capacity(current.len());
-    let mut white_tiles: HashMap<Point, u8> = HashMap::with_capacity(current.len());
+    let mut down_tiles: HashMap<Point, u8> = HashMap::with_capacity(current.len());
 
     // This is almost the same as all the previous games of life this year
-    for _ in 0..n {
-        for black_tile in current.iter() {
-            let mut count: u8 = 0;
-            for adjacent in Direction::adjacent_tiles(*black_tile) {
-                if current.contains(&adjacent) {
-                    count += 1;
+    (0..n).for_each(|_| {
+        current.iter().for_each(|up| {
+            let count = Direction::adjacent_tiles(*up).fold(0u8, |acc, adj| {
+                if current.contains(&adj) {
+                    acc + 1
                 } else {
-                    *white_tiles.entry(adjacent).or_default() += 1;
+                    *down_tiles.entry(adj).or_default() += 1;
+                    acc
                 }
-            }
+            });
 
             if count == 1 || count == 2 {
-                destination.insert(*black_tile);
+                destination.insert(*up);
             }
-        }
+        });
 
-        for (white_tile, count) in white_tiles.drain() {
+        down_tiles.drain().for_each(|(up, count)| {
             if count == 2 {
-                destination.insert(white_tile);
-            }
-        }
+                destination.insert(up);
+            };
+        });
 
         std::mem::swap(&mut current, &mut destination);
         destination.clear();
-    }
+    });
 
     current
 }

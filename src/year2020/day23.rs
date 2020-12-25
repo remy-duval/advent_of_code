@@ -159,13 +159,11 @@ impl CupRing {
 impl Display for CupRing {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let mut current = 0;
-        for _ in 0..8 {
+        (0..8).try_for_each(|_| {
             current = self.storage[current];
             // +1 since we store the cup indexed from 0 where the problem indexes from 1
-            write!(f, "{}", current + 1)?;
-        }
-
-        Ok(())
+            write!(f, "{}", current + 1)
+        })
     }
 }
 

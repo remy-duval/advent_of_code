@@ -144,26 +144,23 @@ impl Room {
         let directions = text
             .split_terminator("\n\n")
             .find_map(Direction::read_block)
-            .map_or_else(
-                || HashMap::new(),
-                |parsed| {
-                    let (from, index) = from.map_or_else(
-                        || (Direction::North, None),
-                        |(direction, index)| (direction, Some(index)),
-                    );
+            .map_or_else(HashMap::new, |parsed| {
+                let (from, index) = from.map_or_else(
+                    || (Direction::North, None),
+                    |(direction, index)| (direction, Some(index)),
+                );
 
-                    parsed
-                        .into_iter()
-                        .map(|dir| {
-                            if dir == from {
-                                (dir, index.clone())
-                            } else {
-                                (dir, None)
-                            }
-                        })
-                        .collect()
-                },
-            );
+                parsed
+                    .into_iter()
+                    .map(|dir| {
+                        if dir == from {
+                            (dir, index)
+                        } else {
+                            (dir, None)
+                        }
+                    })
+                    .collect()
+            });
 
         println!("Available directions: {}", directions.keys().join(", "));
 
@@ -254,7 +251,7 @@ impl Direction {
     pub fn read_block(s: &str) -> Option<Vec<Self>> {
         s.strip_prefix("Doors here lead:\n").and_then(|s| {
             s.lines()
-                .map(|line| match line.trim_start_matches("-").trim() {
+                .map(|line| match line.trim_start_matches('-').trim() {
                     "north" => Some(Direction::North),
                     "south" => Some(Direction::South),
                     "east" => Some(Direction::East),
@@ -324,7 +321,7 @@ impl Item {
         s.strip_prefix("Items here:\n").map(|s| {
             s.lines()
                 .filter_map(|line| {
-                    let item = line.trim_start_matches("-").trim();
+                    let item = line.trim_start_matches('-').trim();
                     // Prevent dangerous items from being picked up by the script
                     if Self::DANGEROUS_ITEMS.contains(&item) {
                         None

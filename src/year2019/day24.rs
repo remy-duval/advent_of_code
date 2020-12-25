@@ -30,15 +30,13 @@ impl Problem for Day {
 /// Computes next states of the Bugs with no recursion until we get one we saw before.
 fn first_repeat(start: Bugs) -> Bugs {
     let mut seen: HashSet<Bugs> = HashSet::new();
-    seen.insert(start);
-
     let mut current = start;
     loop {
-        current = current.next_state();
-        if seen.contains(&current) {
+        // Insert returns false if value is already present
+        if !seen.insert(current) {
             return current;
         } else {
-            seen.insert(current);
+            current = current.next_state();
         }
     }
 }

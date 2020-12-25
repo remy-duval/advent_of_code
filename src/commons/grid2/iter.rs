@@ -193,7 +193,7 @@ impl DoubleEndedIterator for Indices {
     }
 
     fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
-        self.end = self.move_point(self.end, -1 * (n as isize));
+        self.end = self.move_point(self.end, -(n as isize));
         self.next_back()
     }
 }

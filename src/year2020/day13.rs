@@ -42,17 +42,16 @@ fn earliest(schedule: &Schedule) -> Option<(Timestamp, Timestamp)> {
     schedule
         .lines
         .iter()
-        .copied()
-        .filter_map(|x| x)
+        .filter_map(|&x| x)
         .map(|bus| (bus, bus - schedule.timestamp.rem_euclid(bus)))
         .min_by_key(|(_, earliest)| *earliest)
 }
 
 /// Find the earliest timestamp such as each bus line will depart one minute after the other
 fn second_part(bus: &[Option<Timestamp>]) -> Option<Result<Timestamp, NotCoPrime>> {
-    chinese_remainder_theorem(bus.iter().copied().enumerate().filter_map(|(index, bus)| {
-        let bus = bus?;
-        let time_diff = (index as Timestamp) * -1;
+    chinese_remainder_theorem(bus.iter().enumerate().filter_map(|(index, bus)| {
+        let bus = *bus.as_ref()?;
+        let time_diff = -(index as Timestamp);
         Some((time_diff, bus))
     }))
 }

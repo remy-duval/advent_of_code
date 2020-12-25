@@ -45,9 +45,9 @@ impl FromStr for Signal {
             .map(|c| c.to_digit(10).and_then(|d| d.try_into().ok()))
             .collect::<Option<_>>();
 
-        Ok(Signal(
-            data.ok_or(anyhow::anyhow!("Error parsing the input !"))?,
-        ))
+        Ok(Signal(data.ok_or_else(|| {
+            anyhow::anyhow!("Error parsing the input !")
+        })?))
     }
 }
 

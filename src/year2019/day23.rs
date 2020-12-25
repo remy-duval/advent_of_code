@@ -15,15 +15,15 @@ impl Problem for Day {
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
         let memory = data.data;
-        let output = run_until_nat_packet(&memory).ok_or(anyhow::anyhow!(
-            "No NAT packet received, but the network has stopped"
-        ))?;
+        let output = run_until_nat_packet(&memory).ok_or_else(|| {
+            anyhow::anyhow!("No NAT packet received, but the network has stopped")
+        })?;
         println!("First NAT packet was : {}\n", output);
 
         println!("Starting network with NAT ON");
-        let output = run_until_duplicate_wakeup(&memory).ok_or(anyhow::anyhow!(
-            "The network stopped before sending twice the same wakeup"
-        ))?;
+        let output = run_until_duplicate_wakeup(&memory).ok_or_else(|| {
+            anyhow::anyhow!("The network stopped before sending twice the same wakeup")
+        })?;
         println!("Duplicate Y wake-up was : {}", output);
 
         Ok(())

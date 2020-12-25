@@ -6,10 +6,8 @@ impl crate::Problem for Day {
     const TITLE: &'static str = "Day 1: Report Repair";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        let (first, second) = first_part(&data.data).ok_or(anyhow::anyhow!(
-            "No 2020 2-elements sum found in {:?}",
-            data.data
-        ))?;
+        let (first, second) = first_part(&data.data)
+            .ok_or_else(|| anyhow::anyhow!("No 2020 2-elements sum found in {:?}", data.data))?;
         println!(
             "2 expenses that sum to 2020: {a} * {b} = {product}",
             a = first,
@@ -17,10 +15,8 @@ impl crate::Problem for Day {
             product = first * second
         );
 
-        let (first, second, third) = second_part(&data.data).ok_or(anyhow::anyhow!(
-            "No 2020 3-elements sum found in {:?}",
-            data.data
-        ))?;
+        let (first, second, third) = second_part(&data.data)
+            .ok_or_else(|| anyhow::anyhow!("No 2020 3-elements sum found in {:?}", data.data))?;
 
         println!(
             "3 expenses that sum to 2020: {a} * {b} * {c} = {product}",
@@ -64,7 +60,11 @@ fn first_part(expenses: &[u64]) -> Option<(u64, u64)> {
 
 fn second_part(expenses: &[u64]) -> Option<(u64, u64, u64)> {
     for (i, a) in expenses.iter().copied().enumerate() {
-        let wanted = if a <= 2020 { 2020 - a } else { continue; };
+        let wanted = if a <= 2020 {
+            2020 - a
+        } else {
+            continue;
+        };
         if let Some((b, c)) = find_sum(expenses, wanted, |idx| i != idx) {
             return Some((a, b, c));
         }

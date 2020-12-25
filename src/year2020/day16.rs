@@ -49,23 +49,23 @@ impl Tickets {
 
         // First compute the possible header for each column
         let mut possibilities: Vec<Vec<&str>> = vec![Vec::new(); width];
-        for (name, rule) in &self.rules {
+        self.rules.iter().for_each(|(name, rule)| {
             let mut valid: Vec<usize> = (0..width).collect();
             // Filter out columns where the rule is invalid at least once
             self.valid.lines().for_each(|line| {
                 valid.retain(|idx| line.get(*idx).map_or(false, |num| rule.is_valid_for(num)));
             });
 
-            for idx in valid {
-                possibilities[idx].push(name.as_str());
-            }
-        }
+            valid
+                .into_iter()
+                .for_each(|idx| possibilities[idx].push(name.as_str()));
+        });
 
         // Then assign the actual headers one by one
         let mut headers: Vec<Option<&str>> = vec![None; width];
         loop {
             let mut changes = 0;
-            for i in 0..width {
+            (0..width).for_each(|i| {
                 // This relies on the assumption that there will never be 2+ headers that are
                 // Equally possible for a column with no tie breaker in other columns
                 // This should be faster than computing arrangements until we find one that works
@@ -77,7 +77,7 @@ impl Tickets {
                         possibility.retain(|&str| str != ok);
                     }
                 }
-            }
+            });
 
             // Break the loop if no header has been assigned this pass
             // This should trigger only when everything has been assigned (see assumption above)
@@ -97,9 +97,10 @@ impl Tickets {
         let mut out = BufWriter::new(stdout());
 
         writeln!(out, "{}", "-".repeat(30))?;
-        for i in 0..headers.len() {
-            writeln!(out, "|{:>20} |{:>5} |", headers[i], self.ticket[i])?;
-        }
+        self.ticket
+            .iter()
+            .zip(headers)
+            .try_for_each(|(&value, &header)| writeln!(out, "|{:>20} |{:>5} |", header, value))?;
         writeln!(out, "{}", "-".repeat(30))?;
 
         Ok(())

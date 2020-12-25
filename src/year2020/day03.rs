@@ -25,13 +25,11 @@ fn first_part(data: &Forest) -> usize {
 }
 
 fn second_part(data: &Forest) -> usize {
-    let a: usize = count_tree_at_slope(data, (1, 1));
-    let b: usize = count_tree_at_slope(data, (3, 1));
-    let c: usize = count_tree_at_slope(data, (5, 1));
-    let d: usize = count_tree_at_slope(data, (7, 1));
-    let e: usize = count_tree_at_slope(data, (1, 2));
-
-    a * b * c * d * e
+    count_tree_at_slope(data, (1, 1))
+        * count_tree_at_slope(data, (3, 1))
+        * count_tree_at_slope(data, (5, 1))
+        * count_tree_at_slope(data, (7, 1))
+        * count_tree_at_slope(data, (1, 2))
 }
 
 /// Count the number of trees encountered while descending the forest with the given slope
@@ -71,12 +69,10 @@ impl Forest {
     /// ### Returns
     /// true if a tree is at the given position, false if not
     fn has_tree_at(&self, position: (usize, usize)) -> bool {
-        if let Some(tree_line) = self.trees.get(position.1) {
-            let x: usize = position.0 as usize % tree_line.len();
-            tree_line[x]
-        } else {
-            false
-        }
+        self.trees
+            .get(position.1)
+            .and_then(|tree_line| tree_line.get(position.0 % tree_line.len()))
+            .map_or(false, |&b| b)
     }
 }
 

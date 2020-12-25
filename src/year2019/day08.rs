@@ -112,8 +112,7 @@ impl Image {
                     .layers
                     .iter()
                     .map(|elt| elt[i][j])
-                    .skip_while(|current| *current >= 2)
-                    .next()
+                    .find(|current| *current < 2)
                     .unwrap_or(2);
             }
         }

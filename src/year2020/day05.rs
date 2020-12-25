@@ -13,10 +13,10 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 5: Binary Boarding";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        let max = first_part(&data.data).unwrap_or(0);
+        let max = first_part(&data.data).unwrap_or_default();
         println!("The maximum seat ID on the plane is {max}", max = max);
 
-        let missing = second_part(data.data).unwrap_or(0);
+        let missing = second_part(data.data).unwrap_or_default();
         println!(
             "The missing seat ID on the plane is {missing}",
             missing = missing

@@ -37,15 +37,12 @@ impl Problem for Day {
 }
 
 fn run_until_duplicate_execution(state: &mut ProgramState) -> (usize, i32) {
-    let mut visited = HashSet::new();
     let mut current_pointer = state.instruction_pointer;
-    loop {
+    let mut visited = HashSet::new();
+    visited.insert(current_pointer);
+    while state.execute_next() && !visited.contains(&state.instruction_pointer) {
         visited.insert(current_pointer);
-        if !state.execute_next() || visited.contains(&state.instruction_pointer) {
-            break;
-        } else {
-            current_pointer = state.instruction_pointer;
-        }
+        current_pointer = state.instruction_pointer;
     }
 
     (current_pointer, state.accumulator)
@@ -137,7 +134,7 @@ impl Operation {
             }
             Self::Jmp(jump) => {
                 if jump < 0 {
-                    state.instruction_pointer -= (-1 * jump) as usize
+                    state.instruction_pointer -= (-jump) as usize
                 } else {
                     state.instruction_pointer += jump as usize;
                 }

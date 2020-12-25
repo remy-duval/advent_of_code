@@ -8,8 +8,8 @@ impl crate::Problem for Day {
     const TITLE: &'static str = "Day 5: Sunny with a Chance of Asteroids";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        let (first, second) =
-            solve(&data.data[..]).ok_or(anyhow::anyhow!("Program should not have crashed !"))?;
+        let (first, second) = solve(&data.data[..])
+            .ok_or_else(|| anyhow::anyhow!("Program should not have crashed !"))?;
         println!("Input 1 produced : {}", first);
         println!("Input 5 produced : {}", second);
 

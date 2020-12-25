@@ -77,12 +77,10 @@ impl Operation {
                     if op == Operator::OpenParen || precedence(op) < min_precedence {
                         operators.push(op);
                         break;
+                    } else if let Some(res) = op.binary_op(operands.pop().zip(operands.pop())) {
+                        operands.push(res);
                     } else {
-                        if let Some(res) = op.binary_op(operands.pop().zip(operands.pop())) {
-                            operands.push(res);
-                        } else {
-                            return Err(anyhow::anyhow!("Bad operator call {:?}", op));
-                        }
+                        return Err(anyhow::anyhow!("Bad operator call {:?}", op));
                     }
                 }
 

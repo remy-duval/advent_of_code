@@ -13,7 +13,7 @@ use crate::Problem;
 
 const IMAGE_WIDTH: usize = 12;
 
-const SEA_MONSTER: [&'static str; 3] = [
+const SEA_MONSTER: [&str; 3] = [
     "                  # ",
     "#    ##    ##    ###",
     " #  #  #  #  #  #   ",
@@ -98,8 +98,8 @@ fn second_part(image: FullImage) -> usize {
         .iter()
         .find_map(|image| {
             let mut seen: usize = 0;
-            for j in 0..(image.width - 3) {
-                for i in 0..(image.width - SEA_MONSTER_LEN) {
+            (0..(image.width - 3)).for_each(|j| {
+                (0..(image.width - SEA_MONSTER_LEN)).for_each(|i| {
                     let area = [
                         &image.data[j][i..(i + SEA_MONSTER_LEN)],
                         &image.data[j + 1][i..(i + SEA_MONSTER_LEN)],
@@ -108,8 +108,8 @@ fn second_part(image: FullImage) -> usize {
                     if matcher(area) {
                         seen += 1;
                     }
-                }
-            }
+                })
+            });
 
             // If there was at least one match we found the correct image for our result
             if seen != 0 {
@@ -237,21 +237,18 @@ struct FullImage {
 impl FullImage {
     /// Build the image from the ordered tiles and the row width
     fn assemble(ordered_tiles: Vec<Tile>, width: usize) -> Self {
-        let mut result = Vec::with_capacity(width * 8);
-
         assert_eq!(ordered_tiles.len(), width * width);
-        for y in 0..width {
-            for data_part in 0..8 {
-                let mut row = Vec::with_capacity(width * 8);
-                for x in 0..width {
-                    let line = ordered_tiles[y * width + x].data[data_part];
-                    for pixel in 0..8 {
-                        row.push(line.char_at(pixel));
-                    }
-                }
-                result.push(row);
-            }
-        }
+        let result = (0..width)
+            .cartesian_product(0..8)
+            .map(|(y, data_part)| {
+                (0..width)
+                    .flat_map(|x| {
+                        let line = ordered_tiles[y * width + x].data[data_part];
+                        (0..8).map(move |pixel| line.char_at(pixel))
+                    })
+                    .collect_vec()
+            })
+            .collect_vec();
 
         Self {
             data: result,
@@ -268,11 +265,11 @@ impl FullImage {
     /// This image, but rotated right 90 degree
     pub fn rotated_right(&self) -> Self {
         let mut copy = self.data.clone();
-        for y in 0..self.width {
-            for x in 0..self.width {
+        (0..self.width).for_each(|y| {
+            (0..self.width).for_each(|x| {
                 copy[y][x] = self.data[x][self.width - y - 1];
-            }
-        }
+            })
+        });
 
         Self {
             data: copy,
@@ -284,15 +281,10 @@ impl FullImage {
 impl Display for FullImage {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         use std::fmt::Write;
-
-        for line in &self.data {
-            for char in line {
-                f.write_char(*char)?;
-            }
-            f.write_char('\n')?;
-        }
-
-        Ok(())
+        self.data.iter().try_for_each(|line| {
+            line.iter().try_for_each(|&char| f.write_char(char))?;
+            f.write_char('\n')
+        })
     }
 }
 
@@ -342,11 +334,9 @@ impl FromStr for JigsawImage {
             })
             .try_collect()?;
 
-        let mut tiles = Vec::with_capacity(results.len() * 8);
-        for result in results {
-            tiles.extend_from_slice(&result);
-        }
-        Ok(Self { tiles })
+        Ok(Self {
+            tiles: results.concat(),
+        })
     }
 }
 
@@ -374,10 +364,10 @@ impl Tile {
     pub fn new(id: u16, data: &[[bool; 10]; 10]) -> Self {
         let mut left = [false; 10];
         let mut right = [false; 10];
-        for i in 0..10 {
+        (0..10).for_each(|i| {
             left[i] = data[i][0];
             right[i] = data[i][9];
-        }
+        });
 
         // This is really ugly, but it is a lot more compressed than storing the raw String
         Self {
@@ -412,11 +402,11 @@ impl Tile {
         // Rotate a data array to the right
         fn right(data: [[bool; 10]; 10]) -> [[bool; 10]; 10] {
             let mut next = [[false; 10]; 10];
-            for y in 0..10 {
-                for x in 0..10 {
+            (0..10).for_each(|y| {
+                (0..10).for_each(|x| {
                     next[y][x] = data[x][9 - y];
-                }
-            }
+                });
+            });
             next
         }
 
@@ -437,15 +427,15 @@ impl Display for Tile {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         writeln!(f, "Tile {}:", self.id)?;
         writeln!(f, "{}", self.borders[0])?;
-        for i in 0..8 {
+        (0..8).try_for_each(|i| {
             writeln!(
                 f,
                 "{}{}{}",
                 self.borders[2].char_at(i + 1),
                 self.data[i],
                 self.borders[3].char_at(i + 1)
-            )?;
-        }
+            )
+        })?;
         writeln!(f, "{}", self.borders[1])?;
         Ok(())
     }
@@ -457,12 +447,7 @@ struct Row(u8);
 
 impl Row {
     fn new(array: &[bool]) -> Self {
-        let mut acc = 0;
-        for i in 0..8 {
-            acc += if array[i] { 1 << i } else { 0 };
-        }
-
-        Self(acc)
+        Self((0..8).fold(0, |acc, i| acc + if array[i] { 1 << i } else { 0 }))
     }
 
     /// Check if the `idx` character is '#'
@@ -484,10 +469,7 @@ impl Row {
 impl Display for Row {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         use std::fmt::Write;
-        for idx in 0..8 {
-            f.write_char(self.char_at(idx))?;
-        }
-        Ok(())
+        (0..8).try_for_each(|idx| f.write_char(self.char_at(idx)))
     }
 }
 
@@ -497,12 +479,7 @@ struct Border(u16);
 
 impl Border {
     fn new(array: &[bool; 10]) -> Self {
-        let mut acc = 0;
-        for i in 0..10 {
-            acc += if array[i] { 1 << i } else { 0 };
-        }
-
-        Self(acc)
+        Self((0..10).fold(0, |acc, i| acc + if array[i] { 1 << i } else { 0 }))
     }
 
     /// Check if the `idx` character is '#'
@@ -524,10 +501,7 @@ impl Border {
 impl Display for Border {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         use std::fmt::Write;
-        for idx in 0..10 {
-            f.write_char(self.char_at(idx))?;
-        }
-        Ok(())
+        (0..10).try_for_each(|idx| f.write_char(self.char_at(idx)))
     }
 }
 
