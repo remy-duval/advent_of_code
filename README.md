@@ -7,7 +7,7 @@ This is mostly a learning experience with Rust, so the solutions are probably me
 ### Implemented
 
 - Year 2019 (full)
-- Year 2020 (in progress)
+- Year 2020 (full)
 
 ### Usage
 
