@@ -4,17 +4,17 @@ Solutions for some problems in Aoc.
 
 This is mostly a learning experience with Rust, so the solutions are probably messy, but they work.
 
-### Implemented
+### Years
 
-- Year 2019 (full)
-- Year 2020 (full)
+* 2019 - `advent_of_code_2019`
+* 2020 - `advent_of_code_2020`
 
-### Usage
+### Output
 
-The executable expects three arguments:
+The problem name, then the solution then the time it took to compute (excluding input file read)
 
-* `--year` The year (full or only two last digits)
-* `--day` The day between 01 and 25
-* The path to the file containing the input for the day
+### Arguments
 
-It will print the name of the problem, its solution and also the time it took to solve.
+* `--day <DAY>` | `-d <DAY>` - The day between 01 and 25
+* `<INPUT_FILE>` - The path to the file containing the input for the day
+    * The file should contain the problem input as provided
