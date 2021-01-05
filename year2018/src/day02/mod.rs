@@ -8,7 +8,7 @@ pub struct Day;
 impl Problem for Day {
     type Input = LineSep<String>;
     type Err = anyhow::Error;
-    const TITLE: &'static str = "";
+    const TITLE: &'static str = "Day 2: Inventory Management System";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
         println!("The checksum is {}", check_sum(&data.data));

@@ -8,7 +8,7 @@ pub struct Day;
 impl Problem for Day {
     type Input = LineSep<i32>;
     type Err = std::convert::Infallible;
-    const TITLE: &'static str = "";
+    const TITLE: &'static str = "Day 1: Chronal Calibration";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
         println!("The sum of frequencies is {}", sum(&data.data));

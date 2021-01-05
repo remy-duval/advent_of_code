@@ -23,6 +23,8 @@
 
 mod day01;
 mod day02;
+mod day03;
+mod day04;
 
 /// Dispatch to the correct problem and solve it
 pub fn solve_problem(day: u8, input: &str) -> anyhow::Result<()> {
@@ -31,6 +33,8 @@ pub fn solve_problem(day: u8, input: &str) -> anyhow::Result<()> {
     match day {
         1 => solve::<day01::Day>(input),
         2 => solve::<day02::Day>(input),
+        3 => solve::<day03::Day>(input),
+        4 => solve::<day04::Day>(input),
         _ => Err(anyhow::anyhow!("{} is not implemented for year 2019", day)),
     }
 }
