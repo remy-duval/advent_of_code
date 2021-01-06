@@ -119,14 +119,10 @@ impl FromStr for Timestamp {
                 .ok_or_else(|| TimestampParseError::BadFormat(s.into()))
         }
 
-        let s = s.trim_start_matches('[').trim_end_matches(']');
+        let s = s.trim().trim_start_matches("[1518-").trim_end_matches(']');
         let (day, time) = split_two(s, ' ')?;
         let (hour, minutes) = split_two(time, ':')?;
-        let (_, month, day) = day
-            .trim()
-            .splitn(3, '-')
-            .collect_tuple::<(_, _, _)>()
-            .ok_or_else(|| TimestampParseError::BadFormat(s.into()))?;
+        let (month, day) = split_two(day, '-')?;
 
         Ok(Self {
             day: (parse_u8(month)?, parse_u8(day)?),
