@@ -1,3 +1,5 @@
+use hashbrown::HashSet;
+
 use commons::Problem;
 
 pub struct Day;
@@ -31,47 +33,37 @@ impl Problem for Day {
     }
 }
 
-/// Find two elements at acceptable indexes in the given slice that sum to the wanted value
-///
-/// # Arguments
-/// * `data` - an integer slice that contains the number to sum
-/// * `wanted` - the wanted integer
-/// * `check_index` - a predicate on an index in the slice, if false the value is ignored
-///
-/// # Returns
-/// Option of the found elements as a tuple (first, second)
-fn find_sum(data: &[u64], wanted: u64, check_index: impl Fn(usize) -> bool) -> Option<(u64, u64)> {
-    for (i, first) in data.iter().copied().enumerate() {
-        let to_find = if check_index(i) && first <= wanted {
-            wanted - first
-        } else {
-            continue;
-        };
-        for (j, second) in data.iter().copied().enumerate() {
-            if check_index(j) && i != j && second == to_find {
-                return Some((first, second));
+/// Find two elements of `data` that sum to `wanted`.
+/// Already seen numbers are stored in `seen` for faster lookup
+fn two_sum(data: &[u64], wanted: u64, seen: &mut HashSet<u64>) -> Option<(u64, u64)> {
+    data.iter().find_map(|&element| {
+        if element < wanted {
+            if seen.contains(&(wanted - element)) {
+                Some((element, (wanted - element)))
+            } else {
+                seen.insert(element);
+                None
             }
+        } else {
+            None
         }
-    }
-    None
+    })
 }
 
 fn first_part(expenses: &[u64]) -> Option<(u64, u64)> {
-    find_sum(expenses, 2020, |_| true)
+    two_sum(expenses, 2020, &mut HashSet::with_capacity(expenses.len()))
 }
 
 fn second_part(expenses: &[u64]) -> Option<(u64, u64, u64)> {
-    for (i, a) in expenses.iter().copied().enumerate() {
-        let wanted = if a <= 2020 {
-            2020 - a
+    let mut seen = HashSet::with_capacity(expenses.len());
+    expenses.iter().find_map(|&element| {
+        if element <= 2020 {
+            let (a, b) = two_sum(expenses, 2020 - element, &mut seen)?;
+            Some((a, b, element))
         } else {
-            continue;
-        };
-        if let Some((b, c)) = find_sum(expenses, wanted, |idx| i != idx) {
-            return Some((a, b, c));
+            None
         }
-    }
-    None
+    })
 }
 
 #[cfg(test)]
