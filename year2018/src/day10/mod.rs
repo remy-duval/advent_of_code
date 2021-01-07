@@ -1,0 +1,194 @@
+use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::str::FromStr;
+
+use hashbrown::HashSet;
+use itertools::Itertools;
+
+use commons::grid::Point;
+use commons::Problem;
+
+pub struct Day;
+
+impl Problem for Day {
+    type Input = Message;
+    type Err = std::convert::Infallible;
+    const TITLE: &'static str = "Day 10: The Stars Align";
+
+    fn solve(message: Self::Input) -> Result<(), Self::Err> {
+        let (minimum, time) = message.into_minimum_size();
+        println!("The message took {}s to appear, it is:\n{}", time, minimum);
+
+        Ok(())
+    }
+}
+
+/// The message formed from a gathering of points of light
+/// Use the display trait to get the actual message representation
+#[derive(Debug, Clone)]
+pub struct Message {
+    lights: Vec<Light>,
+    max: Point,
+    min: Point,
+}
+
+impl Message {
+    /// Create the message from the individual lights
+    pub fn new(lights: Vec<Light>) -> Self {
+        let (max, min) = Self::compute_bounds(&lights);
+        Self { lights, max, min }
+    }
+
+    /// Advance the message until its points are the most clustered (minimum size)
+    /// We assume that the message will be formed at that point (i.e. there are no stray points)
+    pub fn into_minimum_size(mut self) -> (Self, usize) {
+        let mut seconds: usize = 0;
+        let mut size: i64 = self.size();
+        let mut previous: i64 = size;
+
+        while previous >= size {
+            self.advance();
+            previous = size;
+            size = self.size();
+            seconds += 1;
+        }
+
+        // We went one step too far to exit the while loop, reverse it
+        self.reverse();
+        (self, seconds.saturating_sub(1))
+    }
+
+    /// Advance the state of the message by one step
+    pub fn advance(&mut self) {
+        self.lights.iter_mut().for_each(Light::advance);
+        let (max, min) = Self::compute_bounds(&self.lights);
+        self.max = max;
+        self.min = min;
+    }
+
+    /// Reverse the state of the message by one step
+    pub fn reverse(&mut self) {
+        self.lights.iter_mut().for_each(Light::reverse);
+        let (max, min) = Self::compute_bounds(&self.lights);
+        self.max = max;
+        self.min = min;
+    }
+
+    /// The size of the message
+    pub fn size(&self) -> i64 {
+        (self.max - self.min).manhattan_distance()
+    }
+
+    /// Compute the new bounding box of the message
+    fn compute_bounds(lights: &[Light]) -> (Point, Point) {
+        let (min, max) = lights.iter().fold(
+            ((i64::MAX, i64::MAX), (i64::MIN, i64::MIN)),
+            |((min_x, min_y), (max_x, max_y)), l| {
+                let min = (min_x.min(l.position.x), min_y.min(l.position.y));
+                let max = (max_x.max(l.position.x), max_y.max(l.position.y));
+                (min, max)
+            },
+        );
+
+        (Point::new(max.0 + 1, max.1 + 1), Point::new(min.0, min.1))
+    }
+}
+
+impl FromStr for Message {
+    type Err = LightParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::new(s.lines().map(str::parse).try_collect()?))
+    }
+}
+
+impl Display for Message {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        use std::fmt::Write;
+
+        let points: HashSet<Point> = self.lights.iter().map(|light| light.position).collect();
+        (self.min.y..self.max.y).try_for_each(|y| {
+            (self.min.x..self.max.x).try_for_each(|x| {
+                if points.contains(&Point::new(x, y)) {
+                    f.write_char('#')
+                } else {
+                    f.write_char('.')
+                }
+            })?;
+            f.write_char('\n')
+        })
+    }
+}
+
+/// The coordinates of a light in the message
+#[derive(Debug, Clone)]
+pub struct Light {
+    position: Point,
+    velocity: Point,
+}
+
+impl Light {
+    /// Advance the light by one step
+    pub fn advance(&mut self) {
+        self.position = self.position + self.velocity;
+    }
+
+    /// Reverse the light by one step
+    pub fn reverse(&mut self) {
+        self.position = self.position - self.velocity;
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum LightParseError {
+    #[error("Bad format for light 'position=POINT velocity=POINT', got {0}")]
+    BadLight(Box<str>),
+    #[error("Bad format for point '<X, Y>>', got {0}")]
+    BadPoint(Box<str>),
+    #[error("Can't parse a point coordinate {0} ({1})")]
+    IntParse(Box<str>, std::num::ParseIntError),
+}
+
+impl FromStr for Light {
+    type Err = LightParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        fn parse_int(int: &str) -> Result<i64, LightParseError> {
+            int.parse()
+                .map_err(|e| LightParseError::IntParse(int.into(), e))
+        }
+
+        fn parse_point(point: &str) -> Result<Point, LightParseError> {
+            let (x, y) = point
+                .trim()
+                .strip_prefix('<')
+                .and_then(|point| point.strip_suffix('>'))
+                .and_then(|point| {
+                    point
+                        .splitn(2, ',')
+                        .map(|coord| parse_int(coord.trim()))
+                        .collect_tuple::<(_, _)>()
+                })
+                .ok_or_else(|| LightParseError::BadPoint(point.into()))?;
+
+            Ok(Point::new(x?, y?))
+        }
+
+        let (pos, speed) = s
+            .trim()
+            .strip_prefix("position=")
+            .and_then(|s| {
+                s.splitn(2, "velocity=")
+                    .map(parse_point)
+                    .collect_tuple::<(_, _)>()
+            })
+            .ok_or_else(|| LightParseError::BadLight(s.into()))?;
+
+        Ok(Self {
+            position: pos?,
+            velocity: speed?,
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests;
