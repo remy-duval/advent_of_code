@@ -29,7 +29,7 @@ impl Problem for Day {
 /// Run the network until the first crash, returning its position
 fn first_part(network: &mut Network) -> Point {
     loop {
-        if let Some(crash) = network.advance() {
+        if let Some(crash) = network.next_tick() {
             return crash;
         }
     }
@@ -38,27 +38,26 @@ fn first_part(network: &mut Network) -> Point {
 /// Run the network until the last crash, returning the last cart position
 fn second_part(network: &mut Network) -> Point {
     loop {
-        if network.advance().is_some() {
-            if network.cart_positions.len() == 1 {
-                break network.cart_positions.iter().next().unwrap().0 .0;
-            } else if network.cart_positions.is_empty() {
-                panic!("No cart remains after the last crash");
-            }
+        if let Some(last) = network.next_tick().and_then(|_| network.last_cart()) {
+            return last;
         }
     }
 }
 
-/// A point, but where the order is based on vertical axis first
+/// A point, but where the order is based on vertical axis first (important for the BTreeMap order)
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
-pub struct VerticalOrderedPoint(pub Point);
+pub struct OrderedPoint(pub Point);
 
-impl Ord for VerticalOrderedPoint {
+impl Ord for OrderedPoint {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.0.y.cmp(&other.0.y).then(self.0.x.cmp(&other.0.x))
+        self.0
+            .y
+            .cmp(&other.0.y)
+            .then_with(|| self.0.x.cmp(&other.0.x))
     }
 }
 
-impl PartialOrd for VerticalOrderedPoint {
+impl PartialOrd for OrderedPoint {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
@@ -67,40 +66,51 @@ impl PartialOrd for VerticalOrderedPoint {
 /// The rail network and the carts on it
 #[derive(Debug, Clone)]
 pub struct Network {
-    /// The state of the mine carts
-    cart_states: Vec<(u8, Direction)>,
-    /// The current positions of the mine carts
-    cart_positions: BTreeMap<VerticalOrderedPoint, usize>,
+    /// The mine carts indexed by their position (ordered correctly since this is a BTreeMap)
+    carts: BTreeMap<OrderedPoint, Cart>,
     /// The rail way tracks
     tracks: HashMap<Point, Track>,
 }
 
 impl Network {
-    /// Advance the state of the network, returns an Option of any crash that happened
-    pub fn advance(&mut self) -> Option<Point> {
-        let mut crash = None;
-        self.cart_positions.clone().iter().for_each(|(point, idx)| {
-            // Remove the cart from its previous position
-            // If nothing has been removed, this cart has been crashed into already
-            if self.cart_positions.remove(point).is_none() {
-                return;
-            }
+    /// Get the position of the last cart if there is only one left, None otherwise
+    pub fn last_cart(&self) -> Option<Point> {
+        match self.carts.len() {
+            1 => Some(self.carts.iter().next()?.0 .0),
+            0 => panic!("No cart remains after the last crash"),
+            _ => None,
+        }
+    }
 
-            let state = &mut self.cart_states[*idx];
-            let next = VerticalOrderedPoint(point.0 + state.1.offset());
-            if let Some(track) = self.tracks.get(&next.0) {
-                *state = track.next(state.1, state.0);
-                // If the inserted point is already present, we got a crash !
-                if self.cart_positions.insert(next, *idx).is_some() {
-                    // Remove the crashed carts
-                    self.cart_positions.remove(&next);
-                    // Assign the point of the crash
-                    crash = Some(next.0);
+    /// Compute the next tick of the network, returns an Option of any crash that happened
+    pub fn next_tick(&mut self) -> Option<Point> {
+        let mut crash = None;
+        self.carts
+            .clone()
+            .into_iter()
+            .for_each(|(point, mut cart)| {
+                // First of all, remove the cart from its previous position
+                if let Some(other) = self.carts.remove(&point) {
+                    let next = OrderedPoint(point.0 + cart.direction.offset());
+
+                    // If the removed cart is not this one, reverse the change
+                    if other.id != cart.id {
+                        self.carts.insert(point, other);
+                    } else if let Some(track) = self.tracks.get(&next.0) {
+                        // Update the cart with the arrival track, then insert it
+                        cart.update(*track);
+                        // If the inserted point is already present, we got a crash !
+                        if self.carts.insert(next, cart).is_some() {
+                            // Remove the crashed carts
+                            self.carts.remove(&next);
+                            // Assign the point of the crash
+                            crash = Some(next.0);
+                        }
+                    } else {
+                        panic!("A mine-cart went off the tracks !");
+                    }
                 }
-            } else {
-                panic!("A mine-cart went off the tracks !");
-            }
-        });
+            });
 
         crash
     }
@@ -116,9 +126,9 @@ impl Display for Network {
         (0..(max.1 + 1)).try_for_each(|y| {
             (0..(max.0 + 1)).try_for_each(|x| {
                 let point = Point::new(x, y);
-                let v_point = VerticalOrderedPoint(point);
-                let c: char = if let Some(cart) = self.cart_positions.get(&v_point) {
-                    self.cart_states[*cart].1.char()
+                let v_point = OrderedPoint(point);
+                let c: char = if let Some(cart) = self.carts.get(&v_point) {
+                    cart.direction.char()
                 } else if let Some(track) = self.tracks.get(&point) {
                     match track {
                         Track::Horizontal => '-',
@@ -143,8 +153,8 @@ impl FromStr for Network {
     type Err = std::convert::Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut cart_states = Vec::with_capacity(10);
-        let mut cart_positions = BTreeMap::new();
+        let mut next_id = 0;
+        let mut carts = BTreeMap::new();
         let mut tracks = HashMap::with_capacity(s.len());
 
         s.lines().enumerate().for_each(|(y, line)| {
@@ -163,8 +173,13 @@ impl FromStr for Network {
                             '>' => (Track::Horizontal, Direction::East),
                             _ => (Track::Horizontal, Direction::West),
                         };
-                        cart_states.push((0, direction));
-                        cart_positions.insert(VerticalOrderedPoint(point), cart_states.len() - 1);
+                        let cart = Cart {
+                            id: next_id,
+                            turn: Default::default(),
+                            direction,
+                        };
+                        carts.insert(OrderedPoint(point), cart);
+                        next_id += 1;
                         Some(track)
                     }
                     _ => None,
@@ -176,17 +191,88 @@ impl FromStr for Network {
             });
         });
 
-        Ok(Self {
-            cart_states,
-            cart_positions,
-            tracks,
-        })
+        Ok(Self { carts, tracks })
+    }
+}
+
+/// The state of a mine cart
+#[derive(Debug, Copy, Clone)]
+struct Cart {
+    /// A unique ID for the cart
+    /// Checked when taking the cart turn to see if the cart was not already replaced
+    id: u8,
+    /// The inner memory of the cart for it to know which turn to take next
+    turn: Turn,
+    /// The current direction of the cart
+    direction: Direction,
+}
+
+impl Cart {
+    /// Update the cart turn and direction from the given track
+    fn update(&mut self, track: Track) {
+        self.direction = match track {
+            Track::Horizontal | Track::Vertical => self.direction,
+            Track::AntiSlash => match self.direction {
+                Direction::North => Direction::West,
+                Direction::East => Direction::South,
+                Direction::South => Direction::East,
+                Direction::West => Direction::North,
+            },
+            Track::Slash => match self.direction {
+                Direction::North => Direction::East,
+                Direction::East => Direction::North,
+                Direction::South => Direction::West,
+                Direction::West => Direction::South,
+            },
+            Track::Intersection => {
+                let direction = self.turn.direction(self.direction);
+                self.turn = self.turn.next();
+                direction
+            }
+        };
+    }
+}
+
+/// The inner memory of a mine cart about the next turn to make
+#[derive(Debug, Copy, Clone)]
+enum Turn {
+    /// next turn is to the left
+    Left,
+    /// next turn is straight ahead
+    Straight,
+    /// next turn is to the right
+    Right,
+}
+
+impl Default for Turn {
+    fn default() -> Self {
+        Self::Left
+    }
+}
+
+impl Turn {
+    /// The next turn the cart will make
+    fn next(self) -> Self {
+        match self {
+            Self::Left => Self::Straight,
+            Self::Straight => Self::Right,
+            Self::Right => Self::Left,
+        }
+    }
+
+    /// Compute the direction of this turn
+    fn direction(self, from: Direction) -> Direction {
+        match self {
+            Turn::Left => from.left(),
+            Turn::Straight => from,
+            Turn::Right => from.right(),
+        }
     }
 }
 
 /// A track in the network
 #[derive(Debug, Copy, Clone)]
-pub enum Track {
+enum Track {
     /// a straight '|'
     Horizontal,
     /// a straight '-'
@@ -197,45 +283,6 @@ pub enum Track {
     Slash,
     /// an '+' intersection
     Intersection,
-}
-
-impl Track {
-    /// Compute the direction and number of intersection seen after taking this track
-    ///
-    /// ### Arguments
-    /// * `direction` - The direction before taking the track
-    /// * `intersections` - The number of intersections seen beforehand
-    ///
-    /// ### Returns
-    /// (new number of intersections seen, new direction)
-    pub fn next(self, direction: Direction, intersections: u8) -> (u8, Direction) {
-        let mut after = intersections;
-        let direction = match self {
-            Self::Horizontal | Self::Vertical => direction,
-            Self::AntiSlash => match direction {
-                Direction::North => Direction::West,
-                Direction::East => Direction::South,
-                Direction::South => Direction::East,
-                Direction::West => Direction::North,
-            },
-            Self::Slash => match direction {
-                Direction::North => Direction::East,
-                Direction::East => Direction::North,
-                Direction::South => Direction::West,
-                Direction::West => Direction::South,
-            },
-            Self::Intersection => {
-                after = (after + 1) % 3;
-                match intersections % 3 {
-                    0 => direction.left(),
-                    1 => direction,
-                    _ => direction.right(),
-                }
-            }
-        };
-
-        (after, direction)
-    }
 }
 
 #[cfg(test)]
