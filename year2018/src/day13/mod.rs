@@ -1,12 +1,13 @@
-use std::cmp::{Ord, Ordering, PartialOrd};
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use hashbrown::HashMap;
 
-use commons::grid::{Direction, Point};
+use commons::grid::Direction;
 use commons::Problem;
+
+use crate::points::Point;
 
 pub struct Day;
 
@@ -43,31 +44,11 @@ fn second_part(network: &mut Network) -> Point {
         }
     }
 }
-
-/// A point, but where the order is based on vertical axis first (important for the BTreeMap order)
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
-pub struct OrderedPoint(pub Point);
-
-impl Ord for OrderedPoint {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.0
-            .y
-            .cmp(&other.0.y)
-            .then_with(|| self.0.x.cmp(&other.0.x))
-    }
-}
-
-impl PartialOrd for OrderedPoint {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
 /// The rail network and the carts on it
 #[derive(Debug, Clone)]
 pub struct Network {
     /// The mine carts indexed by their position (ordered correctly since this is a BTreeMap)
-    carts: BTreeMap<OrderedPoint, Cart>,
+    carts: BTreeMap<Point, Cart>,
     /// The rail way tracks
     tracks: HashMap<Point, Track>,
 }
@@ -76,7 +57,7 @@ impl Network {
     /// Get the position of the last cart if there is only one left, None otherwise
     pub fn last_cart(&self) -> Option<Point> {
         match self.carts.len() {
-            1 => Some(self.carts.iter().next()?.0 .0),
+            1 => Some(*self.carts.iter().next()?.0),
             0 => panic!("No cart remains after the last crash"),
             _ => None,
         }
@@ -91,12 +72,12 @@ impl Network {
             .for_each(|(point, mut cart)| {
                 // First of all, remove the cart from its previous position
                 if let Some(other) = self.carts.remove(&point) {
-                    let next = OrderedPoint(point.0 + cart.direction.offset());
+                    let next = point + cart.direction.offset();
 
                     // If the removed cart is not this one, reverse the change
                     if other.id != cart.id {
                         self.carts.insert(point, other);
-                    } else if let Some(track) = self.tracks.get(&next.0) {
+                    } else if let Some(track) = self.tracks.get(&next) {
                         // Update the cart with the arrival track, then insert it
                         cart.update(*track);
                         // If the inserted point is already present, we got a crash !
@@ -104,7 +85,7 @@ impl Network {
                             // Remove the crashed carts
                             self.carts.remove(&next);
                             // Assign the point of the crash
-                            crash = Some(next.0);
+                            crash = Some(next);
                         }
                     } else {
                         panic!("A mine-cart went off the tracks !");
@@ -126,8 +107,7 @@ impl Display for Network {
         (0..(max.1 + 1)).try_for_each(|y| {
             (0..(max.0 + 1)).try_for_each(|x| {
                 let point = Point::new(x, y);
-                let v_point = OrderedPoint(point);
-                let c: char = if let Some(cart) = self.carts.get(&v_point) {
+                let c: char = if let Some(cart) = self.carts.get(&point) {
                     cart.direction.char()
                 } else if let Some(track) = self.tracks.get(&point) {
                     match track {
@@ -178,7 +158,7 @@ impl FromStr for Network {
                             turn: Default::default(),
                             direction,
                         };
-                        carts.insert(OrderedPoint(point), cart);
+                        carts.insert(point, cart);
                         next_id += 1;
                         Some(track)
                     }
