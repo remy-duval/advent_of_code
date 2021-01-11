@@ -1,8 +1,4 @@
-#![allow(unused)]
-
 use commons::Problem;
-
-use crate::points::Point;
 
 mod data;
 

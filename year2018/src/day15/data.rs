@@ -1,10 +1,8 @@
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::collections::{BTreeMap, VecDeque};
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use hashbrown::{HashMap, HashSet};
-
-use commons::grid::Direction;
 
 use crate::points::Point;
 

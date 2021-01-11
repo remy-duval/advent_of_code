@@ -61,36 +61,36 @@ fn first_part_main() {
 
 #[test]
 fn second_part_example_a() {
-    let mut fight = Day::parse(EXAMPLE_ONE).unwrap();
+    let fight = Day::parse(EXAMPLE_ONE).unwrap();
     assert_eq!(fight.second_part().unwrap(), (29, 172));
 }
 
 #[test]
 fn second_part_example_b() {
-    let mut fight = Day::parse(EXAMPLE_THREE).unwrap();
+    let fight = Day::parse(EXAMPLE_THREE).unwrap();
     assert_eq!(fight.second_part().unwrap(), (33, 948));
 }
 
 #[test]
 fn second_part_example_c() {
-    let mut fight = Day::parse(EXAMPLE_FOUR).unwrap();
+    let fight = Day::parse(EXAMPLE_FOUR).unwrap();
     assert_eq!(fight.second_part().unwrap(), (37, 94));
 }
 
 #[test]
 fn second_part_example_d() {
-    let mut fight = Day::parse(EXAMPLE_FIVE).unwrap();
+    let fight = Day::parse(EXAMPLE_FIVE).unwrap();
     assert_eq!(fight.second_part().unwrap(), (39, 166));
 }
 
 #[test]
 fn second_part_example_e() {
-    let mut fight = Day::parse(EXAMPLE_SIX).unwrap();
+    let fight = Day::parse(EXAMPLE_SIX).unwrap();
     assert_eq!(fight.second_part().unwrap(), (30, 38));
 }
 
 #[test]
 fn second_part_main() {
-    let mut fight = Day::parse(MAIN).unwrap();
+    let fight = Day::parse(MAIN).unwrap();
     assert_eq!(fight.second_part().unwrap(), (43, 1187));
 }
