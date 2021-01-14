@@ -53,22 +53,22 @@ impl OpCode {
     /// Apply this OpCode to the given registers
     pub fn apply(self, reg: &mut [Int], a: Int, b: Int, c: Int) -> Result<(), IndexError> {
         *get_mut(reg, c)? = match self {
-            OpCode::AddR => *get(reg, a)? + *get(reg, b)?,
-            OpCode::AddI => *get(reg, a)? + b,
-            OpCode::MulR => *get(reg, a)? * *get(reg, b)?,
-            OpCode::MulI => *get(reg, a)? * b,
-            OpCode::BitAndR => *get(reg, a)? & *get(reg, b)?,
-            OpCode::BitAndI => *get(reg, a)? & b,
-            OpCode::BitOrR => *get(reg, a)? | *get(reg, b)?,
-            OpCode::BitOrI => *get(reg, a)? | b,
-            OpCode::SetR => *get(reg, a)?,
-            OpCode::SetI => a,
-            OpCode::GreaterIR => greater(a, *get(reg, b)?),
-            OpCode::GreaterRI => greater(*get(reg, a)?, b),
-            OpCode::GreaterRR => greater(*get(reg, a)?, *get(reg, b)?),
-            OpCode::EqIR => equal(a, *get(reg, b)?),
-            OpCode::EqRI => equal(*get(reg, a)?, b),
-            OpCode::EqRR => equal(*get(reg, a)?, *get(reg, b)?),
+            Self::AddR => *get(reg, a)? + *get(reg, b)?,
+            Self::AddI => *get(reg, a)? + b,
+            Self::MulR => *get(reg, a)? * *get(reg, b)?,
+            Self::MulI => *get(reg, a)? * b,
+            Self::BitAndR => *get(reg, a)? & *get(reg, b)?,
+            Self::BitAndI => *get(reg, a)? & b,
+            Self::BitOrR => *get(reg, a)? | *get(reg, b)?,
+            Self::BitOrI => *get(reg, a)? | b,
+            Self::SetR => *get(reg, a)?,
+            Self::SetI => a,
+            Self::GreaterIR => greater(a, *get(reg, b)?),
+            Self::GreaterRI => greater(*get(reg, a)?, b),
+            Self::GreaterRR => greater(*get(reg, a)?, *get(reg, b)?),
+            Self::EqIR => equal(a, *get(reg, b)?),
+            Self::EqRI => equal(*get(reg, a)?, b),
+            Self::EqRR => equal(*get(reg, a)?, *get(reg, b)?),
         };
 
         Ok(())

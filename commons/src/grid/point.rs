@@ -17,27 +17,37 @@ pub struct Point {
 
 impl Point {
     /// Simple constructor for Point.
-    pub fn new(x: i64, y: i64) -> Point {
+    pub const fn new(x: i64, y: i64) -> Point {
         Self { x, y }
     }
 
+    /// Addition for a Point
+    pub const fn addition(&self, other: &Point) -> Point {
+        Point::new(self.x + other.x, self.y + other.y)
+    }
+
+    /// Subtraction for a point
+    pub const fn subtract(&self, other: &Point) -> Point {
+        Point::new(self.x - other.x, self.y - other.y)
+    }
+
     /// Return a Point moved in the given direction.
-    pub fn moved(&self, direction: Direction) -> Point {
-        *self + direction.offset()
+    pub const fn moved(&self, direction: Direction) -> Point {
+        self.addition(&direction.offset())
     }
 
     /// Manhattan Distance between this point and the origin.
-    pub fn manhattan_distance(&self) -> i64 {
+    pub const fn manhattan_distance(&self) -> i64 {
         self.x.abs() + self.y.abs()
     }
 
     /// Multiply all the coordinates of this point with the given value
-    pub fn multiply(&self, mul: i64) -> Point {
+    pub const fn multiply(&self, mul: i64) -> Point {
         Point::new(self.x * mul, self.y * mul)
     }
 
     /// Divide all the coordinates of this point with the divisor
-    pub fn divide(&self, divisor: i64) -> Point {
+    pub const fn divide(&self, divisor: i64) -> Point {
         Point::new(self.x / divisor, self.y / divisor)
     }
 
@@ -63,16 +73,30 @@ impl Display for Point {
 }
 
 impl Add<Point> for Point {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self::Output {
-        Point::new(self.x + rhs.x, self.y + rhs.y)
+    type Output = Point;
+    fn add(self, rhs: Point) -> Point {
+        self.addition(&rhs)
+    }
+}
+
+impl Add<&Point> for Point {
+    type Output = Point;
+    fn add(self, rhs: &Point) -> Point {
+        self.addition(rhs)
     }
 }
 
 impl Sub<Point> for Point {
-    type Output = Self;
-    fn sub(self, rhs: Self) -> Self::Output {
-        Point::new(self.x - rhs.x, self.y - rhs.y)
+    type Output = Point;
+    fn sub(self, rhs: Point) -> Point {
+        self.subtract(&rhs)
+    }
+}
+
+impl Sub<&Point> for Point {
+    type Output = Point;
+    fn sub(self, rhs: &Point) -> Point {
+        self.subtract(rhs)
     }
 }
 
@@ -87,7 +111,7 @@ pub enum Direction {
 
 impl Direction {
     /// All the directions as a constant
-    const ALL: [Direction; 4] = [
+    pub const ALL: [Direction; 4] = [
         Direction::North,
         Direction::East,
         Direction::South,
@@ -95,7 +119,7 @@ impl Direction {
     ];
 
     /// All the directions as a static method
-    pub fn all() -> [Direction; 4] {
+    pub const fn all() -> [Direction; 4] {
         Self::ALL
     }
 
@@ -105,7 +129,7 @@ impl Direction {
     }
 
     /// The direction to the right of this one.
-    pub fn right(self) -> Direction {
+    pub const fn right(self) -> Direction {
         match self {
             Direction::North => Direction::East,
             Direction::South => Direction::West,
@@ -115,7 +139,7 @@ impl Direction {
     }
 
     /// The direction to the left of this one.
-    pub fn left(self) -> Direction {
+    pub const fn left(self) -> Direction {
         match self {
             Direction::North => Direction::West,
             Direction::South => Direction::East,
@@ -125,7 +149,7 @@ impl Direction {
     }
 
     /// The direction to the back of this one.
-    pub fn back(self) -> Direction {
+    pub const fn back(self) -> Direction {
         match self {
             Direction::North => Direction::South,
             Direction::South => Direction::North,
@@ -135,7 +159,7 @@ impl Direction {
     }
 
     /// A simple char representation of this direction.
-    pub fn char(self) -> char {
+    pub const fn char(self) -> char {
         match self {
             Direction::North => '^',
             Direction::South => 'v',
@@ -145,7 +169,7 @@ impl Direction {
     }
 
     /// The offset of this direction on a grid (x is from West to East, y from North to South)
-    pub fn offset(self) -> Point {
+    pub const fn offset(self) -> Point {
         match self {
             Direction::North => Point::new(0, -1),
             Direction::South => Point::new(0, 1),
