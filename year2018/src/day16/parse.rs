@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;
 
-use super::instructions::{IndexError, Int, OpCode};
+use super::instructions::{errors::IndexError, Int, OpCode};
 
 /// The value of the registers at a certain point in time
 #[derive(Debug, Clone, Eq, PartialEq)]

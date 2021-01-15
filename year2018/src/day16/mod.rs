@@ -4,7 +4,8 @@ use commons::Problem;
 use instructions::{Int, OpCode};
 use parse::Sample;
 
-mod instructions;
+pub use super::instructions;
+
 mod parse;
 
 pub struct Day;
