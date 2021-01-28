@@ -7,7 +7,7 @@ use itertools::Itertools;
 use errors::*;
 
 /// The type of an integer in the system
-pub type Int = i32;
+pub type Int = i64;
 
 /// Errors related to the instructions
 pub mod errors {
@@ -66,7 +66,7 @@ impl Program {
 
     /// Execute the next step of the program
     pub fn step(&mut self) -> Result<Option<()>, Box<ExecutionError>> {
-        self.line = index(self.registers[self.ip_index]).map_err(|e| self.error(e))?;
+        self.line = self.next_instruction()?;
         if let Some(instruction) = self.instructions.get(self.line) {
             instruction
                 .apply(&mut self.registers)
@@ -76,6 +76,11 @@ impl Program {
         } else {
             Ok(None)
         }
+    }
+
+    /// The index of the next instruction to execute for the program
+    pub fn next_instruction(&self) -> Result<usize, Box<ExecutionError>> {
+        index(self.registers[self.ip_index]).map_err(|e| self.error(e))
     }
 
     /// Reset this program to its starting state
@@ -98,10 +103,10 @@ impl Program {
 /// An instruction with an OpCode and its inputs
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Instruction {
-    code: OpCode,
-    a: Int,
-    b: Int,
-    c: Int,
+    pub code: OpCode,
+    pub a: Int,
+    pub b: Int,
+    pub c: Int,
 }
 
 impl Instruction {

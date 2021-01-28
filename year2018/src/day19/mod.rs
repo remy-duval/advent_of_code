@@ -29,7 +29,7 @@ fn run_optimized(mut program: Program, initial: Int) -> Result<Int, Box<Executio
     program.registers[0] = initial;
 
     loop {
-        if (3..16).contains(&program.registers[program.ip_index]) {
+        if program.registers[program.ip_index] == 3 {
             // This range of the code contains inefficient code that makes it run far too long
             // Optimize this two nested loops:
             //
