@@ -42,6 +42,7 @@ mod day18;
 mod day19;
 mod day20;
 mod day21;
+mod day22;
 pub mod instructions;
 pub mod points;
 
@@ -71,6 +72,7 @@ pub fn solve_problem(day: u8, input: &str) -> anyhow::Result<()> {
         19 => solve::<day19::Day>(input),
         20 => solve::<day20::Day>(input),
         21 => solve::<day21::Day>(input),
+        22 => solve::<day22::Day>(input),
         _ => Err(anyhow::anyhow!("{} is not implemented for year 2018", day)),
     }
 }
