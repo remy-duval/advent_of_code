@@ -7,7 +7,7 @@ use super::input::{Bot, Dimension, Point3};
 pub fn partition(bots: &[Bot]) -> Option<Point3> {
     // See the implementation of Ord to understand how this priority queue works
     let mut queue: BinaryHeap<Partition> = BinaryHeap::new();
-    queue.push(Partition::initial(&bots)?);
+    queue.push(Partition::initial(&bots));
 
     // Pop the partition with the most bots in range and the smallest size
     while let Some(current) = queue.pop() {
@@ -43,7 +43,7 @@ impl Partition {
     }
 
     /// Build the initial partition, it should be large enough to be in range of everything
-    fn initial(bots: &[Bot]) -> Option<Self> {
+    fn initial(bots: &[Bot]) -> Self {
         let mut min = Point3::new(Dimension::MAX, Dimension::MAX, Dimension::MAX);
         let mut max = Point3::new(Dimension::MIN, Dimension::MIN, Dimension::MIN);
         bots.iter().for_each(|next| {
@@ -66,10 +66,10 @@ impl Partition {
             size
         };
 
-        Some(Self {
+        Self {
             region: Cube { bottom: min, size },
             bots: bots.len(), // All the bots are by definition in range, no need to waste time
-        })
+        }
     }
 
     /// The distance from the center of this partition to the origin

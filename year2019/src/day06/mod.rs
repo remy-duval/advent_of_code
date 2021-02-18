@@ -17,7 +17,7 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 6: Universal Orbit Map";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        let orbits = parse_map(&data.data).ok_or_else(|| anyhow::anyhow!("Parse map error !"))?;
+        let orbits = parse_map(&data.data);
         let from_origin =
             depth_first_search(COM, orbits).ok_or_else(|| anyhow::anyhow!("DFS error !"))?;
         let first = check_sum(&from_origin);
@@ -76,7 +76,7 @@ fn depth_first_search(
 }
 
 /// Parse the data into a map of Planets -> All planets orbiting it directly
-fn parse_map(data: &[String]) -> Option<HashMap<PlanetName, Vec<PlanetName>>> {
+fn parse_map(data: &[String]) -> HashMap<PlanetName, Vec<PlanetName>> {
     let raw_values: Vec<(PlanetName, PlanetName)> = data
         .iter()
         .filter_map(|orbit_definition| {
@@ -99,7 +99,7 @@ fn parse_map(data: &[String]) -> Option<HashMap<PlanetName, Vec<PlanetName>>> {
         })
         .collect::<HashMap<_, _>>();
 
-    Some(map)
+    map
 }
 
 #[cfg(test)]

@@ -7,8 +7,8 @@ const B: &str = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D6
 
 #[test]
 fn first_part() {
-    let first = parse_all(A.parse().unwrap(), 2).expect("Parse error !");
-    let second = parse_all(B.parse().unwrap(), 2).expect("Parse error !");
+    let first = parse_all(A.parse().unwrap(), 2);
+    let second = parse_all(B.parse().unwrap(), 2);
 
     let result = closest(&first[..])
         .expect("Could not find closest !")
@@ -22,8 +22,8 @@ fn first_part() {
 
 #[test]
 fn second_part() {
-    let first = parse_all(A.parse().unwrap(), 2).expect("Parse error !");
-    let second = parse_all(B.parse().unwrap(), 2).expect("Parse error !");
+    let first = parse_all(A.parse().unwrap(), 2);
+    let second = parse_all(B.parse().unwrap(), 2);
 
     let result = shortest(&first[..]).expect("Could not find shortest !").1;
     assert_eq!(result, 610);
@@ -33,7 +33,7 @@ fn second_part() {
 
 #[test]
 fn solve_test() {
-    let crossed = parse_all(DATA.parse().unwrap(), 2).expect("Parse error !");
+    let crossed = parse_all(DATA.parse().unwrap(), 2);
     let closest = closest(&crossed[..]).expect("Could not find closest !");
     let length = shortest(&crossed[..]).expect("Could not find shortest !").1;
 

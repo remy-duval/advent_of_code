@@ -13,7 +13,7 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 3: Crossed Wires";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        let crossed = parse_all(data, 2).ok_or_else(|| anyhow!("Parse error !"))?;
+        let crossed = parse_all(data, 2);
         let closest = closest(&crossed[..]).ok_or_else(|| anyhow!("Could not find closest !"))?;
         let (shortest, length) =
             shortest(&crossed[..]).ok_or_else(|| anyhow!("Could not find shortest !"))?;
@@ -60,7 +60,7 @@ fn shortest(crossed: &[(Point, i64)]) -> Option<(Point, i64)> {
 }
 
 /// Parse all the data into the crossing points of the grid.
-fn parse_all(data: LineSep<CommaSep<String>>, cable_number: i8) -> Option<Vec<(Point, i64)>> {
+fn parse_all(data: LineSep<CommaSep<String>>, cable_number: i8) -> Vec<(Point, i64)> {
     fn parse_cable(cable: CommaSep<String>) -> Option<HashMap<Point, i64>> {
         let mut current = Point::default();
         let mut from_origin = 0;
@@ -110,7 +110,8 @@ fn parse_all(data: LineSep<CommaSep<String>>, cable_number: i8) -> Option<Vec<(P
             }
         })
         .collect();
-    Some(crossed)
+
+    crossed
 }
 
 #[cfg(test)]
