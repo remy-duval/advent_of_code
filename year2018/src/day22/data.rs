@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use hashbrown::HashMap;
-use itertools::{Itertools, process_results};
+use itertools::{process_results, Itertools};
 
 /// The type of a point in the cavern
 pub type Point = (u32, u32);

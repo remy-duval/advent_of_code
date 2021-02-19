@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use itertools::{Itertools, process_results};
+use itertools::{process_results, Itertools};
 
 /// The type of the dimensions of the point
 pub type Dimension = i32;
@@ -43,7 +43,7 @@ impl Point3 {
 
     /// The manhattan distance of this point to the center
     pub fn origin_distance(&self) -> Dimension {
-       self.x.abs() + self.y.abs() + self.z.abs()
+        self.x.abs() + self.y.abs() + self.z.abs()
     }
 }
 

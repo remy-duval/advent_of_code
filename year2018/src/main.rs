@@ -2,9 +2,9 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
-name = "Advent of Code 2018",
-author = "Remy Duval",
-about = "Solutions for the advent of code problems of year 2018"
+    name = "Advent of Code 2018",
+    author = "Remy Duval",
+    about = "Solutions for the advent of code problems of year 2018"
 )]
 struct Arguments {
     #[structopt(short, long)]

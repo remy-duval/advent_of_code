@@ -147,9 +147,7 @@ fn prune_dead_ends(
                 .connections
                 .retain(|(point, _)| raw_map.contains_key(point));
 
-            if !hallway.contains.is_empty()
-                || hallway.connections.len() >= 2
-                || hallway.char == '@'
+            if !hallway.contains.is_empty() || hallway.connections.len() >= 2 || hallway.char == '@'
             {
                 true
             } else {
@@ -166,9 +164,7 @@ fn prune_dead_ends(
 /// # Returns
 /// * `first map` The optimized map Point -> Hallway
 /// * `second map` The original map but with all points on fused paths to char ' '
-fn fuse_paths(
-    map: HashMap<Point, HallWay>,
-) -> (HashMap<Point, HallWay>, HashMap<Point, HallWay>) {
+fn fuse_paths(map: HashMap<Point, HallWay>) -> (HashMap<Point, HallWay>, HashMap<Point, HallWay>) {
     // True for points on the path that are the junction on two other points only
     fn not_significant(hall: &HallWay) -> bool {
         hall.connections.len() == 2

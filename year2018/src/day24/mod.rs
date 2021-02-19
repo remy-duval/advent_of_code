@@ -10,7 +10,10 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 24: Immune System Simulator 20XX";
 
     fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        println!("The winning army ends with {} units", first_part(data.clone()));
+        println!(
+            "The winning army ends with {} units",
+            first_part(data.clone())
+        );
         println!(
             "The least amount of units the immune system has after winning is {}",
             second_part(data)

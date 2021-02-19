@@ -12,7 +12,6 @@ fn first_part_example_one() {
     assert_eq!(count_constellations(&points), 2);
 }
 
-
 #[test]
 fn first_part_example_two() {
     let points = Day::parse(TWO).unwrap().data;
@@ -24,7 +23,6 @@ fn first_part_example_three() {
     let points = Day::parse(THREE).unwrap().data;
     assert_eq!(count_constellations(&points), 3);
 }
-
 
 #[test]
 fn first_part_example_four() {

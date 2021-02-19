@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::f64::consts;
 use std::fmt::{Display, Formatter};
-use std::io::{BufWriter, stdin, stdout, Write};
+use std::io::{stdin, stdout, BufWriter, Write};
 use std::str::FromStr;
 use std::time::Duration;
 
@@ -10,10 +10,10 @@ use hashbrown::HashSet;
 use itertools::Itertools;
 use num_integer::gcd;
 
-use commons::{CLEAR_COMMAND, TO_TOP};
 use commons::grid::Point;
 use commons::parse::LineSep;
 use commons::Problem;
+use commons::{CLEAR_COMMAND, TO_TOP};
 
 pub struct Day;
 
@@ -249,7 +249,7 @@ impl AsteroidField {
                 None
             }
         })
-            .collect::<HashSet<_>>()
+        .collect::<HashSet<_>>()
     }
 }
 

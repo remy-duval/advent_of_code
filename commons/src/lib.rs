@@ -22,8 +22,8 @@
 )]
 
 pub use arguments::Day;
-pub use problem::{load, solve};
 pub use problem::Problem;
+pub use problem::{load, solve};
 
 /// String to print in the console to return to the top
 pub const TO_TOP: &str = "\u{001b}[H";

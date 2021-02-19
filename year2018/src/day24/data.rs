@@ -19,13 +19,20 @@ pub struct Battle {
 impl Battle {
     /// The maximum amount of hit points the infection unit have
     pub fn infection_max_hp(&self) -> Int {
-        self.infection.iter().map(|u| u.hit_points).max().unwrap_or_default()
+        self.infection
+            .iter()
+            .map(|u| u.hit_points)
+            .max()
+            .unwrap_or_default()
     }
 
     /// Return a copy of this battle with the immune system unit damage increased
     pub fn with_boosted_immune_system(&self, amount: Int) -> Self {
         let mut cloned = self.clone();
-        cloned.immune_system.iter_mut().for_each(|unit| unit.damage += amount);
+        cloned
+            .immune_system
+            .iter_mut()
+            .for_each(|unit| unit.damage += amount);
 
         cloned
     }
@@ -86,7 +93,10 @@ impl Battle {
         let mut imm: usize = 0;
         let mut inf: usize = 0;
         loop {
-            match (initiative(&self.immune_system, imm), initiative(&self.infection, inf)) {
+            match (
+                initiative(&self.immune_system, imm),
+                initiative(&self.infection, inf),
+            ) {
                 (Some(a), Some(b)) if a < b => {
                     action(&self.infection[inf], &mut self.immune_system);
                     inf += 1;

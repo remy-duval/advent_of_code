@@ -26,7 +26,7 @@ fn count_constellations(points: &[Point4]) -> usize {
     points.iter().for_each(|point| {
         // Find all groups that can connect to this point and fuse them in one
         let mut main: Option<&mut Vec<&Point4>> = None; // The main group connected to the point
-        let mut connected: usize = 0;                   // Number of groups connected to the point
+        let mut connected: usize = 0; // Number of groups connected to the point
         groups.iter_mut().for_each(|group| {
             if group.iter().any(|p| p.distance(point) <= 3) {
                 connected += 1;
@@ -83,11 +83,9 @@ impl FromStr for Point4 {
 
     fn from_str(string: &str) -> Result<Self, Self::Err> {
         itertools::process_results(
-            string.split(',').map(|coord| {
-                match coord.trim().parse() {
-                    Ok(coord) => Ok(coord),
-                    Err(err) => Err(ParsePointError::IntParse(coord.into(), err)),
-                }
+            string.split(',').map(|coord| match coord.trim().parse() {
+                Ok(coord) => Ok(coord),
+                Err(err) => Err(ParsePointError::IntParse(coord.into(), err)),
             }),
             |iter| match iter.collect_tuple::<(_, _, _, _)>() {
                 Some((a, b, c, d)) => Ok(Point4([a, b, c, d])),
