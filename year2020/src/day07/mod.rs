@@ -118,14 +118,12 @@ fn count_bags_inside<'a>(
 }
 
 fn parse_rules(raw: &str) -> Result<Rules<'_>, RuleParseError> {
-    fn first_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
-        Some((iter.next()?.trim(), iter.next()?.trim()))
-    }
-
     raw.lines()
         .map(|line| {
             let line = line.trim_end_matches('.');
-            let (bag, rules) = first_two(line.splitn(2, "bags contain"))
+            let (bag, rules) = line
+                .split_once("bags contain")
+                .map(|(a, b)| (a.trim(), b.trim()))
                 .ok_or_else(|| RuleParseError::MissingElement(line.to_owned()))?;
 
             let rules = if rules == "no other bags" {
@@ -135,7 +133,9 @@ fn parse_rules(raw: &str) -> Result<Rules<'_>, RuleParseError> {
                     .split(',')
                     .map(|rule| {
                         let rule = rule.trim().trim_end_matches("bag").trim_end_matches("bags");
-                        let (number, bag) = first_two(rule.splitn(2, ' '))
+                        let (number, bag) = rule
+                            .split_once(' ')
+                            .map(|(a, b)| (a.trim(), b.trim()))
                             .ok_or_else(|| RuleParseError::MissingElement(rule.to_owned()))?;
 
                         let number: u32 = number

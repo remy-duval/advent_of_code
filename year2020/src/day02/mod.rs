@@ -80,9 +80,9 @@ impl FromStr for Password {
             Some((iter.next()?, iter.next()?))
         }
 
-        let (pol, pwd) = first_two(s.splitn(2, ':')).ok_or(PasswordError::MissingPart)?;
+        let (pol, pwd) = s.split_once(':').ok_or(PasswordError::MissingPart)?;
         let (occ, char) = first_two(pol.split_whitespace()).ok_or(PasswordError::MissingPart)?;
-        let (min, max) = first_two(occ.splitn(2, '-')).ok_or(PasswordError::MissingPart)?;
+        let (min, max) = occ.split_once('-').ok_or(PasswordError::MissingPart)?;
         let a: u8 = min.trim().parse::<u8>()?;
         let b: u8 = max.trim().parse::<u8>()?;
         let character = char.chars().next().ok_or(PasswordError::MissingPart)?;

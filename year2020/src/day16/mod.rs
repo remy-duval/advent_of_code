@@ -155,16 +155,14 @@ impl FromStr for Rule {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         fn parse_range(s: &str) -> Result<RangeInclusive<u16>, ParseError> {
             let (from, to) = s
-                .splitn(2, '-')
-                .collect_tuple::<(_, _)>()
+                .split_once('-')
                 .ok_or_else(|| ParseError::BadRulesSection(s.into()))?;
 
             Ok(parse_int(from)?..=parse_int(to)?)
         }
 
         let (first, second) = s
-            .splitn(2, "or")
-            .collect_tuple::<(_, _)>()
+            .split_once("or")
             .ok_or_else(|| ParseError::BadRulesSection(s.into()))?;
 
         Ok(Rule(parse_range(first)?, parse_range(second)?))
@@ -188,8 +186,7 @@ impl FromStr for Tickets {
         let mut rules = HashMap::with_capacity(ticket.len());
         for line in rule_section.lines() {
             let (name, rule) = line
-                .splitn(2, ':')
-                .collect_tuple::<(_, _)>()
+                .split_once(':')
                 .ok_or_else(|| ParseError::BadRulesSection(rule_section.into()))?;
 
             rules.insert(name.to_owned(), rule.parse::<Rule>()?);

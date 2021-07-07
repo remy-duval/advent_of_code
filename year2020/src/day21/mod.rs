@@ -99,13 +99,12 @@ impl FromStr for Recipe {
     type Err = std::convert::Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut elements = s.splitn(2, "(contains");
-        let ingredients = elements.next().map_or_else(Vec::new, |list| {
+        let elements = s.split_once("(contains");
+        let ingredients = elements.map_or_else(Vec::new, |(list, _)| {
             list.split_whitespace().map(|ing| ing.to_owned()).collect()
         });
         let allergens = elements
-            .next()
-            .and_then(|allergens| allergens.strip_suffix(')'))
+            .and_then(|(_, allergens)| allergens.strip_suffix(')'))
             .map_or_else(Vec::new, |list| {
                 list.split(',').map(|all| all.trim().to_owned()).collect()
             });

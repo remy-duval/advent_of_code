@@ -145,14 +145,12 @@ impl LinearFunction {
         let mut y = Self::default();
         let mut n = exponent;
         while n > 1 {
-            if n % 2 == 0 {
-                x = x.clone().compose_with(x, size);
-                n /= 2;
-            } else {
+            // Odd case
+            if n & 1 != 0 {
                 y = x.clone().compose_with(y, size);
-                x = x.clone().compose_with(x, size);
-                n /= 2;
             }
+            x = x.clone().compose_with(x, size);
+            n >>= 1; // Divide by 2
         }
 
         x.compose_with(y, size)

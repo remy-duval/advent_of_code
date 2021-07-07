@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use hashbrown::HashSet;
-use itertools::Itertools;
 
 use commons::parse::LineSep;
 use commons::Problem;
@@ -166,7 +165,7 @@ impl FromStr for Operation {
                 .map_err(|e| ParseOpError::ArgumentParseError(arg.to_owned(), e))
         }
 
-        if let Some((op, arg)) = s.splitn(2, ' ').collect_tuple() {
+        if let Some((op, arg)) = s.split_once(' ') {
             match op {
                 "acc" => Ok(Operation::Acc(parse_arg(arg)?)),
                 "jmp" => Ok(Operation::Jmp(parse_arg(arg)?)),

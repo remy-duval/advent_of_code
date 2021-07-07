@@ -111,12 +111,11 @@ impl Iterator for Recipes {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let data = if self.current < self.inner.len() {
-            self.inner[self.current]
-        } else {
+        // Add new items if there isn't enough yet
+        if self.current >= self.inner.len() {
             self.generate()?;
-            self.inner[self.current]
-        };
+        }
+        let data = self.inner[self.current];
 
         self.current += 1;
         Some(data)

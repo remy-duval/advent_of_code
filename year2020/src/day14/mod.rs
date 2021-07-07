@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use hashbrown::HashMap;
-use itertools::Itertools;
 
 use commons::parse::LineSep;
 use commons::Problem;
@@ -154,9 +153,8 @@ impl FromStr for Instruction {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (instruction, value) = s
-            .splitn(2, '=')
-            .map(|part| part.trim())
-            .collect_tuple::<(_, _)>()
+            .split_once('=')
+            .map(|(a, b)| (a.trim(), b.trim()))
             .ok_or_else(|| InstructionParseError::Unknown(s.into()))?;
 
         // This is really dirty, at some point I should consider adding regex

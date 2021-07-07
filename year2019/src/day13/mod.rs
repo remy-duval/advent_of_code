@@ -129,28 +129,25 @@ impl GameState {
     /// Update operation for a single tile of the game screen.
     fn update_tile(&mut self, position: (usize, usize), tile: i64) {
         let tile: Tile = tile.into();
-        let original: Tile;
 
         // Fetch the data in screen, possibly resizing it to fit.
-        let row = if self.height <= position.1 {
+        if self.height <= position.1 {
             self.height = position.1 + 1;
             self.screen
                 .resize(self.height, Vec::with_capacity(self.width));
-            &mut self.screen[position.1]
-        } else {
-            &mut self.screen[position.1]
-        };
+        }
+
+        // Now resized, this should work
+        let row = &mut self.screen[position.1];
+
+        // Then resize the row if necessary
         if row.len() <= position.0 {
-            if self.width <= position.0 {
-                self.width = position.0 + 1;
-            }
+            self.width = self.width.max(position.0 + 1);
             row.resize(self.width, Tile::Empty);
-            original = row[position.0];
-            row[position.0] = tile;
-        } else {
-            original = row[position.0];
-            row[position.0] = tile;
-        };
+        }
+
+        let original = row[position.0];
+        row[position.0] = tile;
 
         // Updates the block count if the original or new one where blocks
         if original == Tile::Block && tile != Tile::Block {

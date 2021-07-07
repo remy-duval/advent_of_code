@@ -133,7 +133,7 @@ impl FromStr for RulesAndWords {
         let rules = blocks.next().map_or_else(HashMap::new, |block| {
             block
                 .lines()
-                .filter_map(|line| line.splitn(2, ':').collect_tuple::<(_, _)>())
+                .filter_map(|line| line.split_once(':'))
                 .map(|(key, value)| (key.trim().to_owned(), value.trim().to_owned()))
                 .collect::<HashMap<_, _>>()
         });

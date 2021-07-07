@@ -159,8 +159,7 @@ impl<'a> PassportBuilder<'a> {
         let mut builder = Self::default();
         string
             .split_whitespace()
-            .flat_map(|kv| kv.splitn(2, ':')) // key:value format
-            .tuples::<(_, _)>() // Group as (key, value) tuples
+            .filter_map(|kv| kv.split_once(':'))
             .for_each(|(key, value)| match key {
                 "pid" => builder.passport_id = Some(value),
                 "byr" => builder.birth = Some(value),
