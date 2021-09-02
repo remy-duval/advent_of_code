@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 
+use color_eyre::eyre::Result;
 use itertools::Itertools;
 
 use commons::Problem;
@@ -14,10 +15,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 13: Care Package";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!("{}", CLEAR_COMMAND);
         let mut memory = data.data;
         memory[0] = 2;

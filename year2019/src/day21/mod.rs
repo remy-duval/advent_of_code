@@ -34,6 +34,8 @@
 
 use std::io::{stdout, BufWriter, Write};
 
+use color_eyre::eyre::Result;
+
 use commons::Problem;
 
 use super::int_code::{IntCodeInput, Processor, Status};
@@ -42,13 +44,13 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = std::io::Error;
     const TITLE: &'static str = "Day 21: Springdroid Adventure";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         first_part(&data.data)?;
         println!();
-        second_part(&data.data)
+        second_part(&data.data)?;
+        Ok(())
     }
 }
 

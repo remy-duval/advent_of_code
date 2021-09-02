@@ -1,5 +1,7 @@
 use std::ops::Add;
 
+use color_eyre::eyre::Result;
+
 use commons::grid::Point;
 use commons::Problem;
 
@@ -10,10 +12,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = String;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 18: Many-Worlds Interpretation";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         // First part
         let (start, keys, map) = parsers::parse_and_optimize_map(&data);
         println!("Map size : {}", map.len());

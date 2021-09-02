@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use hashbrown::HashMap;
 use itertools::Itertools;
 
@@ -11,10 +12,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = events::Events;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 4: Repose Record";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let schedule = Schedule::new(&data.events);
         let (guard, sleepiest) = schedule.first_strategy().unwrap();
         println!(

@@ -1,7 +1,9 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Result, WrapErr};
 use itertools::Itertools;
 
+use color_eyre::Report;
 use commons::grid::Point;
 use commons::Problem;
 
@@ -11,14 +13,13 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Coordinates;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 6: Chronal Coordinates";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "The largest finite area is of size {}",
             data.largest_finite_area()
-                .ok_or_else(|| anyhow::anyhow!("Could not find a finite area"))?
+                .ok_or_else(|| eyre!("Could not find a finite area"))?
         );
 
         println!(
@@ -119,20 +120,11 @@ impl Coordinates {
     }
 }
 
-/// An error that happens when parsing the coordinates
-#[derive(Debug, thiserror::Error)]
-pub enum CoordinatesParseError {
-    #[error("Could not parse a number {0} ({1})")]
-    ParseIntError(Box<str>, #[source] std::num::ParseIntError),
-    #[error("Expected '<X>, <Y>' but got: {0}")]
-    BadFormat(Box<str>),
-}
-
 impl FromStr for Coordinates {
-    type Err = CoordinatesParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let points: Vec<Point> = s
+        let points = s
             .lines()
             .map(|line| {
                 let (x, y) = line
@@ -140,14 +132,14 @@ impl FromStr for Coordinates {
                     .map(|part| {
                         part.trim()
                             .parse::<i64>()
-                            .map_err(|err| CoordinatesParseError::ParseIntError(line.into(), err))
+                            .wrap_err_with(|| format!("Could not parse a number {0}", part))
                     })
                     .collect_tuple::<(_, _)>()
-                    .ok_or_else(|| CoordinatesParseError::BadFormat(line.into()))?;
+                    .ok_or_else(|| eyre!("Expected '<X>, <Y>' but got: {}", line))?;
 
                 Ok(Point::new(x?, y?))
             })
-            .try_collect()?;
+            .collect::<Result<Vec<Point>>>()?;
 
         Ok(Coordinates::new(points))
     }

@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Result};
 use hashbrown::{HashMap, HashSet};
 
 use commons::grid::{Direction, Point};
@@ -8,16 +9,11 @@ use commons::Problem;
 
 pub struct Day;
 
-#[derive(Debug, thiserror::Error)]
-#[error("Breadth first search error for {0}")]
-pub struct BfsError(&'static str);
-
 impl Problem for Day {
     type Input = Maze;
-    type Err = BfsError;
     const TITLE: &'static str = "Day 20: Donut Maze";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "The distance from AA to ZZ without recursion is {}",
             first_part(&data)?
@@ -32,14 +28,14 @@ impl Problem for Day {
     }
 }
 
-fn first_part(maze: &Maze) -> Result<usize, BfsError> {
+fn first_part(maze: &Maze) -> Result<usize> {
     maze.bfs("AA", "ZZ", true)
-        .ok_or(BfsError("Traversal without recursion"))
+        .ok_or_else(|| eyre!("Breadth first search error for traversal without recursion"))
 }
 
-fn second_part(maze: &Maze) -> Result<usize, BfsError> {
+fn second_part(maze: &Maze) -> Result<usize> {
     maze.bfs("AA", "ZZ", false)
-        .ok_or(BfsError("Traversal with recursion"))
+        .ok_or_else(|| eyre!("Breadth first search error for traversal with recursion"))
 }
 
 /// Represent the maze to traverse in this problem.

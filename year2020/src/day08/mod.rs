@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashSet;
 
 use commons::parse::LineSep;
@@ -9,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Operation>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 8: Handheld Halting";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let mut state = ProgramState::new(data.data);
         let (cause, accumulator) = run_until_duplicate_execution(&mut state);
 
@@ -145,24 +145,13 @@ impl Operation {
     }
 }
 
-/// An error that could happen during an operation parsing
-#[derive(Debug, thiserror::Error)]
-pub enum ParseOpError {
-    #[error("The operation is not formatted correctly '{0}'")]
-    BadFormat(String),
-    #[error("Unknown operation name '{0}'")]
-    UnknownOperation(String),
-    #[error("Could not parse the argument in '{0}' (error is {1})")]
-    ArgumentParseError(String, std::num::ParseIntError),
-}
-
 impl FromStr for Operation {
-    type Err = ParseOpError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn parse_arg(arg: &str) -> Result<i32, ParseOpError> {
+        fn parse_arg(arg: &str) -> Result<i32> {
             arg.parse()
-                .map_err(|e| ParseOpError::ArgumentParseError(arg.to_owned(), e))
+                .wrap_err_with(|| format!("Could not parse the argument in '{}'", arg))
         }
 
         if let Some((op, arg)) = s.split_once(' ') {
@@ -170,10 +159,10 @@ impl FromStr for Operation {
                 "acc" => Ok(Operation::Acc(parse_arg(arg)?)),
                 "jmp" => Ok(Operation::Jmp(parse_arg(arg)?)),
                 "nop" => Ok(Operation::Noop(parse_arg(arg)?)),
-                _ => Err(ParseOpError::UnknownOperation(op.to_owned())),
+                _ => Err(eyre!("Unknown operation name '{}'", op)),
             }
         } else {
-            Err(ParseOpError::BadFormat(s.to_owned()))
+            Err(eyre!("The operation is not formatted correctly '{}'", s))
         }
     }
 }

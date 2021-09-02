@@ -1,13 +1,14 @@
+use color_eyre::eyre::Result;
+
 use commons::Problem;
 
 pub struct Day;
 
 impl Problem for Day {
     type Input = commons::parse::LineSep<i64>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 1 : The Tyranny of the Rocket Equation";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let (first, second) = solve(&data.data);
         println!("Fuel for single stage : {}", first);
         println!("Fuel complete : {}", second);

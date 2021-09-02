@@ -5,6 +5,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
+use color_eyre::eyre::{bail, eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
@@ -25,18 +26,17 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = JigsawImage;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 20: Jurassic Jigsaw";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let tiles = data.tiles;
-        let image = match_tiles(tiles, IMAGE_WIDTH)
-            .ok_or_else(|| anyhow::anyhow!("Could not build the image"))?;
+        let image =
+            match_tiles(tiles, IMAGE_WIDTH).ok_or_else(|| eyre!("Could not build the image"))?;
 
         println!(
             "The corners ID product is {}",
             first_part(&image, IMAGE_WIDTH)
-                .ok_or_else(|| anyhow::anyhow!("Could not find the corners of the image"))?
+                .ok_or_else(|| eyre!("Could not find the corners of the image"))?
         );
 
         println!(
@@ -293,19 +293,8 @@ pub struct JigsawImage {
     tiles: Vec<Tile>,
 }
 
-/// An error during the parsing of a tile
-#[derive(Debug, thiserror::Error)]
-pub enum ImageParseError {
-    #[error("Did not find the ID field of a tile in:\n{0}")]
-    NoIdFound(Box<str>),
-    #[error("Could not parse the tile ID ({1}) from:\n{0}")]
-    IdParseError(Box<str>, #[source] std::num::ParseIntError),
-    #[error("Too many elements for a tile (expected 10 * 10, got {0:?}) in a tile line:\n{1}")]
-    WrongDimensions((usize, usize), Box<str>),
-}
-
 impl FromStr for JigsawImage {
-    type Err = ImageParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let results: Vec<_> = sep_by_empty_lines(s)
@@ -315,17 +304,21 @@ impl FromStr for JigsawImage {
                     .next()
                     .and_then(|line| line.trim().strip_prefix("Tile "))
                     .and_then(|line| line.strip_suffix(":"))
-                    .ok_or_else(|| ImageParseError::NoIdFound(s.into()))?;
+                    .ok_or_else(|| eyre!("Did not find the ID field of a tile in:\n{}", s))?;
 
                 let id: u16 = id
                     .parse()
-                    .map_err(|e| ImageParseError::IdParseError(s.into(), e))?;
+                    .wrap_err_with(|| format!("Could not parse the tile ID ({})", s))?;
                 let mut data = [[false; 10]; 10];
                 for (y, line) in lines.enumerate() {
                     for (x, char) in line.chars().enumerate() {
                         match data.get_mut(y).and_then(|row| row.get_mut(x)) {
                             Some(current) => *current = char == '#',
-                            None => return Err(ImageParseError::WrongDimensions((x, y), s.into())),
+                            None =>
+                            bail!(
+                                "Too many elements for a tile (expected 10 * 10, got ({}, {})) in a tile line:\n{}",
+                                x, y, s
+                            ),
                         };
                     }
                 }

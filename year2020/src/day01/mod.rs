@@ -1,3 +1,4 @@
+use color_eyre::eyre::{eyre, Result};
 use hashbrown::HashSet;
 
 use commons::Problem;
@@ -6,12 +7,11 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = commons::parse::LineSep<u64>;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 1: Report Repair";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let (first, second) = first_part(&data.data)
-            .ok_or_else(|| anyhow::anyhow!("No 2020 2-elements sum found in {:?}", data.data))?;
+            .ok_or_else(|| eyre!("No 2020 2-elements sum found in {:?}", data.data))?;
         println!(
             "2 expenses that sum to 2020: {a} * {b} = {product}",
             a = first,
@@ -20,7 +20,7 @@ impl Problem for Day {
         );
 
         let (first, second, third) = second_part(&data.data)
-            .ok_or_else(|| anyhow::anyhow!("No 2020 3-elements sum found in {:?}", data.data))?;
+            .ok_or_else(|| eyre!("No 2020 3-elements sum found in {:?}", data.data))?;
 
         println!(
             "3 expenses that sum to 2020: {a} * {b} * {c} = {product}",

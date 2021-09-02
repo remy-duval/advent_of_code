@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{bail, ensure, Report, Result};
 use itertools::Itertools;
 
 use commons::parse::LineSep;
@@ -9,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<BoardingPass>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 5: Binary Boarding";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let max = first_part(&data.data).unwrap_or_default();
         println!("The maximum seat ID on the plane is {max}", max = max);
 
@@ -52,27 +52,24 @@ pub struct BoardingPass {
     seat: u16,
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum BoardingPassParseError {
-    #[error("The boarding pass should have a length of 10 characters, not {0}")]
-    BadLength(usize),
-    #[error("The boarding pass should only contain be F, B, L or R, not {0}")]
-    BadElement(char),
-}
-
 impl FromStr for BoardingPass {
-    type Err = BoardingPassParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() != 10 {
-            return Err(BoardingPassParseError::BadLength(s.len()));
-        }
+        ensure!(
+            s.len() == 10,
+            "The boarding pass should have a length of 10 characters, not {}",
+            s.len()
+        );
 
-        let seat = s.chars().try_fold(0, |acc, current| {
-            let bit = match current {
+        let seat = s.chars().try_fold(0, |acc, c| {
+            let bit = match c {
                 'F' | 'L' => 0,
                 'B' | 'R' => 1,
-                _ => return Err(BoardingPassParseError::BadElement(current)),
+                _ => bail!(
+                    "The boarding pass should only contain be F, B, L or R, not {}",
+                    c
+                ),
             };
 
             Ok(acc * 2 + bit)

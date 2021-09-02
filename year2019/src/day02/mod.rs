@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use itertools::Itertools;
 
 use commons::Problem;
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = int_code::IntCodeInput;
-    type Err = int_code::IntCodeError;
     const TITLE: &'static str = "Day 2: 1202 Program Alarm";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let first = run_one(&data.data, 12, 2)
             .ok_or_else(|| int_code::IntCodeError::Other("1202 program error".into()))?;
         let (noun, verb) = find_match(&data.data, WANTED)

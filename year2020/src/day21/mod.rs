@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::Result;
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Recipe>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 21: Allergen Assessment";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let recipes = data.data;
         let containers = find_containers(&recipes);
         println!(

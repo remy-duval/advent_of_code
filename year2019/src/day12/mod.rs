@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::Result;
 use hashbrown::HashMap;
 use num_integer::lcm;
 
@@ -13,10 +14,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Moons;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 12: The N-Body Problem";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let mut moons: Moons = data;
         // First part
         (0..STEPS).for_each(|_| moons.next());

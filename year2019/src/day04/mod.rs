@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use anyhow::anyhow;
+use color_eyre::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
 use commons::Problem;
@@ -9,10 +9,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Between;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 4: Secure Container";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let Between { from, to } = data;
         println!("Range is {}..{}", from, to);
 
@@ -33,19 +32,19 @@ pub struct Between {
 }
 
 impl FromStr for Between {
-    type Err = anyhow::Error;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Some((a, b)) = s.split('-').collect_tuple() {
             let from: i32 = a.parse()?;
             let to: i32 = b.parse()?;
             if from >= to {
-                Err(anyhow!("{} >= {}", from, to))
+                Err(eyre!("{} >= {}", from, to))
             } else {
                 Ok(Between { from, to })
             }
         } else {
-            Err(anyhow!("Didn't find the lower and higher bound in {}", s))
+            Err(eyre!("Didn't find the lower and higher bound in {}", s))
         }
     }
 }
@@ -83,7 +82,7 @@ fn split_digits(int: i32) -> [u8; 6] {
 
 /// Checks that the given digits are ordered (first condition).
 fn check_ordered(digits: [u8; 6]) -> bool {
-    let mut prev = std::u8::MIN;
+    let mut prev = u8::MIN;
     for digit in digits.iter() {
         if *digit < prev {
             return false;

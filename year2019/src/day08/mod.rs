@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
 use commons::Problem;
@@ -12,10 +13,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Image;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 8: Space Image Format";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let mut image = data;
         let (_, w, t) = image.check_sum();
         image.build();
@@ -54,7 +54,7 @@ impl Debug for Image {
 }
 
 impl FromStr for Image {
-    type Err = &'static str;
+    type Err = Report;
 
     fn from_str(data: &str) -> Result<Self, Self::Err> {
         let size_hint = data.len() / WIDTH / HEIGHT;
@@ -75,7 +75,7 @@ impl FromStr for Image {
 
         Ok(Self::new(match layers {
             Some(ok) => ok,
-            None => return Err("Could not build the Image."),
+            None => return Err(eyre!("Could not build the Image.")),
         }))
     }
 }

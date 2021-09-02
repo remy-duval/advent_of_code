@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
+
 use commons::parse::LineSep;
 use commons::Problem;
 
@@ -7,10 +9,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Password>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 2: Password Philosophy";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "{} passwords respect the first policy",
             first_part(&data.data)
@@ -73,19 +74,29 @@ impl Password {
 }
 
 impl FromStr for Password {
-    type Err = PasswordError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         fn first_two<'a>(mut iter: impl Iterator<Item = &'a str>) -> Option<(&'a str, &'a str)> {
             Some((iter.next()?, iter.next()?))
         }
 
-        let (pol, pwd) = s.split_once(':').ok_or(PasswordError::MissingPart)?;
-        let (occ, char) = first_two(pol.split_whitespace()).ok_or(PasswordError::MissingPart)?;
-        let (min, max) = occ.split_once('-').ok_or(PasswordError::MissingPart)?;
-        let a: u8 = min.trim().parse::<u8>()?;
-        let b: u8 = max.trim().parse::<u8>()?;
-        let character = char.chars().next().ok_or(PasswordError::MissingPart)?;
+        fn missing() -> Report {
+            eyre!("Part of the password is missing, the format is 'int-int char: password'")
+        }
+
+        let (pol, pwd) = s.split_once(':').ok_or_else(missing)?;
+        let (occ, char) = first_two(pol.split_whitespace()).ok_or_else(missing)?;
+        let (min, max) = occ.split_once('-').ok_or_else(missing)?;
+        let a: u8 = min
+            .trim()
+            .parse::<u8>()
+            .wrap_err("Could not parse minimum of the policy")?;
+        let b: u8 = max
+            .trim()
+            .parse::<u8>()
+            .wrap_err("Could not parse maximum of the policy")?;
+        let character = char.chars().next().ok_or_else(missing)?;
 
         Ok(Password {
             parameters: (a.min(b), a.max(b)),
@@ -93,14 +104,6 @@ impl FromStr for Password {
             value: pwd.trim().into(),
         })
     }
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum PasswordError {
-    #[error("Part of the password is missing, the format is 'int-int char: password'")]
-    MissingPart,
-    #[error("Could not parse one of the integer of the policy parameters {0}")]
-    ParseIntError(#[from] std::num::ParseIntError),
 }
 
 #[cfg(test)]

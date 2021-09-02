@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::{process_results, Itertools};
 
 /// The type of the dimensions of the point
@@ -47,28 +48,8 @@ impl Point3 {
     }
 }
 
-/// An error when parsing a Bot
-#[derive(Debug, thiserror::Error)]
-pub enum ParseBotError {
-    #[error("Expected pos=POINT, r=RADIUS, got: {0}")]
-    BadFormat(Box<str>),
-    #[error("Couldn't parse the position: {0}")]
-    ParsePoint(#[from] ParsePointError),
-    #[error("Couldn't parse the radius of the bot: {0} ({1})")]
-    ParseInt(Box<str>, #[source] std::num::ParseIntError),
-}
-
-/// An error when parsing a Point3
-#[derive(Debug, thiserror::Error)]
-pub enum ParsePointError {
-    #[error("Expected <X, Y, Z> for a point, got: {0}")]
-    BadFormat(Box<str>),
-    #[error("Couldn't parse a dimension of a point: {0} ({1})")]
-    ParseInt(Box<str>, #[source] std::num::ParseIntError),
-}
-
 impl FromStr for Bot {
-    type Err = ParseBotError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         fn split(s: &str) -> Option<(&str, &str)> {
@@ -78,21 +59,24 @@ impl FromStr for Bot {
             Some((pos, radius))
         }
 
-        let (pos, radius) = split(s).ok_or_else(|| ParseBotError::BadFormat(s.into()))?;
+        let (pos, radius) =
+            split(s).ok_or_else(|| eyre!("Expected pos=POINT, r=RADIUS, got: {}", s))?;
         let r = radius
             .parse::<Dimension>()
-            .map_err(|e| ParseBotError::ParseInt(radius.into(), e))?;
-        let pos = pos.parse()?;
+            .wrap_err_with(|| format!("Couldn't parse the radius of the bot: {}", radius))?;
+        let pos = pos
+            .parse::<Point3>()
+            .wrap_err("Couldn't parse the bot position")?;
 
         Ok(Self { pos, r })
     }
 }
 
 impl FromStr for Point3 {
-    type Err = ParsePointError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn inner(s: &str) -> Option<Result<(Dimension, Dimension, Dimension), ParsePointError>> {
+        fn inner(s: &str) -> Option<Result<(Dimension, Dimension, Dimension)>> {
             let elements = s
                 .strip_prefix('<')?
                 .strip_suffix('>')?
@@ -100,13 +84,14 @@ impl FromStr for Point3 {
                 .split(',')
                 .map(|n| {
                     n.parse::<Dimension>()
-                        .map_err(|e| ParsePointError::ParseInt(n.into(), e))
+                        .wrap_err_with(|| format!("Couldn't parse a dimension of a point: {}", n))
                 });
 
             process_results(elements, |results| results.collect_tuple::<(_, _, _)>()).transpose()
         }
 
-        let (x, y, z) = inner(s).unwrap_or_else(|| Err(ParsePointError::BadFormat(s.into())))?;
+        let (x, y, z) =
+            inner(s).unwrap_or_else(|| Err(eyre!("Expected <X, Y, Z> for a point, got: {}", s)))?;
         Ok(Self { x, y, z })
     }
 }

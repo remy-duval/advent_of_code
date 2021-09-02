@@ -1,3 +1,5 @@
+use color_eyre::eyre::Result;
+
 use commons::grid::Point;
 use commons::Problem;
 
@@ -7,10 +9,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 19: Tractor Beam";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let memory = data.data;
         // First part
         let affected = count_pulled(&memory, Point::new(0, 0), Point::new(50, 50));

@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use hashbrown::HashSet;
 
 use commons::parse::LineSep;
@@ -7,10 +8,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<i32>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 1: Chronal Calibration";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!("The sum of frequencies is {}", sum(&data.data));
         println!(
             "The first repeated frequency is {}",

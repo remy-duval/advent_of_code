@@ -7,10 +7,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = SortedAdapters;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 10: Adapter Array";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> color_eyre::Result<()> {
         let (ones, threes) = first_part(&data);
 
         println!(

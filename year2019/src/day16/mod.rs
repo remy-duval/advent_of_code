@@ -1,6 +1,7 @@
 use std::convert::TryInto;
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
 use commons::Problem;
@@ -11,10 +12,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Signal;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 16: Flawed Frequency Transmission";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         // First part
         let output = naive_fft(&data.0, 100).into_iter().take(8).join("");
         println!("The first 8 digits of the simple output are {}", output);
@@ -36,7 +36,7 @@ impl Problem for Day {
 pub struct Signal(Vec<i32>);
 
 impl FromStr for Signal {
-    type Err = anyhow::Error;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let data: Option<Vec<i32>> = s
@@ -45,9 +45,9 @@ impl FromStr for Signal {
             .map(|c| c.to_digit(10).and_then(|d| d.try_into().ok()))
             .collect::<Option<_>>();
 
-        Ok(Signal(data.ok_or_else(|| {
-            anyhow::anyhow!("Error parsing the input !")
-        })?))
+        Ok(Signal(
+            data.ok_or_else(|| eyre!("Error parsing the input !"))?,
+        ))
     }
 }
 

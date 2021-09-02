@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
+use color_eyre::eyre::Result;
 use hashbrown::HashMap;
 
 use commons::grid::Direction;
@@ -13,10 +14,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Network;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 13: Mine Cart Madness";
 
-    fn solve(mut network: Self::Input) -> Result<(), Self::Err> {
+    fn solve(mut network: Self::Input) -> Result<()> {
         let crash = first_part(&mut network);
         println!("The first crash happened at {},{}", crash.x, crash.y);
 

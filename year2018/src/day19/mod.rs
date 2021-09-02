@@ -1,17 +1,16 @@
-#![warn(unused)]
+use color_eyre::eyre::Result;
 
 use commons::Problem;
 
-use super::instructions::{errors::ExecutionError, Int, Program};
+use super::instructions::{Int, Program};
 
 pub struct Day;
 
 impl Problem for Day {
     type Input = Program;
-    type Err = Box<ExecutionError>;
     const TITLE: &'static str = "Day 19: Go With The Flow";
 
-    fn solve(program: Self::Input) -> Result<(), Self::Err> {
+    fn solve(program: Self::Input) -> Result<()> {
         let first = run_optimized(program.clone(), 0)?;
         println!("Run 1: The register 0 contains {} on exit", first);
 
@@ -24,7 +23,7 @@ impl Problem for Day {
 
 /// Run the given input program, optimizing the critical section to make it not run for hours
 /// This will only work for programs that have the same critical section as mine though
-fn run_optimized(mut program: Program, initial: Int) -> Result<Int, Box<ExecutionError>> {
+fn run_optimized(mut program: Program, initial: Int) -> Result<Int> {
     program.reset();
     program.registers[0] = initial;
 

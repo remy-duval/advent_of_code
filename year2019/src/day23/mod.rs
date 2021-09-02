@@ -1,5 +1,7 @@
 use std::fmt::{Display, Formatter};
 
+use color_eyre::eyre::{eyre, Result};
+
 use commons::Problem;
 
 use super::int_code::{IntCodeInput, Processor, Status};
@@ -10,20 +12,17 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 23: Category Six";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let memory = data.data;
-        let output = run_until_nat_packet(&memory).ok_or_else(|| {
-            anyhow::anyhow!("No NAT packet received, but the network has stopped")
-        })?;
+        let output = run_until_nat_packet(&memory)
+            .ok_or_else(|| eyre!("No NAT packet received, but the network has stopped"))?;
         println!("First NAT packet was : {}\n", output);
 
         println!("Starting network with NAT ON");
-        let output = run_until_duplicate_wakeup(&memory).ok_or_else(|| {
-            anyhow::anyhow!("The network stopped before sending twice the same wakeup")
-        })?;
+        let output = run_until_duplicate_wakeup(&memory)
+            .ok_or_else(|| eyre!("The network stopped before sending twice the same wakeup"))?;
         println!("Duplicate Y wake-up was : {}", output);
 
         Ok(())

@@ -1,3 +1,4 @@
+use color_eyre::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
 use commons::parse::LineSep;
@@ -7,15 +8,14 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<String>;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 2: Inventory Management System";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!("The checksum is {}", check_sum(&data.data));
         println!(
             "The common part of the two found box is {}",
             find_different_by_one(&data.data)
-                .ok_or_else(|| anyhow::anyhow!("Could not find the two common boxes"))?
+                .ok_or_else(|| eyre!("Could not find the two common boxes"))?
         );
 
         Ok(())

@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
 use commons::Problem;
@@ -9,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = TenCups;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 23: Crab Cups";
 
-    fn solve(cups: Self::Input) -> Result<(), Self::Err> {
+    fn solve(cups: Self::Input) -> Result<()> {
         println!(
             "Part 1: The order after 100 moves is '{}'",
             first_part(&cups.0)
@@ -50,23 +50,20 @@ fn second_part(cups: &[usize]) -> (usize, usize) {
 #[derive(Debug, Clone)]
 pub struct TenCups(Vec<usize>);
 
-/// An error when parsing cups labels
-#[derive(Debug, thiserror::Error)]
-#[error("'{0}' is not a valid base 10 digit")]
-pub struct CupParseError(char);
-
 impl FromStr for TenCups {
-    type Err = CupParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         Ok(Self(
             s.trim()
                 .chars()
                 .map(|c| {
-                    c.to_digit(10)
-                        .map_or_else(|| Err(CupParseError(c)), |ok| Ok(ok as usize - 1))
+                    c.to_digit(10).map_or_else(
+                        || Err(eyre!("'{}' is not a valid base 10 digit", c)),
+                        |ok| Ok(ok as usize - 1),
+                    )
                 })
-                .collect::<Result<Vec<usize>, CupParseError>>()?,
+                .collect::<Result<Vec<usize>>>()?,
         ))
     }
 }

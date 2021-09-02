@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result};
 use num_integer::{mod_floor, ExtendedGcd, Integer};
 
 use commons::parse::LineSep;
@@ -12,10 +13,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Shuffle>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 22: Slam Shuffle";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "The final position of the 2019th card is {}",
             first_part(data.data.clone())
@@ -58,25 +58,25 @@ pub enum Shuffle {
 }
 
 impl FromStr for Shuffle {
-    type Err = &'static str;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         if s.starts_with("deal into new stack") {
             Ok(Shuffle::NewStack)
         } else if s.starts_with("cut") {
             if let Ok(int) = s.replace("cut", "").trim().parse() {
                 Ok(Shuffle::Cut(int))
             } else {
-                Err("Could not parse the cut number")
+                Err(eyre!("Could not parse the cut number"))
             }
         } else if s.starts_with("deal with increment") {
             if let Ok(int) = s.replace("deal with increment", "").trim().parse() {
                 Ok(Shuffle::Deal(int))
             } else {
-                Err("Could not parse the deal with increment number")
+                Err(eyre!("Could not parse the deal with increment number"))
             }
         } else {
-            Err("Could not parse the next shuffle")
+            Err(eyre!("Could not parse the next shuffle"))
         }
     }
 }

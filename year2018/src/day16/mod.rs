@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use hashbrown::{hash_map::Entry, HashMap, HashSet};
 
 use commons::Problem;
@@ -12,10 +13,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = parse::Program;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 16: Chronal Classification";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let (first, possible) = find_possible(&data.samples);
         println!("{} samples behave like 3+ op codes", first);
         println!(

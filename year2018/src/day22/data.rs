@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 use itertools::{process_results, Itertools};
 
@@ -130,19 +131,6 @@ impl Cavern {
     }
 }
 
-/// An error while parsing the rules
-#[derive(Debug, thiserror::Error)]
-pub enum RulesParseError {
-    #[error("Could not parse integer {0} ({1})")]
-    ParseIntError(Box<str>, std::num::ParseIntError),
-    #[error("Expected 'depth: INT', got {0}")]
-    BadDepth(Box<str>),
-    #[error("Expected 'target: INT,INT', got {0}")]
-    BadTarget(Box<str>),
-    #[error("Expected two lines, depth and target, got {0}")]
-    BadFormat(Box<str>),
-}
-
 impl Display for Cavern {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let max = self.grid.keys().fold((0, 0), |(max_x, max_y), point| {
@@ -163,21 +151,21 @@ impl Display for Cavern {
 }
 
 impl FromStr for Cavern {
-    type Err = RulesParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (depth, target) = s
             .lines()
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| RulesParseError::BadFormat(s.into()))?;
+            .ok_or_else(|| eyre!("Expected two lines, depth and target, got {}", s))?;
 
         let depth = depth
             .strip_prefix("depth:")
-            .ok_or_else(|| RulesParseError::BadDepth(depth.into()))
+            .ok_or_else(|| eyre!("Expected 'depth: INT', got {}", depth))
             .and_then(|str| {
                 str.trim()
                     .parse()
-                    .map_err(|err| RulesParseError::ParseIntError(str.into(), err))
+                    .wrap_err_with(|| format!("Could not parse integer {}", str))
             })?;
 
         let target = target
@@ -187,13 +175,13 @@ impl FromStr for Cavern {
                     str.split(',').map(|str| {
                         str.trim()
                             .parse()
-                            .map_err(|err| RulesParseError::ParseIntError(str.into(), err))
+                            .wrap_err_with(|| format!("Could not parse integer {}", str))
                     }),
                     |iter| iter.collect_tuple::<(_, _)>(),
                 )
                 .transpose()
             })
-            .unwrap_or_else(|| Err(RulesParseError::BadTarget(target.into())))?;
+            .unwrap_or_else(|| Err(eyre!("Expected 'target: INT,INT', got {}", target)))?;
 
         let dimensions = (target.0 as usize + 1) * (target.1 as usize + 1);
         let mut grid = HashMap::with_capacity(dimensions);

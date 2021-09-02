@@ -1,3 +1,5 @@
+use color_eyre::eyre::Result;
+
 use commons::Problem;
 
 mod data;
@@ -6,10 +8,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = data::Battle;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 24: Immune System Simulator 20XX";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "The winning army ends with {} units",
             first_part(data.clone())

@@ -1,3 +1,4 @@
+use color_eyre::eyre::{eyre, Result};
 use itertools::{Itertools, MinMaxResult};
 
 use commons::parse::LineSep;
@@ -9,21 +10,19 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<u64>;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 9: Encoding Error";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let wanted = first_not_sum(&data.data, PREAMBLE)
-            .ok_or_else(|| anyhow::anyhow!("Did not find the first element that is not a sum"))?;
+            .ok_or_else(|| eyre!("Did not find the first element that is not a sum"))?;
 
         println!(
             "The first element that is not a sum of the previous ones is {first}",
             first = wanted
         );
 
-        let (min, max) = second_part(&data.data, wanted).ok_or_else(|| {
-            anyhow::anyhow!("Did not find the slice that can be summed to {}", wanted)
-        })?;
+        let (min, max) = second_part(&data.data, wanted)
+            .ok_or_else(|| eyre!("Did not find the slice that can be summed to {}", wanted))?;
 
         println!(
             "The slice between {min} and {max} (sum is {sum}) will sum up to it",

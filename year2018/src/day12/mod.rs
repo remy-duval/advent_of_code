@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result};
 use hashbrown::HashSet;
 use itertools::Itertools;
 
@@ -12,10 +13,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Rules;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 12: Subterranean Sustainability";
 
-    fn solve(rules: Self::Input) -> Result<(), Self::Err> {
+    fn solve(rules: Self::Input) -> Result<()> {
         let first = first_part(&rules);
         println!("After 20 generations the sum is {}", first);
 
@@ -140,21 +140,10 @@ impl Rules {
     }
 }
 
-/// An error that happens when parsing the rules
-#[derive(Debug, thiserror::Error)]
-pub enum RulesParseError {
-    #[error("Bad format for the initial state {0}")]
-    InitialStateFormat(Box<str>),
-    #[error("Bad format for a rule")]
-    RuleFormat(Box<str>),
-    #[error("Missing either the initial state or the rules")]
-    MissingPart(Box<str>),
-}
-
 impl FromStr for Rules {
-    type Err = RulesParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         fn state(state: &str) -> Vec<bool> {
             state.chars().map(|c| c == '#').collect()
         }
@@ -162,18 +151,18 @@ impl FromStr for Rules {
         let mut lines = s.lines();
         let initial_state = lines
             .next()
-            .ok_or_else(|| RulesParseError::MissingPart(s.into()))?
+            .ok_or_else(|| eyre!("Missing either the initial state or the rules {}", s))?
             .strip_prefix("initial state:")
-            .ok_or_else(|| RulesParseError::InitialStateFormat(s.into()))?
+            .ok_or_else(|| eyre!("Bad format for the initial state {}", s))?
             .trim();
 
         let mut rules = vec![false; 32];
-        lines.dropping(1).try_for_each(|line| {
+        lines.dropping(1).try_for_each(|line| -> Result<()> {
             let (pattern, after) = line
                 .splitn(2, "=>")
                 .map(str::trim)
                 .collect_tuple::<(_, _)>()
-                .ok_or_else(|| RulesParseError::RuleFormat(line.into()))?;
+                .ok_or_else(|| eyre!("Bad format for a rule {}", line))?;
 
             let index = Self::pattern(&state(pattern));
             let active = after.chars().next().map_or(false, |c| c == '#');

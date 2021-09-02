@@ -1,13 +1,14 @@
+use color_eyre::eyre::Result;
+
 use commons::Problem;
 
 pub struct Day;
 
 impl Problem for Day {
     type Input = String;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 5: Alchemical Reduction";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!("After the basic reaction, {} units remain", first(&data));
         println!("After the best reaction, {} units remain", second(&data));
         Ok(())

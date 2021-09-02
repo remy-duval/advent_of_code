@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::Problem;
@@ -8,10 +9,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Keys;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 25: Combo Breaker";
 
-    fn solve(keys: Self::Input) -> Result<(), Self::Err> {
+    fn solve(keys: Self::Input) -> Result<()> {
         println!("The encryption key is {}", solve(keys));
         Ok(())
     }
@@ -67,30 +67,21 @@ fn modular_exponentiation(mut a: Key, mut n: Key, modulo: Key) -> Key {
     }
 }
 
-/// An error that can happen when parsing the keys
-#[derive(Debug, thiserror::Error)]
-pub enum ParseKeysError {
-    #[error("Could not parse the key '{0}' ({1})")]
-    ParseIntError(Box<str>, #[source] std::num::ParseIntError),
-    #[error("Wanted exactly two keys, one each line")]
-    NotExactlyTwoKeys,
-}
-
 impl FromStr for Keys {
-    type Err = ParseKeysError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         if let Some((card, door)) = itertools::process_results(
             s.lines().map(|line| {
                 line.trim()
                     .parse::<Key>()
-                    .map_err(|e| ParseKeysError::ParseIntError(line.into(), e))
+                    .wrap_err_with(|| format!("Could not parse the key '{}'", line))
             }),
             |result| result.collect_tuple::<(_, _)>(),
         )? {
             Ok(Self { card, door })
         } else {
-            Err(ParseKeysError::NotExactlyTwoKeys)
+            Err(eyre!("Wanted exactly two keys, one each line"))
         }
     }
 }

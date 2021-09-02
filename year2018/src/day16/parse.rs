@@ -1,11 +1,12 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;
 
-use super::instructions::{errors::IndexError, Int, OpCode};
+use super::instructions::{Int, OpCode};
 
 /// The value of the registers at a certain point in time
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -26,7 +27,7 @@ pub struct Instruction {
 
 impl Instruction {
     /// Execute this instruction with the given starting registers
-    pub fn execute(&self, registers: &mut Register, code: OpCode) -> Result<(), IndexError> {
+    pub fn execute(&self, registers: &mut Register, code: OpCode) -> Result<()> {
         code.apply(&mut registers.0, self.a, self.b, self.c)
     }
 }
@@ -62,51 +63,17 @@ impl Program {
     }
 }
 
-/// An error while parsing an integer
-#[derive(Debug, thiserror::Error)]
-#[error("Could not parse an integer {0} ({1})")]
-pub struct ParseIntError(Box<str>, std::num::ParseIntError);
-
-/// An error that happens while parsing a register description
-#[derive(Debug, thiserror::Error)]
-pub enum RegisterParseError {
-    #[error(transparent)]
-    ParseIntError(#[from] ParseIntError),
-    #[error("Expected [A, B, C, D] for a register, where A, B, C, D integers, got: {0}")]
-    BadFormat(Box<str>),
-}
-
-/// An error that happens while parsing an instruction description
-#[derive(Debug, thiserror::Error)]
-pub enum InstructionParseError {
-    #[error(transparent)]
-    ParseIntError(#[from] ParseIntError),
-    #[error("Expected A, B, C, D for an instruction, where A, B, C, D integers, got: {0}")]
-    BadFormat(Box<str>),
-}
-
-/// An error that happens while parsing a sample
-#[derive(Debug, thiserror::Error)]
-pub enum SampleParseError {
-    #[error(transparent)]
-    RegisterParseError(#[from] RegisterParseError),
-    #[error(transparent)]
-    InstructionParseError(#[from] InstructionParseError),
-    #[error("Expected register instruction register for a sample, got: {0}")]
-    BadFormat(Box<str>),
-}
-
 /// Parse an integer of type [Element](Element)
-fn parse_element(str: &str) -> Result<Int, ParseIntError> {
+fn parse_element(str: &str) -> Result<Int> {
     str.trim()
         .parse()
-        .map_err(|err| ParseIntError(str.into(), err))
+        .wrap_err_with(|| format!("Could not parse an integer {}", str))
 }
 
 impl FromStr for Register {
-    type Err = RegisterParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let (first, second, third, fourth) = s
             .trim()
             .strip_prefix('[')
@@ -116,22 +83,32 @@ impl FromStr for Register {
                     .map(parse_element)
                     .collect_tuple::<(_, _, _, _)>()
             })
-            .ok_or_else(|| RegisterParseError::BadFormat(s.into()))?;
+            .ok_or_else(|| {
+                eyre!(
+                    "Expected [A, B, C, D] for a register, where A, B, C, D integers, got: {}",
+                    s
+                )
+            })?;
 
         Ok(Self([first?, second?, third?, fourth?]))
     }
 }
 
 impl FromStr for Instruction {
-    type Err = InstructionParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let (first, second, third, fourth) = s
             .trim()
             .split_whitespace()
             .map(parse_element)
             .collect_tuple::<(_, _, _, _)>()
-            .ok_or_else(|| InstructionParseError::BadFormat(s.into()))?;
+            .ok_or_else(|| {
+                eyre!(
+                    "Expected A, B, C, D for an instruction, where A, B, C, D integers, got: {}",
+                    s
+                )
+            })?;
 
         Ok(Self {
             code: first?,
@@ -143,20 +120,29 @@ impl FromStr for Instruction {
 }
 
 impl FromStr for Sample {
-    type Err = SampleParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (before, instruction, after) = s
-            .lines()
-            .collect_tuple::<(_, _, _)>()
-            .ok_or_else(|| SampleParseError::BadFormat(s.into()))?;
+    fn from_str(s: &str) -> Result<Self> {
+        let (before, instruction, after) =
+            s.lines().collect_tuple::<(_, _, _)>().ok_or_else(|| {
+                eyre!(
+                    "Expected register instruction register for a sample, got: {}",
+                    s
+                )
+            })?;
 
-        let before = before
-            .strip_prefix("Before:")
-            .ok_or_else(|| SampleParseError::BadFormat(s.into()))?;
-        let after = after
-            .strip_prefix("After:")
-            .ok_or_else(|| SampleParseError::BadFormat(s.into()))?;
+        let before = before.strip_prefix("Before:").ok_or_else(|| {
+            eyre!(
+                "Expected register instruction register for a sample, got: {}",
+                s
+            )
+        })?;
+        let after = after.strip_prefix("After:").ok_or_else(|| {
+            eyre!(
+                "Expected register instruction register for a sample, got: {}",
+                s
+            )
+        })?;
 
         Ok(Self {
             before: before.trim().parse()?,
@@ -167,9 +153,9 @@ impl FromStr for Sample {
 }
 
 impl FromStr for Program {
-    type Err = SampleParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let mut blocks = sep_by_empty_lines(s).peekable();
         let samples: Vec<Sample> = blocks
             .peeking_take_while(|s| s.starts_with("Before:"))

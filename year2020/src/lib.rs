@@ -21,6 +21,8 @@
     unused_qualifications
 )]
 
+use color_eyre::eyre::{eyre, Result};
+
 mod day01;
 mod day02;
 mod day03;
@@ -48,7 +50,7 @@ mod day24;
 mod day25;
 
 /// Dispatch to the correct problem and solve it
-pub fn solve_problem(day: u8, input: &str) -> anyhow::Result<()> {
+pub fn solve_problem(day: u8, input: &str) -> Result<()> {
     use commons::solve;
 
     match day {
@@ -77,6 +79,6 @@ pub fn solve_problem(day: u8, input: &str) -> anyhow::Result<()> {
         23 => solve::<day23::Day>(input),
         24 => solve::<day24::Day>(input),
         25 => solve::<day25::Day>(input),
-        _ => Err(anyhow::anyhow!("{} is not implemented for year 2020", day)),
+        _ => Err(eyre!("{} is not implemented for year 2020", day)),
     }
 }

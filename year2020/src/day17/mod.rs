@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
+use color_eyre::eyre::Result;
 use hashbrown::{HashMap, HashSet};
 use itertools::iproduct;
 
@@ -24,10 +25,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = ConwayCubes;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 17: Conway Cubes";
 
-    fn solve(input: Self::Input) -> Result<(), Self::Err> {
+    fn solve(input: Self::Input) -> Result<()> {
         let first = first_part(input.clone());
         println!(
             "After 6 cycles in 3D the number of active cubes is {}",

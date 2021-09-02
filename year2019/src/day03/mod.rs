@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use color_eyre::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
 use commons::grid::{Direction, Point};
@@ -9,14 +9,13 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<CommaSep<String>>;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 3: Crossed Wires";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let crossed = parse_all(data, 2);
-        let closest = closest(&crossed[..]).ok_or_else(|| anyhow!("Could not find closest !"))?;
+        let closest = closest(&crossed[..]).ok_or_else(|| eyre!("Could not find closest !"))?;
         let (shortest, length) =
-            shortest(&crossed[..]).ok_or_else(|| anyhow!("Could not find shortest !"))?;
+            shortest(&crossed[..]).ok_or_else(|| eyre!("Could not find shortest !"))?;
 
         println!(
             "Closest cross to origin : {} with distance {}",
@@ -35,7 +34,7 @@ impl Problem for Day {
 /// Return the crossing point closest to the origin (according to manhattan distance)
 fn closest(crossed: &[(Point, i64)]) -> Option<Point> {
     let mut min: Option<Point> = None;
-    let mut distance = std::i64::MAX;
+    let mut distance = i64::MAX;
     for (point, _) in crossed.iter() {
         let current = point.manhattan_distance();
         if current < distance {
@@ -49,7 +48,7 @@ fn closest(crossed: &[(Point, i64)]) -> Option<Point> {
 /// Return the crossing point with the shortest length (second member of the tuple)
 fn shortest(crossed: &[(Point, i64)]) -> Option<(Point, i64)> {
     let mut min: Option<Point> = None;
-    let mut distance = std::i64::MAX;
+    let mut distance = i64::MAX;
     for (point, length) in crossed.iter() {
         if *length < distance {
             min = Some(*point);

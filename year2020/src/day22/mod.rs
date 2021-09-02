@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use std::hash::{BuildHasher, Hash, Hasher};
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
@@ -12,10 +13,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Game;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 22: Crab Combat";
 
-    fn solve(mut game: Self::Input) -> Result<(), Self::Err> {
+    fn solve(mut game: Self::Input) -> Result<()> {
         println!("Normal winner score is {}", game.clone().normal_play());
         println!("Recursive winner score: {}", game.advanced_play());
 
@@ -25,14 +25,6 @@ impl Problem for Day {
 
 /// The number type used to represents the game cards (u8 should be enough, cards are < 50
 type Card = u8;
-
-#[derive(Debug, thiserror::Error)]
-pub enum GameParseError {
-    #[error("Missing a player section in {0}")]
-    MissingPlayer(Box<str>),
-    #[error("Could not parse a card as an integer {0} due to  {1}")]
-    CardParseError(Box<str>, #[source] std::num::ParseIntError),
-}
 
 /// The state of the decks of a game
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -164,7 +156,7 @@ impl Game {
 }
 
 impl FromStr for Game {
-    type Err = GameParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (first_player, second_player) = sep_by_empty_lines(s)
@@ -174,14 +166,14 @@ impl FromStr for Game {
                     .lines()
                     .skip(1)
                     .map(|line| {
-                        line.trim()
-                            .parse::<Card>()
-                            .map_err(|e| GameParseError::CardParseError(line.into(), e))
+                        line.trim().parse::<Card>().wrap_err_with(|| {
+                            format!("Could not parse a card as an integer {}", line)
+                        })
                     })
                     .collect::<Result<VecDeque<Card>, _>>()
             })
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| GameParseError::MissingPlayer(s.into()))?;
+            .ok_or_else(|| eyre!("Missing a player section in {}", s))?;
 
         let first_player = first_player?;
         let second_player: VecDeque<Card> = second_player?;

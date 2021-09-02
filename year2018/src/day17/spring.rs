@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
@@ -136,19 +137,10 @@ impl Scan {
     }
 }
 
-/// An error that happens while parsing a scan
-#[derive(Debug, thiserror::Error)]
-pub enum ScanParseError {
-    #[error("Could not parse number {0} ({1})")]
-    ParseInt(Box<str>, #[source] std::num::ParseIntError),
-    #[error("Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {0}")]
-    BadFormat(Box<str>),
-}
-
 impl FromStr for Scan {
-    type Err = ScanParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         fn split_coordinates<'a>(
             line: &'a str,
             first: &'_ str,
@@ -162,11 +154,11 @@ impl FromStr for Scan {
             Some((a, b.trim().strip_prefix(second)?))
         }
 
-        fn parse_range(str: &str) -> Result<RangeInclusive<i64>, ScanParseError> {
+        fn parse_range(str: &str) -> Result<RangeInclusive<i64>> {
             let mut numbers = str.splitn(2, "..").map(|num| {
                 num.trim()
                     .parse::<i64>()
-                    .map_err(|e| ScanParseError::ParseInt(num.into(), e))
+                    .wrap_err_with(|| format!("Could not parse number {}", num))
             });
 
             let first = numbers.next().unwrap()?; // The iterator has at least one element
@@ -180,14 +172,22 @@ impl FromStr for Scan {
         let mut min = Point::new(i64::MAX, i64::MAX);
         let mut max = Point::new(i64::MIN, i64::MIN);
         let mut tiles: HashMap<Point, Tile> = HashMap::with_capacity(10_000);
-        s.lines().try_for_each(|line| {
+        s.lines().try_for_each(|line| -> Result<()> {
             let (x, y) = {
                 if line.starts_with('x') {
-                    split_coordinates(line, "x=", "y=")
-                        .ok_or_else(|| ScanParseError::BadFormat(line.into()))?
+                    split_coordinates(line, "x=", "y=").ok_or_else(|| {
+                        eyre!(
+                            "Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {}",
+                            line
+                        )
+                    })?
                 } else {
-                    let (y, x) = split_coordinates(line, "y=", "x=")
-                        .ok_or_else(|| ScanParseError::BadFormat(line.into()))?;
+                    let (y, x) = split_coordinates(line, "y=", "x=").ok_or_else(|| {
+                        eyre!(
+                            "Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {}",
+                            line
+                        )
+                    })?;
                     (x, y)
                 }
             };

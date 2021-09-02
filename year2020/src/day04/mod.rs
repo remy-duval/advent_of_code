@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;
@@ -7,10 +8,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = String;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 4: Passport Processing";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let batch = PassportBuilder::parse_many(&data);
         println!(
             "{count} passports have all required fields",

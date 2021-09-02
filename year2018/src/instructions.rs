@@ -2,48 +2,11 @@ use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
-
-use errors::*;
 
 /// The type of an integer in the system
 pub type Int = i64;
-
-/// Errors related to the instructions
-pub mod errors {
-    use super::Int;
-
-    /// Error returned when a register index is out of bound
-    #[derive(Debug, thiserror::Error)]
-    #[error("{0} is out of bounds for a register")]
-    pub struct IndexError(pub(super) Int);
-
-    /// An error that happens when parsing an OpCode from a string
-    #[derive(Debug, thiserror::Error)]
-    #[error("Unknown op code {0}")]
-    pub struct OpCodeParseError(pub(super) Box<str>);
-
-    /// An error that happens when parsing an Instruction from a string
-    #[derive(Debug, thiserror::Error)]
-    pub enum InstructionParseError {
-        #[error(transparent)]
-        OpCodeParseError(#[from] OpCodeParseError),
-        #[error("Could not parse an input Int {0} ({1})")]
-        ParseIntError(Box<str>, #[source] std::num::ParseIntError),
-        #[error("Bad format for a instruction: {0} (expected 'CODE A B C')")]
-        BadFormat(Box<str>),
-    }
-
-    /// An error that happens when executing a program
-    #[derive(Debug, thiserror::Error)]
-    #[error("{line}: {source} caused the program to stop.\n- registers: {reg:?}\n- inst: {inst}")]
-    pub struct ExecutionError {
-        pub(super) source: IndexError,
-        pub(super) line: usize,
-        pub(super) reg: [Int; 6],
-        pub(super) inst: super::Instruction,
-    }
-}
 
 /// A program to execute
 #[derive(Debug, Clone)]
@@ -56,7 +19,7 @@ pub struct Program {
 
 impl Program {
     /// Execute the program until it halts, returning the value of the first register (0)
-    pub fn run(&mut self) -> Result<Int, Box<ExecutionError>> {
+    pub fn run(&mut self) -> Result<Int> {
         loop {
             if self.step()?.is_none() {
                 break Ok(self.registers[0]);
@@ -65,12 +28,12 @@ impl Program {
     }
 
     /// Execute the next step of the program
-    pub fn step(&mut self) -> Result<Option<()>, Box<ExecutionError>> {
+    pub fn step(&mut self) -> Result<Option<()>> {
         self.line = self.next_instruction()?;
         if let Some(instruction) = self.instructions.get(self.line) {
             instruction
                 .apply(&mut self.registers)
-                .map_err(|e| self.error(e))?;
+                .wrap_err_with(|| self.error())?;
             self.registers[self.ip_index] += 1;
             Ok(Some(()))
         } else {
@@ -79,8 +42,8 @@ impl Program {
     }
 
     /// The index of the next instruction to execute for the program
-    pub fn next_instruction(&self) -> Result<usize, Box<ExecutionError>> {
-        index(self.registers[self.ip_index]).map_err(|e| self.error(e))
+    pub fn next_instruction(&self) -> Result<usize> {
+        index(self.registers[self.ip_index]).wrap_err_with(|| self.error())
     }
 
     /// Reset this program to its starting state
@@ -90,13 +53,13 @@ impl Program {
     }
 
     /// Report an error during the program execution
-    fn error(&self, cause: IndexError) -> Box<ExecutionError> {
-        Box::new(ExecutionError {
-            source: cause,
-            line: self.line,
-            reg: self.registers,
-            inst: self.instructions[self.line].clone(),
-        })
+    fn error(&self) -> String {
+        format!(
+            "The program failed on {line}.\n- registers: {reg:?}\n- inst: {inst}",
+            line = self.line,
+            reg = self.registers,
+            inst = self.instructions[self.line].clone(),
+        )
     }
 }
 
@@ -111,7 +74,7 @@ pub struct Instruction {
 
 impl Instruction {
     /// Apply this Instruction to the given registers
-    pub fn apply(&self, reg: &mut [Int]) -> Result<(), IndexError> {
+    pub fn apply(&self, reg: &mut [Int]) -> Result<()> {
         self.code.apply(reg, self.a, self.b, self.c)
     }
 }
@@ -165,7 +128,7 @@ impl OpCode {
     ];
 
     /// Apply this OpCode to the given registers
-    pub fn apply(self, reg: &mut [Int], a: Int, b: Int, c: Int) -> Result<(), IndexError> {
+    pub fn apply(self, reg: &mut [Int], a: Int, b: Int, c: Int) -> Result<()> {
         *get_mut(reg, c)? = match self {
             Self::AddR => *get(reg, a)? + *get(reg, b)?,
             Self::AddI => *get(reg, a)? + b,
@@ -208,24 +171,26 @@ fn equal(a: Int, b: Int) -> Int {
 }
 
 /// Try to convert an [Int](Int) into a [usize](usize) for indexing purpose
-pub fn index(idx: Int) -> Result<usize, IndexError> {
-    usize::try_from(idx).map_err(|_| IndexError(idx))
+pub fn index(idx: Int) -> Result<usize> {
+    usize::try_from(idx).map_err(|_| eyre!("{} is out of bounds for a register", idx))
 }
 
 /// Get the `idx`th element in the registers
-fn get(reg: &[Int], idx: Int) -> Result<&Int, IndexError> {
-    reg.get(index(idx)?).ok_or(IndexError(idx))
+fn get(reg: &[Int], idx: Int) -> Result<&Int> {
+    reg.get(index(idx)?)
+        .ok_or_else(|| eyre!("{} is out of bounds for a register", idx))
 }
 
 /// Get the `idx`th element in the registers, mutable version
-fn get_mut(reg: &mut [Int], idx: Int) -> Result<&mut Int, IndexError> {
-    reg.get_mut(index(idx)?).ok_or(IndexError(idx))
+fn get_mut(reg: &mut [Int], idx: Int) -> Result<&mut Int> {
+    reg.get_mut(index(idx)?)
+        .ok_or_else(|| eyre!("{} is out of bounds for a register", idx))
 }
 
 impl FromStr for Program {
-    type Err = InstructionParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let mut ip_index = 0;
         let instructions: Vec<Instruction> = s
             .lines()
@@ -236,7 +201,7 @@ impl FromStr for Program {
                             ip_index = ip;
                             None
                         }
-                        Err(err) => Some(Err(InstructionParseError::ParseIntError(ip.into(), err))),
+                        Err(_) => Some(Err(eyre!("Could not parse Instruction pointer {}", ip))),
                     }
                 } else {
                     Some(line.parse())
@@ -255,19 +220,24 @@ impl FromStr for Program {
 }
 
 impl FromStr for Instruction {
-    type Err = InstructionParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn parse_int(s: &str) -> Result<Int, InstructionParseError> {
+        fn parse_int(s: &str) -> Result<Int> {
             s.parse()
-                .map_err(|err| InstructionParseError::ParseIntError(s.into(), err))
+                .wrap_err_with(|| format!("Could not parse an input Int {}", s))
         }
 
         let (code, a, b, c) = s
             .split_whitespace()
             .filter(|s| !s.is_empty())
             .collect_tuple::<(_, _, _, _)>()
-            .ok_or_else(|| InstructionParseError::BadFormat(s.into()))?;
+            .ok_or_else(|| {
+                eyre!(
+                    "Bad format for a instruction: {} (expected 'CODE A B C')",
+                    s
+                )
+            })?;
 
         Ok(Self {
             code: code.parse()?,
@@ -279,7 +249,7 @@ impl FromStr for Instruction {
 }
 
 impl FromStr for OpCode {
-    type Err = OpCodeParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.trim() {
@@ -299,7 +269,7 @@ impl FromStr for OpCode {
             "eqir" => Ok(Self::EqIR),
             "eqri" => Ok(Self::EqRI),
             "eqrr" => Ok(Self::EqRR),
-            other => Err(OpCodeParseError(other.into())),
+            other => Err(eyre!("Unknown op code {}", other)),
         }
     }
 }

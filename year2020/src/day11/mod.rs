@@ -21,10 +21,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Ferry;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 11: Seating System";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> color_eyre::Result<()> {
         let first = first_part(data.clone());
 
         println!(

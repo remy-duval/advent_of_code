@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::Result;
 use hashbrown::HashSet;
 
 use commons::parse::SepByEmptyLine;
@@ -9,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = SepByEmptyLine<String>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 6: Custom Customs";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "The total of YES answers for any participant of each group is {}",
             first_part(&data.data)

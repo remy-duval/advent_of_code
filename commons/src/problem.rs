@@ -2,14 +2,11 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::time::Instant;
 
-use anyhow::{anyhow, Result};
+use color_eyre::eyre::{eyre, Result};
 
 pub trait Problem {
     /// The type of the data that is required for the solving the problem
     type Input: FromStr;
-
-    /// The type of the error that could be returned by the problem
-    type Err;
 
     ///  The title of the problem
     const TITLE: &'static str;
@@ -30,7 +27,7 @@ pub trait Problem {
     ///
     /// ### Returns
     /// Result containing any error that happened during the solving process
-    fn solve(data: Self::Input) -> Result<(), Self::Err>;
+    fn solve(data: Self::Input) -> Result<()>;
 }
 
 /// Load the problem data from the given path
@@ -38,7 +35,7 @@ pub trait Problem {
 /// * `input_path` - The path to the input file for this problem
 pub fn load(input_path: PathBuf) -> Result<String> {
     std::fs::read_to_string(&input_path)
-        .map_err(|err| anyhow::anyhow!("Could not read input in '{:?}' due to {}", input_path, err))
+        .map_err(|err| eyre!("Could not read input in '{:?}' due to {}", input_path, err))
 }
 
 /// Solve the problem using the given raw input
@@ -51,17 +48,16 @@ pub fn solve<Day>(input: &str) -> Result<()>
 where
     Day: Problem,
     <<Day as Problem>::Input as FromStr>::Err: std::fmt::Display,
-    <Day as Problem>::Err: std::fmt::Display,
 {
     println!("{}", super::CLEAR_COMMAND);
     println!("{}\n", Day::TITLE);
 
     let time = Instant::now();
-    let input = Day::parse(input).map_err(|err| anyhow!("Parsing failure: {}", err))?;
+    let input = Day::parse(input).map_err(|err| eyre!("Parsing failure: {}", err))?;
     let parsing = time.elapsed();
 
     let solving = Instant::now();
-    let _ = Day::solve(input).map_err(|err| anyhow!("Solving failure: {}", err))?;
+    let _ = Day::solve(input).map_err(|err| eyre!("Solving failure: {}", err))?;
     let solving = solving.elapsed();
     let total = time.elapsed();
 

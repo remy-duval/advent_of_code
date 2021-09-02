@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
+use color_eyre::eyre::{bail, eyre, Report, Result};
 use num_integer::Integer;
 
 use commons::grid::Grid;
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Area;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 18: Settlers of The North Pole";
 
-    fn solve(area: Self::Input) -> Result<(), Self::Err> {
+    fn solve(area: Self::Input) -> Result<()> {
         let (trees, lumberyard) = first_part(area.clone()).trees_and_lumberyards();
         println!(
             "After 10 minutes: {} trees and {} lumberyards: {} resources",
@@ -22,8 +22,8 @@ impl Problem for Day {
             trees * lumberyard
         );
 
-        let second = second_part(area)
-            .ok_or_else(|| anyhow::anyhow!("Could not find the period of the system"))?;
+        let second =
+            second_part(area).ok_or_else(|| eyre!("Could not find the period of the system"))?;
         println!("After one billion minutes: {} resources", second);
 
         Ok(())
@@ -159,23 +159,10 @@ impl Area {
     }
 }
 
-/// An error that happened while parsing the tiles
-#[derive(Debug, thiserror::Error)]
-pub enum AreaParseError {
-    #[error("Tile {tile} in line n°{line} is not '.', '|' or '#'")]
-    BadTile { line: usize, tile: char },
-    #[error("Line n°{line} is of width {actual} instead of expected {expected}")]
-    BadWidth {
-        line: usize,
-        expected: usize,
-        actual: usize,
-    },
-}
-
 impl FromStr for Area {
-    type Err = AreaParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let (width, height) = s.lines().try_fold((0, 0), |(width, height), next| {
             let next_width = next.chars().count();
             if width == 0 {
@@ -183,11 +170,12 @@ impl FromStr for Area {
             } else if next_width == width {
                 Ok((width, height + 1))
             } else {
-                Err(AreaParseError::BadWidth {
-                    line: height + 1,
-                    expected: width,
-                    actual: next_width,
-                })
+                bail!(
+                    "Line n°{line} is of width {actual} instead of expected {expected}",
+                    line = height + 1,
+                    expected = width,
+                    actual = next_width,
+                );
             }
         })?;
 
@@ -196,7 +184,7 @@ impl FromStr for Area {
             line.chars()
                 .enumerate()
                 .try_for_each(|(x, c)| match Tile::from_char(c) {
-                    None => Err(AreaParseError::BadTile { line: y, tile: c }),
+                    None => Err(eyre!("Tile {} in line n°{} is not '.', '|' or '#'", c, y)),
                     Some(tile) => {
                         grid[(x as isize, y as isize)] = tile;
                         Ok(())

@@ -1,8 +1,11 @@
-use commons::parse::LineSep;
-use commons::Problem;
-use hashbrown::HashMap;
 use std::iter::Iterator;
 use std::str::FromStr;
+
+use color_eyre::eyre::{eyre, Report, Result};
+use hashbrown::HashMap;
+
+use commons::parse::LineSep;
+use commons::Problem;
 
 const ORE: &str = "ORE";
 const FUEL: &str = "FUEL";
@@ -12,10 +15,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Reaction>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 14: Space Stoichiometry";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let reactions = as_reaction_map(data.data);
         // Part one
         let cost_for_one_fuel = produce_fuel_from_ore(1, &reactions);
@@ -128,9 +130,9 @@ pub struct Reaction {
 }
 
 impl FromStr for Reaction {
-    type Err = &'static str;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         fn parse_ingredient(data: &str) -> Option<(String, u64)> {
             let mut parsed = data.trim().split(' ').map(|part| part.trim());
             let number: u64 = parsed.next()?.parse().ok()?;
@@ -140,15 +142,20 @@ impl FromStr for Reaction {
         }
 
         let mut split = s.split("=>");
-        let ingredients = split.next().ok_or("Could not find the ingredients")?;
-        let product = split.next().ok_or("Could not find the product")?;
+        let ingredients = split
+            .next()
+            .ok_or_else(|| eyre!("Could not find the ingredients"))?;
+        let product = split
+            .next()
+            .ok_or_else(|| eyre!("Could not find the product"))?;
 
         let ingredients = ingredients
             .split(',')
             .map(|data| parse_ingredient(data))
             .collect::<Option<HashMap<_, _>>>()
-            .ok_or("Could not parse the ingredients")?;
-        let (result, times) = parse_ingredient(product).ok_or("Could not parse the product")?;
+            .ok_or_else(|| eyre!("Could not parse the ingredients"))?;
+        let (result, times) =
+            parse_ingredient(product).ok_or_else(|| eyre!("Could not parse the product"))?;
 
         Ok(Self {
             result,

@@ -1,3 +1,5 @@
+use color_eyre::Result;
+
 use commons::parse::CommaSep;
 use commons::Problem;
 
@@ -18,10 +20,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = CommaSep<u32>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 15: Rambunctious Recitation";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let first = nth_spoken_number(&data.data, FIRST_TURNS);
         println!("The {}th spoken is {}", FIRST_TURNS, first);
 

@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result};
 use hashbrown::{HashMap, HashSet};
 
 use commons::grid::Point;
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Path>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 24: Lobby Layout";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let initial_state = initial_state(data.data);
         println!("Day   0: {:<4} tiles are up", initial_state.len());
 
@@ -129,13 +129,8 @@ impl Path {
     }
 }
 
-/// An error that can happen while parsing directions
-#[derive(Debug, thiserror::Error)]
-#[error("Unknown direction in line '{0}'")]
-pub struct ParseDirectionError(Box<str>);
-
 impl FromStr for Path {
-    type Err = ParseDirectionError;
+    type Err = Report;
 
     fn from_str(line: &str) -> Result<Self, Self::Err> {
         let mut chars = line.chars();
@@ -156,7 +151,7 @@ impl FromStr for Path {
                 }),
                 _ => None,
             }
-            .ok_or_else(|| ParseDirectionError(line.into()))?;
+            .ok_or_else(|| eyre!("Unknown direction in line '{}'", line))?;
 
             path.push(direction);
         }

@@ -1,3 +1,5 @@
+use color_eyre::eyre::Result;
+
 use commons::parse::LineSep;
 use commons::Problem;
 
@@ -8,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<input::Bot>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 23: Experimental Emergency Teleportation";
 
-    fn solve(bots: Self::Input) -> Result<(), Self::Err> {
+    fn solve(bots: Self::Input) -> Result<()> {
         println!(
             "The bots with the largest radius has {} bots in range",
             first_part(&bots.data)

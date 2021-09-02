@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use hashbrown::HashMap;
 use itertools::Itertools;
 
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = IntCodeError;
     const TITLE: &'static str = "Day 11: Space Police";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let memory = data.data;
         let mut hull: HashMap<Point, u8> = HashMap::new();
         println!("\n{}\n", paint_hull(&memory, &mut hull)?);

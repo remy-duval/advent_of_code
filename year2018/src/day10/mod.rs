@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashSet;
 use itertools::Itertools;
 
@@ -11,10 +12,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Message;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 10: The Stars Align";
 
-    fn solve(message: Self::Input) -> Result<(), Self::Err> {
+    fn solve(message: Self::Input) -> Result<()> {
         let (minimum, time) = message.into_minimum_size();
         println!("The message took {}s to appear, it is:\n{}", time, minimum);
 
@@ -94,7 +94,7 @@ impl Message {
 }
 
 impl FromStr for Message {
-    type Err = LightParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(s.lines().map(str::parse).try_collect()?))
@@ -138,26 +138,16 @@ impl Light {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum LightParseError {
-    #[error("Bad format for light 'position=POINT velocity=POINT', got {0}")]
-    BadLight(Box<str>),
-    #[error("Bad format for point '<X, Y>>', got {0}")]
-    BadPoint(Box<str>),
-    #[error("Can't parse a point coordinate {0} ({1})")]
-    IntParse(Box<str>, std::num::ParseIntError),
-}
-
 impl FromStr for Light {
-    type Err = LightParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn parse_int(int: &str) -> Result<i64, LightParseError> {
+    fn from_str(s: &str) -> Result<Self> {
+        fn parse_int(int: &str) -> Result<i64> {
             int.parse()
-                .map_err(|e| LightParseError::IntParse(int.into(), e))
+                .wrap_err_with(|| format!("Can't parse a point coordinate {}", int))
         }
 
-        fn parse_point(point: &str) -> Result<Point, LightParseError> {
+        fn parse_point(point: &str) -> Result<Point> {
             let (x, y) = point
                 .trim()
                 .strip_prefix('<')
@@ -168,7 +158,7 @@ impl FromStr for Light {
                         .map(|coord| parse_int(coord.trim()))
                         .collect_tuple::<(_, _)>()
                 })
-                .ok_or_else(|| LightParseError::BadPoint(point.into()))?;
+                .ok_or_else(|| eyre!("Bad format for point '<X, Y>>', got {}", point))?;
 
             Ok(Point::new(x?, y?))
         }
@@ -181,7 +171,12 @@ impl FromStr for Light {
                     .map(parse_point)
                     .collect_tuple::<(_, _)>()
             })
-            .ok_or_else(|| LightParseError::BadLight(s.into()))?;
+            .ok_or_else(|| {
+                eyre!(
+                    "Bad format for light 'position=POINT velocity=POINT', got {}",
+                    s
+                )
+            })?;
 
         Ok(Self {
             position: pos?,

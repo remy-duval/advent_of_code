@@ -2,6 +2,7 @@ use std::cmp::Reverse;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;
@@ -218,17 +219,6 @@ impl Units {
     }
 }
 
-/// An error that happens when parsing the battle
-#[derive(Debug, thiserror::Error)]
-pub enum ParseError {
-    #[error("Unknown section for the battle data: {0}")]
-    UnknownSection(Box<str>),
-    #[error("Bad format for a units line: {0}")]
-    UnitFormat(Box<str>),
-    #[error("Could not parse an integer '{0}' ({1})")]
-    IntParse(Box<str>, #[source] std::num::ParseIntError),
-}
-
 impl Display for Battle {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         fn elem(index: usize, elements: &[String]) -> &str {
@@ -269,9 +259,9 @@ impl Display for Battle {
 }
 
 impl FromStr for Battle {
-    type Err = ParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let mut immune_system = Vec::with_capacity(10);
         let mut infection = Vec::with_capacity(10);
         let mut elements = Vec::with_capacity(10);
@@ -286,7 +276,7 @@ impl FromStr for Battle {
                     infection.push(parse_unit(line, &mut elements)?);
                 }
             } else {
-                return Err(ParseError::UnknownSection(section.into()));
+                return Err(eyre!("Unknown section for the battle data: {}", section));
             }
         }
 
@@ -303,8 +293,8 @@ impl FromStr for Battle {
 }
 
 /// Parse a unit, filling the elements array with newly discovered elements
-fn parse_unit(line: &str, elements: &mut Vec<String>) -> Result<Units, ParseError> {
-    fn inner(s: &str, elements: &mut Vec<String>) -> Option<Result<Units, ParseError>> {
+fn parse_unit(line: &str, elements: &mut Vec<String>) -> Result<Units> {
+    fn inner(s: &str, elements: &mut Vec<String>) -> Option<Result<Units>> {
         let (count, s) = s.splitn(2, ' ').collect_tuple::<(_, _)>()?;
         let s = s.strip_prefix("units each with")?.trim_start();
         let (hp, s) = s.splitn(2, ' ').collect_tuple::<(_, _)>()?;
@@ -363,15 +353,15 @@ fn parse_unit(line: &str, elements: &mut Vec<String>) -> Result<Units, ParseErro
         }))
     }
 
-    inner(line, elements).unwrap_or_else(|| Err(ParseError::UnitFormat(line.into())))
+    inner(line, elements).unwrap_or_else(|| Err(eyre!("Bad format for a units line: {}", line)))
 }
 
 /// Parse a number for a unit, wrapping any error in a ParseError
-fn parse_number(number: &str) -> Result<Int, ParseError> {
+fn parse_number(number: &str) -> Result<Int> {
     number
         .trim()
         .parse()
-        .map_err(|err| ParseError::IntParse(number.into(), err))
+        .wrap_err_with(|| format!("Could not parse an integer '{0}'", number))
 }
 
 /// Find the index of the given element in the element vector

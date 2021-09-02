@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::Result;
 use itertools::Itertools;
 
 use commons::Problem;
@@ -8,10 +9,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Rules;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 14: Chocolate Charts";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "The last ten numbers are {}",
             first_part(data.full_number())

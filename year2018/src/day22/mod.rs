@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
+use color_eyre::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
 use commons::Problem;
@@ -13,15 +14,14 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Cavern;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 22: Mode Maze";
 
-    fn solve(mut cavern: Self::Input) -> Result<(), Self::Err> {
+    fn solve(mut cavern: Self::Input) -> Result<()> {
         let risk = cavern.risk_level();
         println!("The total danger level in the maze is {}", risk);
 
         let shortest = shortest_path(&mut cavern)
-            .ok_or_else(|| anyhow::anyhow!("Could not find the shortest path to the target"))?;
+            .ok_or_else(|| eyre!("Could not find the shortest path to the target"))?;
         println!("The shortest path to the target is {}", shortest);
 
         Ok(())

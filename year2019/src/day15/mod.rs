@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use color_eyre::eyre::{eyre, Result};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
@@ -13,16 +14,11 @@ const FRAME_DELAY: u64 = 0;
 
 pub struct Day;
 
-#[derive(Debug, thiserror::Error)]
-#[error("Breadth first search failed for: {0}")]
-pub struct BfsError(&'static str);
-
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = BfsError;
     const TITLE: &'static str = "Day 15: Oxygen System";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let memory = data.data;
         let map = explore_map(&memory, true);
 
@@ -44,22 +40,24 @@ impl Problem for Day {
     }
 }
 
-fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize), BfsError> {
+fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize)> {
     let path = Vec::from(
         bfs(Point::default(), map, |p, _| {
             matches!(map.get(&p), Some(Tile::OxygenSystem))
         })
-        .ok_or(BfsError("path to the oxygen "))?,
+        .ok_or_else(|| eyre!("Breadth first search failed for path to the oxygen"))?,
     );
     let oxygen = Direction::compute_movement(Point::default(), &path);
 
     Ok((oxygen, path.len()))
 }
 
-fn second_part(map: &HashMap<Point, Tile>, oxygen: Point) -> Result<usize, BfsError> {
+fn second_part(map: &HashMap<Point, Tile>, oxygen: Point) -> Result<usize> {
     let walkable_tiles = map.iter().filter(|(_, tile)| **tile != Tile::Wall).count();
-    let path = bfs(oxygen, &map, |_, visited| visited.len() >= walkable_tiles)
-        .ok_or(BfsError("The longest path to fill with oxygen"))?;
+    let path =
+        bfs(oxygen, &map, |_, visited| visited.len() >= walkable_tiles).ok_or_else(|| {
+            eyre!("Breadth first search failed for the longest path to fill with oxyge")
+        })?;
 
     Ok(path.len())
 }

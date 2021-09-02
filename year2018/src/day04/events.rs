@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
 /// (Month, Day)
@@ -50,73 +51,51 @@ pub enum Event {
     Change(u16),
 }
 
-/// An error that happened while parsing a timed event
-#[derive(Debug, thiserror::Error)]
-pub enum TimedEventParseError {
-    #[error("Could not parse the event: {0}")]
-    Event(#[from] EventParseError),
-    #[error("Could not parse the timestamp: {0}")]
-    Timestamp(#[from] TimestampParseError),
-    #[error("Bad format for: [<TIMESTAMP>] <EVENT>, got {0}")]
-    BadFormat(Box<str>),
-}
-
-/// An error that happened while parsing a timestamp
-#[derive(Debug, thiserror::Error)]
-pub enum TimestampParseError {
-    #[error("Could not parse number {0} ({1})")]
-    NumberParseError(Box<str>, #[source] std::num::ParseIntError),
-    #[error("Bad format for a timestamp <YEAR>-<MONTH>-<DAY> <HOUR>:<MINUTES>, got {0}")]
-    BadFormat(Box<str>),
-}
-
-/// An error that happened while parsing an event
-#[derive(Debug, thiserror::Error)]
-pub enum EventParseError {
-    #[error("Unknown event {0}")]
-    UnknownEvent(Box<str>),
-    #[error("Could not guard ID {0} ({1})")]
-    IdParse(Box<str>, #[source] std::num::ParseIntError),
-}
-
 impl FromStr for Events {
-    type Err = TimedEventParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         Ok(Self::new(s.lines().map(|line| line.parse()).try_collect()?))
     }
 }
 
 impl FromStr for TimedEvent {
-    type Err = TimedEventParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let (timestamp, event) = s
             .splitn(2, ']')
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| TimedEventParseError::BadFormat(s.into()))?;
+            .ok_or_else(|| eyre!("Bad format for: [<TIMESTAMP>] <EVENT>, got {}", s))?;
 
         Ok(Self {
-            timestamp: timestamp.parse()?,
-            event: event.parse()?,
+            timestamp: timestamp
+                .parse()
+                .wrap_err("Could not parse the timestamp")?,
+            event: event.parse().wrap_err("Could not parse the event")?,
         })
     }
 }
 
 impl FromStr for Timestamp {
-    type Err = TimestampParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn parse_u8(s: &str) -> Result<u8, TimestampParseError> {
+    fn from_str(s: &str) -> Result<Self> {
+        fn parse_u8(s: &str) -> Result<u8> {
             s.parse()
-                .map_err(|err| TimestampParseError::NumberParseError(s.into(), err))
+                .wrap_err_with(|| format!("Could not parse number {}", s))
         }
 
-        fn split_two(s: &str, sep: char) -> Result<(&str, &str), TimestampParseError> {
+        fn split_two(s: &str, sep: char) -> Result<(&str, &str)> {
             s.trim()
                 .splitn(2, sep)
                 .collect_tuple::<(_, _)>()
-                .ok_or_else(|| TimestampParseError::BadFormat(s.into()))
+                .ok_or_else(|| {
+                    eyre!(
+                        "Bad format for a timestamp <YEAR>-<MONTH>-<DAY> <HOUR>:<MINUTES>, got {}",
+                        s
+                    )
+                })
         }
 
         let s = s.trim().trim_start_matches("[1518-").trim_end_matches(']');
@@ -133,15 +112,15 @@ impl FromStr for Timestamp {
 }
 
 impl FromStr for Event {
-    type Err = EventParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn parse_guard(guard: &str) -> Option<Result<u16, EventParseError>> {
+    fn from_str(s: &str) -> Result<Self> {
+        fn parse_guard(guard: &str) -> Option<Result<u16>> {
             let id = guard
                 .strip_prefix("Guard #")?
                 .strip_suffix(" begins shift")?
                 .parse()
-                .map_err(|err| EventParseError::IdParse(guard.into(), err));
+                .wrap_err_with(|| format!("Could not parse guard ID {}", guard));
 
             Some(id)
         }
@@ -150,7 +129,7 @@ impl FromStr for Event {
             "falls asleep" => Ok(Event::Sleep),
             "wakes up" => Ok(Event::WakeUp),
             other => parse_guard(other).map_or_else(
-                || Err(EventParseError::UnknownEvent(other.into())),
+                || Err(eyre!("Unknown event {}", other)),
                 |result| result.map(Event::Change),
             ),
         }

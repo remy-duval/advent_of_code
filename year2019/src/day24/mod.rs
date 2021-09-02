@@ -4,6 +4,7 @@ use std::{
     str::FromStr,
 };
 
+use color_eyre::eyre::Result;
 use itertools::Itertools;
 
 use commons::Problem;
@@ -12,10 +13,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Bugs;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 24: Planet of Discord";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let result = first_repeat(data);
         println!("{}", result);
         println!("Biodiversity rating is {}", result.biodiversity_rating());

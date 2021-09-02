@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use itertools::iproduct;
 
 use commons::grid::Grid;
@@ -7,10 +8,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = isize;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 11: Chronal Charge";
 
-    fn solve(serial_number: Self::Input) -> Result<(), Self::Err> {
+    fn solve(serial_number: Self::Input) -> Result<()> {
         let grid = PartialSumGrid::new(serial_number);
         let (x, y) = first_part(&grid);
         println!("The 3x3 square with the highest power is {},{}", x, y);

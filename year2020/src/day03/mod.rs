@@ -1,15 +1,16 @@
 use std::str::FromStr;
 
+use color_eyre::Result;
+
 use commons::Problem;
 
 pub struct Day;
 
 impl Problem for Day {
     type Input = Forest;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 3: Toboggan Trajectory";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "Using a slope of (3, 1), you will encounter {} trees",
             first_part(&data)

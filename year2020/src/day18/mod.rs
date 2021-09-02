@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
+
 use commons::parse::LineSep;
 use commons::Problem;
 
@@ -7,10 +9,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Operation>;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 18: Operation Order";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let tokens = data.data;
         let first = first_part(&tokens)?;
         println!("No precedence: The sum of each line is {}", first);
@@ -22,11 +23,11 @@ impl Problem for Day {
     }
 }
 
-fn first_part(tokens: &[Operation]) -> anyhow::Result<u64> {
+fn first_part(tokens: &[Operation]) -> Result<u64> {
     tokens.iter().map(Operation::evaluate_no_precedence).sum()
 }
 
-fn second_part(tokens: &[Operation]) -> anyhow::Result<u64> {
+fn second_part(tokens: &[Operation]) -> Result<u64> {
     tokens
         .iter()
         .map(Operation::evaluate_addition_has_precedence)
@@ -39,7 +40,7 @@ pub struct Operation(Vec<Token>);
 
 impl Operation {
     /// Evaluate the operation with no precedence difference between + and *
-    pub fn evaluate_no_precedence(&self) -> anyhow::Result<u64> {
+    pub fn evaluate_no_precedence(&self) -> Result<u64> {
         self.shunting_yard(|op| match op {
             Operator::Plus => 2,
             Operator::Mul => 2,
@@ -49,7 +50,7 @@ impl Operation {
     }
 
     /// Evaluate the operation with a higher precedence for + than for *
-    pub fn evaluate_addition_has_precedence(&self) -> anyhow::Result<u64> {
+    pub fn evaluate_addition_has_precedence(&self) -> Result<u64> {
         self.shunting_yard(|op| match op {
             Operator::Plus => 3,
             Operator::Mul => 2,
@@ -68,7 +69,7 @@ impl Operation {
     /// * `Err(err)` If there was no number left in the input stack at the end
     ///
     /// [Shunting Yard algorithm]: https://en.wikipedia.org/wiki/Shunting-yard_algorithm
-    fn shunting_yard(&self, precedence: impl Fn(Operator) -> u8) -> anyhow::Result<u64> {
+    fn shunting_yard(&self, precedence: impl Fn(Operator) -> u8) -> Result<u64> {
         // A closure that pop operators from the stack and compute their result on the input
         // Return an error if an operation went wrong
         let pop_operators =
@@ -80,7 +81,7 @@ impl Operation {
                     } else if let Some(res) = op.binary_op(operands.pop().zip(operands.pop())) {
                         operands.push(res);
                     } else {
-                        return Err(anyhow::anyhow!("Bad operator call {:?}", op));
+                        return Err(eyre!("Bad operator call {:?}", op));
                     }
                 }
 
@@ -110,7 +111,7 @@ impl Operation {
         if operands.len() == 1 {
             Ok(operands[0])
         } else {
-            Err(anyhow::anyhow!(
+            Err(eyre!(
                 "Not exactly 1 element at the end in the operands: {:?}",
                 operands
             ))
@@ -119,7 +120,7 @@ impl Operation {
 }
 
 impl FromStr for Operation {
-    type Err = TokenParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut tokens = Vec::with_capacity(20);
@@ -172,7 +173,7 @@ enum Token {
 
 impl Token {
     /// Parse the next token in an input, returning the token and the rest of the input
-    fn parse(current: &str) -> Result<(Token, &str), TokenParseError> {
+    fn parse(current: &str) -> Result<(Token, &str)> {
         let last_numeric = current
             .char_indices()
             .take_while(|(_, c)| c.is_ascii_digit())
@@ -181,29 +182,23 @@ impl Token {
 
         if let Some(last_numeric) = last_numeric {
             let (number, rest) = current.split_at(last_numeric);
-            match number.parse::<u64>() {
-                Ok(number) => Ok((Token::Number(number), rest)),
-                Err(err) => Err(TokenParseError::ParseNumberError(number.into(), err)),
-            }
+            number
+                .parse::<u64>()
+                .map(|number| (Token::Number(number), rest))
+                .wrap_err_with(|| format!("Number token parse error {}", number))
         } else {
             match current.chars().next() {
                 Some('+') => Ok((Token::Operator(Operator::Plus), &current[1..])),
                 Some('*') => Ok((Token::Operator(Operator::Mul), &current[1..])),
                 Some('(') => Ok((Token::Operator(Operator::OpenParen), &current[1..])),
                 Some(')') => Ok((Token::Operator(Operator::ClosingParen), &current[1..])),
-                _ => Err(TokenParseError::UnknownToken(current.into())),
+                _ => Err(eyre!(
+                    "Expected token to be number, +, *, ( or ), but was {}",
+                    current
+                )),
             }
         }
     }
-}
-
-/// An error that can happen while lexing the operations
-#[derive(Debug, thiserror::Error)]
-pub enum TokenParseError {
-    #[error("Expected token to be number, +, *, ( or ), but was {0}")]
-    UnknownToken(Box<str>),
-    #[error("Number token parse error {0} (due to {1})")]
-    ParseNumberError(Box<str>, #[source] std::num::ParseIntError),
 }
 
 #[cfg(test)]

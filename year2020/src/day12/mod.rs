@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{ensure, eyre, Report, Result, WrapErr};
+
 use commons::grid::{Direction, Point};
 use commons::parse::LineSep;
 use commons::Problem;
@@ -8,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Instruction>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 12: Rain Risk";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let first = first_part(&data.data);
 
         println!(
@@ -119,51 +120,42 @@ pub enum Instruction {
     RotateRight(i64),
 }
 
-/// An error that can happen when parsing an instruction
-#[derive(Debug, thiserror::Error)]
-pub enum ParseInstructionError {
-    #[error("Not enough characters to parse an instruction")]
-    BadFormat,
-    #[error("Instruction type is not known: {0}")]
-    UnknownInstruction(char),
-    #[error("Could not parse the instruction argument because {0}")]
-    ParseDigitError(#[from] std::num::ParseIntError),
-    #[error("A rotation argument should be a multiple of 90 degrees, not {0}")]
-    NonWholeRotation(i64),
-}
-
 impl FromStr for Instruction {
-    type Err = ParseInstructionError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if !s.is_char_boundary(1) {
-            Err(ParseInstructionError::BadFormat)
-        } else {
-            let (instruction, argument) = s.split_at(1);
-            let argument: i64 = argument.parse()?;
-            match instruction.chars().next() {
-                None => Err(ParseInstructionError::BadFormat),
-                Some('N') => Ok(Instruction::Move(Direction::North, argument)),
-                Some('S') => Ok(Instruction::Move(Direction::South, argument)),
-                Some('E') => Ok(Instruction::Move(Direction::East, argument)),
-                Some('W') => Ok(Instruction::Move(Direction::West, argument)),
-                Some('F') => Ok(Instruction::Forward(argument)),
-                Some('R') => {
-                    if argument % 90 != 0 {
-                        Err(ParseInstructionError::NonWholeRotation(argument))
-                    } else {
-                        Ok(Instruction::RotateRight(argument / 90))
-                    }
-                }
-                Some('L') => {
-                    if argument % 90 != 0 {
-                        Err(ParseInstructionError::NonWholeRotation(argument))
-                    } else {
-                        Ok(Instruction::RotateLeft(argument / 90))
-                    }
-                }
-                Some(other) => Err(ParseInstructionError::UnknownInstruction(other)),
+    fn from_str(s: &str) -> Result<Self> {
+        ensure!(
+            s.is_char_boundary(1),
+            "Not enough characters to parse an instruction"
+        );
+        let (instruction, argument) = s.split_at(1);
+        let argument: i64 = argument
+            .parse()
+            .wrap_err("Could not parse the instruction argument")?;
+        match instruction.chars().next() {
+            None => Err(eyre!("Not enough characters to parse an instruction")),
+            Some('N') => Ok(Instruction::Move(Direction::North, argument)),
+            Some('S') => Ok(Instruction::Move(Direction::South, argument)),
+            Some('E') => Ok(Instruction::Move(Direction::East, argument)),
+            Some('W') => Ok(Instruction::Move(Direction::West, argument)),
+            Some('F') => Ok(Instruction::Forward(argument)),
+            Some('R') => {
+                ensure!(
+                    argument % 90 == 0,
+                    "A rotation argument should be a multiple of 90 degrees, not {}",
+                    argument
+                );
+                Ok(Instruction::RotateRight(argument / 90))
             }
+            Some('L') => {
+                ensure!(
+                    argument % 90 == 0,
+                    "A rotation argument should be a multiple of 90 degrees, not {}",
+                    argument
+                );
+                Ok(Instruction::RotateLeft(argument / 90))
+            }
+            Some(other) => Err(eyre!("Instruction type is not known: {}", other)),
         }
     }
 }

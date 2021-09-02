@@ -1,3 +1,4 @@
+use color_eyre::eyre::Result;
 use itertools::Itertools;
 
 use commons::Problem;
@@ -8,10 +9,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 7: Amplification Circuit";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "The best output with single cycle is {}",
             single_loop(&data.data)

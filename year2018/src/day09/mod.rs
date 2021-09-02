@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::Problem;
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Rules;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 9: Marble Mania";
 
-    fn solve(mut rules: Self::Input) -> Result<(), Self::Err> {
+    fn solve(mut rules: Self::Input) -> Result<()> {
         println!("Part 1: The winning score is {}", winning_score(&rules));
         rules.points *= 100;
         println!("Part 2: The winning score is {}", winning_score(&rules));
@@ -38,22 +38,13 @@ pub struct Rules {
     points: usize,
 }
 
-/// An error that happens when parsing the rules of the game
-#[derive(Debug, thiserror::Error)]
-pub enum RulesParseError {
-    #[error("Expected '<PLAYERS> players; last marble is worth <POINTS> points', got {0}")]
-    BadFormat(Box<str>),
-    #[error("Could not parse number {0} ({1})")]
-    ParseIntError(Box<str>, std::num::ParseIntError),
-}
-
 impl FromStr for Rules {
-    type Err = RulesParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn parse_int(int: &str) -> Result<usize, RulesParseError> {
+    fn from_str(s: &str) -> Result<Self> {
+        fn parse_int(int: &str) -> Result<usize> {
             int.parse()
-                .map_err(|e| RulesParseError::ParseIntError(int.into(), e))
+                .wrap_err_with(|| format!("Could not parse number {}", int))
         }
 
         let (players, points) = s
@@ -64,7 +55,12 @@ impl FromStr for Rules {
                     .map(|part| parse_int(part.trim()))
                     .collect_tuple::<(_, _)>()
             })
-            .ok_or_else(|| RulesParseError::BadFormat(s.into()))?;
+            .ok_or_else(|| {
+                eyre!(
+                    "Expected '<PLAYERS> players; last marble is worth <POINTS> points', got {}",
+                    s
+                )
+            })?;
 
         Ok(Self {
             players: players?,

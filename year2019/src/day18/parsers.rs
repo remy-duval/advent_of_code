@@ -1,10 +1,13 @@
 //! All the methods for interpreting the map in a suitable way for the shortest path finding
 
-use commons::grid::{Direction, Point};
-use hashbrown::HashMap;
-use itertools::Itertools;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
+
+use color_eyre::eyre::{eyre, Report, Result};
+use hashbrown::HashMap;
+use itertools::Itertools;
+
+use commons::grid::{Direction, Point};
 
 use super::{HallWay, Keys};
 
@@ -248,14 +251,14 @@ enum Tile {
 }
 
 impl TryFrom<char> for Tile {
-    type Error = ();
+    type Error = Report;
 
-    fn try_from(c: char) -> Result<Self, Self::Error> {
+    fn try_from(c: char) -> Result<Self> {
         match c {
             '.' | '@' => Ok(Tile::Empty(c)),
             c if c.is_ascii_uppercase() => Ok(Tile::Door(c)),
             c if c.is_ascii_lowercase() => Ok(Tile::Key(c)),
-            _ => Err(()),
+            _ => Err(eyre!("Unknown tile {}", c)),
         }
     }
 }

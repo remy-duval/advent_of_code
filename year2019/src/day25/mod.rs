@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use color_eyre::eyre::{eyre, Result};
 use itertools::Itertools;
 
 use commons::Problem;
@@ -13,10 +14,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 25: Cryostasis";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let mut line = String::new();
         loop {
             println!("Mode ? (options are manual / script)");
@@ -36,7 +36,7 @@ impl Problem for Day {
                         println!("Finding the key code took {}s", elapsed.as_secs_f64());
                         Ok(())
                     } else {
-                        Err(anyhow::anyhow!("Could not find the key code at the end"))
+                        Err(eyre!("Could not find the key code at the end"))
                     };
                 }
                 _ => println!("Unrecognized : {}", line),

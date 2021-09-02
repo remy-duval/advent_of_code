@@ -1,6 +1,7 @@
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
@@ -12,15 +13,14 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = Tickets;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 16: Ticket Translation";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!("The ticket scanning error rate is {}", data.error_rate);
 
         let headers = data
             .find_headers()
-            .ok_or_else(|| anyhow::anyhow!("Could not find the headers for the tickets"))?;
+            .ok_or_else(|| eyre!("Could not find the headers for the tickets"))?;
 
         data.print_ticket(&headers)?;
 
@@ -134,67 +134,61 @@ impl Rule {
     }
 }
 
-/// An error that could be thrown when parsing a ticket
-#[derive(Debug, thiserror::Error)]
-pub enum ParseError {
-    #[error("Expected three blocks: rules, ticket and nearby tickets, but got {0}")]
-    MissingBlock(Box<str>),
-    #[error("Expected rules for the tickets, got {0}")]
-    BadRulesSection(Box<str>),
-    #[error("Expected 'your ticket:' followed by a comma separated numbers, got {0}")]
-    BadTicketSection(Box<str>),
-    #[error("Expected 'nearby tickets:' followed by comma separated numbers per line, got {0}")]
-    BadNearbySection(Box<str>),
-    #[error("Failed to parse a string into an int: {0} ({1})")]
-    NumberFormat(Box<str>, std::num::ParseIntError),
-}
-
 impl FromStr for Rule {
-    type Err = ParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn parse_range(s: &str) -> Result<RangeInclusive<u16>, ParseError> {
+    fn from_str(s: &str) -> Result<Self> {
+        fn parse_range(s: &str) -> Result<RangeInclusive<u16>> {
             let (from, to) = s
                 .split_once('-')
-                .ok_or_else(|| ParseError::BadRulesSection(s.into()))?;
+                .ok_or_else(|| eyre!("Expected rules for the tickets, got {}", s))?;
 
             Ok(parse_int(from)?..=parse_int(to)?)
         }
 
         let (first, second) = s
             .split_once("or")
-            .ok_or_else(|| ParseError::BadRulesSection(s.into()))?;
+            .ok_or_else(|| eyre!("Expected rules for the tickets, got {}", s))?;
 
         Ok(Rule(parse_range(first)?, parse_range(second)?))
     }
 }
 
 impl FromStr for Tickets {
-    type Err = ParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let (rule_section, ticket, others) = sep_by_empty_lines(s)
             .collect_tuple::<(_, _, _)>()
-            .ok_or_else(|| ParseError::MissingBlock(s.into()))?;
+            .ok_or_else(|| {
+                eyre!(
+                    "Expected three blocks: rules, ticket and nearby tickets, but got {}",
+                    s
+                )
+            })?;
 
-        let ticket: Vec<_> = parse_line(
-            ticket
-                .strip_prefix("your ticket:")
-                .ok_or_else(|| ParseError::BadTicketSection(ticket.into()))?,
-        )?;
+        let ticket: Vec<_> = parse_line(ticket.strip_prefix("your ticket:").ok_or_else(|| {
+            eyre!(
+                "Expected 'your ticket:' followed by a comma separated numbers, got {}",
+                ticket
+            )
+        })?)?;
 
         let mut rules = HashMap::with_capacity(ticket.len());
         for line in rule_section.lines() {
             let (name, rule) = line
                 .split_once(':')
-                .ok_or_else(|| ParseError::BadRulesSection(rule_section.into()))?;
+                .ok_or_else(|| eyre!("Expected rules for the tickets, got {}", s))?;
 
             rules.insert(name.to_owned(), rule.parse::<Rule>()?);
         }
 
-        let nearby = others
-            .strip_prefix("nearby tickets:")
-            .ok_or_else(|| ParseError::BadNearbySection(others.into()))?;
+        let nearby = others.strip_prefix("nearby tickets:").ok_or_else(|| {
+            eyre!(
+                "Expected 'nearby tickets:' followed by comma separated numbers per line, got {}",
+                others
+            )
+        })?;
 
         let (valid, error_rate) = parse_valid_tickets(nearby, ticket.len(), &rules)?;
 
@@ -208,14 +202,14 @@ impl FromStr for Tickets {
 }
 
 /// Parse an integer with a ParseError
-fn parse_int(s: &str) -> Result<u16, ParseError> {
+fn parse_int(s: &str) -> Result<u16> {
     s.trim()
         .parse()
-        .map_err(|e| ParseError::NumberFormat(s.into(), e))
+        .wrap_err_with(|| format!("Failed to parse a string into an int: {}", s))
 }
 
 /// Parse a comma separated line with a ParseError
-fn parse_line(s: &str) -> Result<Vec<u16>, ParseError> {
+fn parse_line(s: &str) -> Result<Vec<u16>> {
     s.split(',')
         .filter(|l| !l.is_empty())
         .map(parse_int)
@@ -227,7 +221,7 @@ fn parse_valid_tickets(
     s: &str,
     width: usize,
     rules: &HashMap<String, Rule>,
-) -> Result<(Grid<u16>, u16), ParseError> {
+) -> Result<(Grid<u16>, u16)> {
     let mut others = Grid::new(width, 0);
     let mut error_rate = 0;
     for line in s.lines().filter(|line| !line.is_empty()) {

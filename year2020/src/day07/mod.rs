@@ -1,3 +1,4 @@
+use color_eyre::eyre::{eyre, Result, WrapErr};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = String;
-    type Err = RuleParseError;
     const TITLE: &'static str = "Day 7: Handy Haversacks";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let rules = parse_rules(&data)?;
         println!(
             "{bags} contains a {wanted} bag",
@@ -34,14 +34,6 @@ impl Problem for Day {
 type Bag<'a> = &'a str;
 type BagRule<'a> = HashMap<Bag<'a>, u32>;
 type Rules<'a> = HashMap<Bag<'a>, BagRule<'a>>;
-
-#[derive(Debug, thiserror::Error)]
-pub enum RuleParseError {
-    #[error("Missing element in the string for a rule")]
-    MissingElement(String),
-    #[error("Could not parse a number of bad in the rule")]
-    DigitError(String, std::num::ParseIntError),
-}
 
 /// Find the number of bags that can contain the wanted one (recursively)
 fn first_part<'a>(all_rules: &Rules<'a>) -> usize {
@@ -117,14 +109,14 @@ fn count_bags_inside<'a>(
     }
 }
 
-fn parse_rules(raw: &str) -> Result<Rules<'_>, RuleParseError> {
+fn parse_rules(raw: &str) -> Result<Rules<'_>> {
     raw.lines()
         .map(|line| {
             let line = line.trim_end_matches('.');
             let (bag, rules) = line
                 .split_once("bags contain")
                 .map(|(a, b)| (a.trim(), b.trim()))
-                .ok_or_else(|| RuleParseError::MissingElement(line.to_owned()))?;
+                .ok_or_else(|| eyre!("Missing element in the string for a rule {}", line))?;
 
             let rules = if rules == "no other bags" {
                 HashMap::new()
@@ -136,15 +128,17 @@ fn parse_rules(raw: &str) -> Result<Rules<'_>, RuleParseError> {
                         let (number, bag) = rule
                             .split_once(' ')
                             .map(|(a, b)| (a.trim(), b.trim()))
-                            .ok_or_else(|| RuleParseError::MissingElement(rule.to_owned()))?;
+                            .ok_or_else(|| {
+                                eyre!("Missing element in the string for a rule {}", rule)
+                            })?;
 
-                        let number: u32 = number
-                            .parse()
-                            .map_err(|err| RuleParseError::DigitError(rule.to_owned(), err))?;
+                        let number = number.parse::<u32>().wrap_err_with(|| {
+                            format!("Could not parse a number of bag in the rule {}", rule)
+                        })?;
 
                         Ok((bag, number))
                     })
-                    .collect::<Result<_, _>>()?
+                    .collect::<Result<_>>()?
             };
 
             Ok((bag, rules))

@@ -5,6 +5,7 @@ use std::{
     str::FromStr,
 };
 
+use color_eyre::eyre::{eyre, Result};
 use itertools::Itertools;
 
 use commons::grid::{Direction, Point};
@@ -16,13 +17,12 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 17: Set and Forget";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let memory = data.data;
         let scaffold = Scaffold::from_camera_program(&memory, true)
-            .ok_or_else(|| anyhow::anyhow!("The camera program should have worked !"))?;
+            .ok_or_else(|| eyre!("The camera program should have worked !"))?;
 
         // First part
         let calibration = scaffold.intersections_sum();
@@ -31,8 +31,8 @@ impl Problem for Day {
         // Second part
         let path = scaffold.straight_ahead_path();
         println!("The path is {}", path.iter().join(","));
-        let (main, a, b, c) = compression(&path, (5, 20))
-            .ok_or_else(|| anyhow::anyhow!("The compression should succeed !"))?;
+        let (main, a, b, c) =
+            compression(&path, (5, 20)).ok_or_else(|| eyre!("The compression should succeed !"))?;
         println!(
             "We can send it as {} with \nA = {}\nB = {} \nC = {}",
             main, a, b, c

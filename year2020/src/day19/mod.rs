@@ -3,6 +3,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Result};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
@@ -15,20 +16,17 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = RulesAndWords;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 19: Monster Messages";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         println!(
             "There are {} valid words in the input",
-            first_part(&data)
-                .ok_or_else(|| anyhow::anyhow!("Failed to create the parser for P1"))?
+            first_part(&data).ok_or_else(|| eyre!("Failed to create the parser for P1"))?
         );
 
         println!(
             "There are {} valid words in the input after modifying the rules",
-            second_part(data)
-                .ok_or_else(|| anyhow::anyhow!("Failed to create the parser for P2"))?
+            second_part(data).ok_or_else(|| eyre!("Failed to create the parser for P2"))?
         );
 
         Ok(())

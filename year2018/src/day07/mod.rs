@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
 use commons::parse::LineSep;
@@ -10,10 +11,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Step>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 7: The Sum of Its Parts";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let requirements = build_requirements(&data.data);
 
         let steps = process_steps(requirements.clone());
@@ -122,12 +122,8 @@ pub struct Step {
     requires: char,
 }
 
-#[derive(Debug, thiserror::Error)]
-#[error("Bad format for a step, got {0}")]
-pub struct StepParseError(Box<str>);
-
 impl FromStr for Step {
-    type Err = StepParseError;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (requires, step) = s
@@ -139,7 +135,7 @@ impl FromStr for Step {
                     .filter_map(|s| s.trim().chars().next())
                     .collect_tuple::<(_, _)>()
             })
-            .ok_or_else(|| StepParseError(s.into()))?;
+            .ok_or_else(|| eyre!("Bad format for a step, got {}", s))?;
 
         Ok(Self { step, requires })
     }

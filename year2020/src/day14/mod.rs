@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 
 use commons::parse::LineSep;
@@ -11,10 +12,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Instruction>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 14: Docking Data";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let instructions = data.data;
         let first = first_part(&instructions);
         println!("Decoder V1: The memory sum after completion is {}", first);
@@ -140,22 +140,14 @@ impl FloatingMasks {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum InstructionParseError {
-    #[error("Unknown line {0} (expected 'instruction = value')")]
-    Unknown(Box<str>),
-    #[error("Could not parse a memory index or value {0} ({1})")]
-    ParseInt(Box<str>, std::num::ParseIntError),
-}
-
 impl FromStr for Instruction {
-    type Err = InstructionParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let (instruction, value) = s
             .split_once('=')
             .map(|(a, b)| (a.trim(), b.trim()))
-            .ok_or_else(|| InstructionParseError::Unknown(s.into()))?;
+            .ok_or_else(|| eyre!("Unknown line {} (expected 'instruction = value')", s))?;
 
         // This is really dirty, at some point I should consider adding regex
         match instruction.get(0..4) {
@@ -175,17 +167,17 @@ impl FromStr for Instruction {
             Some("mem[") => {
                 let index = instruction
                     .get(4..(instruction.len() - 1)) // Take everything until the ']'
-                    .ok_or_else(|| InstructionParseError::Unknown(s.into()))?
+                    .ok_or_else(|| eyre!("Unknown line {} (expected 'instruction = value')", s))?
                     .parse::<Value>()
-                    .map_err(|err| InstructionParseError::ParseInt(s.into(), err))?;
+                    .wrap_err_with(|| format!("Could not parse a memory index or value {}", s))?;
 
                 let value = value
                     .parse::<Value>()
-                    .map_err(|err| InstructionParseError::ParseInt(s.into(), err))?;
+                    .wrap_err_with(|| format!("Could not parse a memory index or value {}", s))?;
 
                 Ok(Instruction::SetValue { index, value })
             }
-            _ => Err(InstructionParseError::Unknown(s.into())),
+            _ => Err(eyre!("Unknown line {} (expected 'instruction = value')", s)),
         }
     }
 }

@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::parse::LineSep;
@@ -9,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Point4>;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 25: Four-Dimensional Adventure";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let count = count_constellations(&data.data);
         println!("The number of constellations is {}", count);
         Ok(())
@@ -69,27 +69,20 @@ impl Point4 {
     }
 }
 
-/// An error that happens when parsing a point
-#[derive(Debug, thiserror::Error)]
-pub enum ParsePointError {
-    #[error("Bad format for a four dimensional point: {0}")]
-    BadFormat(Box<str>),
-    #[error("Can't parse an integer '{0}' ({1})")]
-    IntParse(Box<str>, std::num::ParseIntError),
-}
-
 impl FromStr for Point4 {
-    type Err = ParsePointError;
+    type Err = Report;
 
-    fn from_str(string: &str) -> Result<Self, Self::Err> {
+    fn from_str(string: &str) -> Result<Self> {
         itertools::process_results(
-            string.split(',').map(|coord| match coord.trim().parse() {
-                Ok(coord) => Ok(coord),
-                Err(err) => Err(ParsePointError::IntParse(coord.into(), err)),
+            string.split(',').map(|coord| {
+                coord
+                    .trim()
+                    .parse()
+                    .wrap_err_with(|| format!("Can't parse an integer '{}'", coord))
             }),
             |iter| match iter.collect_tuple::<(_, _, _, _)>() {
                 Some((a, b, c, d)) => Ok(Point4([a, b, c, d])),
-                None => Err(ParsePointError::BadFormat(string.into())),
+                None => Err(eyre!("Bad format for a four dimensional point: {}", string)),
             },
         )?
     }

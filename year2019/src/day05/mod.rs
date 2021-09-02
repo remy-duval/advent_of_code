@@ -1,3 +1,5 @@
+use color_eyre::eyre::{eyre, Result};
+
 use commons::Problem;
 
 use super::int_code::{IntCodeInput, Processor, Status};
@@ -6,12 +8,11 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = IntCodeInput;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 5: Sunny with a Chance of Asteroids";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
-        let (first, second) = solve(&data.data[..])
-            .ok_or_else(|| anyhow::anyhow!("Program should not have crashed !"))?;
+    fn solve(data: Self::Input) -> Result<()> {
+        let (first, second) =
+            solve(&data.data[..]).ok_or_else(|| eyre!("Program should not have crashed !"))?;
         println!("Input 1 produced : {}", first);
         println!("Input 5 produced : {}", second);
 

@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use color_eyre::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::parse::LineSep;
@@ -11,10 +12,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = LineSep<Claim>;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 3: No Matter How You Slice It";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let tissue = Tissue::new(data.data);
 
         println!(
@@ -26,7 +26,7 @@ impl Problem for Day {
             "The claim #{} is intact",
             tissue
                 .find_intact_claim()
-                .ok_or_else(|| anyhow::anyhow!("Could not find the intact claim on the tissue"))?
+                .ok_or_else(|| eyre!("Could not find the intact claim on the tissue"))?
                 .id
         );
 
@@ -110,36 +110,34 @@ impl Claim {
     }
 }
 
-/// Error raised when parsing a claim from a String: #<ID> @ <LEFT>,<TOP>: <WIDTH>x<HEIGHT>
-#[derive(Debug, thiserror::Error)]
-pub enum ClaimParseError {
-    #[error("Could not parse a number in the claim {0} ({1})")]
-    ParseIntError(Box<str>, #[source] std::num::ParseIntError),
-    #[error("Expected #<ID> @ <LEFT>,<TOP>: <WIDTH>x<HEIGHT> for claim, got {0}")]
-    BadFormat(Box<str>),
-    #[error("Expected <FIRST>{1}<SECOND> for coordinates, got {0}")]
-    BadCoordinates(Box<str>, char),
-}
-
 impl FromStr for Claim {
-    type Err = ClaimParseError;
+    type Err = Report;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         // Generate a bad format error
-        fn bad_format(s: &str) -> ClaimParseError {
-            ClaimParseError::BadFormat(s.into())
+        fn bad_format(s: &str) -> Report {
+            eyre!(
+                "Expected #<ID> @ <LEFT>,<TOP>: <WIDTH>x<HEIGHT> for claim, got {}",
+                s
+            )
         }
 
-        fn parse_int(s: &str) -> Result<i16, ClaimParseError> {
+        fn parse_int(s: &str) -> Result<i16> {
             s.parse()
-                .map_err(|err| ClaimParseError::ParseIntError(s.into(), err))
+                .wrap_err_with(|| format!("Could not parse a number in the claim {}", s))
         }
 
-        fn parse_coordinates(s: &str, sep: char) -> Result<(i16, i16), ClaimParseError> {
+        fn parse_coordinates(s: &str, sep: char) -> Result<(i16, i16)> {
             itertools::process_results(s.splitn(2, sep).map(|s| parse_int(s.trim())), |iter| {
                 iter.collect_tuple::<(_, _)>()
             })?
-            .ok_or_else(|| ClaimParseError::BadCoordinates(s.into(), sep))
+            .ok_or_else(|| {
+                eyre!(
+                    "Expected <FIRST>{1}<SECOND> for coordinates, got {0}",
+                    sep,
+                    s
+                )
+            })
         }
 
         let (id, claim) = s

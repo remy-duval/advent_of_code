@@ -1,5 +1,6 @@
 use std::ops::Add;
 
+use color_eyre::eyre::Result;
 use hashbrown::{HashMap, HashSet};
 
 use commons::grid::Point;
@@ -9,10 +10,9 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = String;
-    type Err = std::convert::Infallible;
     const TITLE: &'static str = "Day 20: A Regular Map";
 
-    fn solve(regex: Self::Input) -> Result<(), Self::Err> {
+    fn solve(regex: Self::Input) -> Result<()> {
         let map = build_map(&regex);
         println!("The furthest room is {} doors away", first_part(&map));
         println!("{} rooms are more than 1000 doors away", second_part(&map));

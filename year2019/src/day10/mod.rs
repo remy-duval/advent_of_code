@@ -5,7 +5,7 @@ use std::io::{stdin, stdout, BufWriter, Write};
 use std::str::FromStr;
 use std::time::Duration;
 
-use anyhow::Context;
+use color_eyre::eyre::{eyre, Result, WrapErr};
 use hashbrown::HashSet;
 use itertools::Itertools;
 use num_integer::gcd;
@@ -19,14 +19,13 @@ pub struct Day;
 
 impl Problem for Day {
     type Input = AsteroidField;
-    type Err = anyhow::Error;
     const TITLE: &'static str = "Day 10: Monitoring Station";
 
-    fn solve(data: Self::Input) -> Result<(), Self::Err> {
+    fn solve(data: Self::Input) -> Result<()> {
         let mut asteroids = data;
         let (station, station_view) = asteroids
             .find_surveillance_point()
-            .ok_or_else(|| anyhow::anyhow!("Not found any surveillance point"))?;
+            .ok_or_else(|| eyre!("Not found any surveillance point"))?;
         asteroids.set_station(station);
         println!("{}", asteroids);
         println!(
@@ -42,7 +41,7 @@ impl Problem for Day {
         let ordered = field_ordering(&station, station_view);
         let two_hundredth = ordered[199];
         asteroids.set_marked(two_hundredth);
-        visualize(&mut asteroids, ordered).context("IO error during visualization")?;
+        visualize(&mut asteroids, ordered).wrap_err("IO error during visualization")?;
         println!("200th destroyed asteroid is {}", two_hundredth);
 
         Ok(())
