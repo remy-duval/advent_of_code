@@ -32,7 +32,7 @@ fn count_constellations(points: &[Point4]) -> usize {
                 connected += 1;
                 match main {
                     Some(ref mut cons) => {
-                        cons.extend(group.drain(..));
+                        cons.append(group);
                     }
                     None => {
                         group.push(point);

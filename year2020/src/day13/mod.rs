@@ -140,7 +140,7 @@ impl FromStr for Schedule {
                 "x" => Ok(None),
                 number => number
                     .parse::<Timestamp>()
-                    .map(|x| Some(x))
+                    .map(Some)
                     .wrap_err_with(|| format!("Could not parse a timestamp, got {}", number)),
             })
             .try_collect()?;

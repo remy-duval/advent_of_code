@@ -70,17 +70,17 @@ impl<'a> Passport<'a> {
 
     /// byr (Birth Year) - four digits; at least 1920 and at most 2002.
     fn birth_valid(&self) -> bool {
-        Self::year_valid(&self.birth, 1920, 2002)
+        Self::year_valid(self.birth, 1920, 2002)
     }
 
     /// iyr (Issue Year) - four digits; at least 2010 and at most 2020.
     fn issued_valid(&self) -> bool {
-        Self::year_valid(&self.issued, 2010, 2020)
+        Self::year_valid(self.issued, 2010, 2020)
     }
 
     /// four digits; at least 2020 and at most 2030.
     fn expiration_valid(&self) -> bool {
-        Self::year_valid(&self.expiration, 2020, 2030)
+        Self::year_valid(self.expiration, 2020, 2030)
     }
 
     /// hgt (Height) - a number followed by either cm or in:

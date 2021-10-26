@@ -85,7 +85,7 @@ impl GameState {
         let blocks = self.blocks;
         loop {
             match status {
-                Status::RequireInput => engine.write_int(decider(&self)),
+                Status::RequireInput => engine.write_int(decider(self)),
                 _ => return (self.score, (self.blocks, blocks)),
             }
             status = self.run(engine, false);

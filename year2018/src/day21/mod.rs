@@ -28,7 +28,7 @@ impl Problem for Day {
 /// Find the first possible exit value of a program
 fn first_exit_value(program: &mut Program) -> Result<Option<Int>> {
     while step_optimized(program)?.is_some() {
-        if let Some(exit_value) = possible_exit_value(&program) {
+        if let Some(exit_value) = possible_exit_value(program) {
             return Ok(Some(exit_value));
         }
     }
@@ -45,7 +45,7 @@ fn last_exit_value(program: &mut Program) -> Result<Option<Int>> {
     // We need to exit manually as soon as an exit value is seen a second time
     program.reset();
     while step_optimized(program)?.is_some() {
-        if let Some(exit_value) = possible_exit_value(&program) {
+        if let Some(exit_value) = possible_exit_value(program) {
             // If the exit value was already present in the map, we have found all of them
             if !seen.insert(exit_value) {
                 break;

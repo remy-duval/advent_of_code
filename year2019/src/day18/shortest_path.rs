@@ -77,6 +77,7 @@ impl SolvingCache {
 
     /// Finds the minimums of paths.
     #[allow(clippy::map_entry)]
+    #[allow(clippy::needless_collect)]
     fn find_minimum(&mut self, start: Point, start_keys: Keys) -> usize {
         if start_keys.is_full() {
             0

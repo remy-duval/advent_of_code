@@ -55,7 +55,7 @@ fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize)> {
 fn second_part(map: &HashMap<Point, Tile>, oxygen: Point) -> Result<usize> {
     let walkable_tiles = map.iter().filter(|(_, tile)| **tile != Tile::Wall).count();
     let path =
-        bfs(oxygen, &map, |_, visited| visited.len() >= walkable_tiles).ok_or_else(|| {
+        bfs(oxygen, map, |_, visited| visited.len() >= walkable_tiles).ok_or_else(|| {
             eyre!("Breadth first search failed for the longest path to fill with oxyge")
         })?;
 

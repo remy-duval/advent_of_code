@@ -303,7 +303,7 @@ impl FromStr for JigsawImage {
                 let id = lines
                     .next()
                     .and_then(|line| line.trim().strip_prefix("Tile "))
-                    .and_then(|line| line.strip_suffix(":"))
+                    .and_then(|line| line.strip_suffix(':'))
                     .ok_or_else(|| eyre!("Did not find the ID field of a tile in:\n{}", s))?;
 
                 let id: u16 = id

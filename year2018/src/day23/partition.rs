@@ -7,7 +7,7 @@ use super::input::{Bot, Dimension, Point3};
 pub fn partition(bots: &[Bot]) -> Option<Point3> {
     // See the implementation of Ord to understand how this priority queue works
     let mut queue: BinaryHeap<Partition> = BinaryHeap::new();
-    queue.push(Partition::initial(&bots));
+    queue.push(Partition::initial(bots));
 
     // Pop the partition with the most bots in range and the smallest size
     while let Some(current) = queue.pop() {
@@ -19,7 +19,7 @@ pub fn partition(bots: &[Bot]) -> Option<Point3> {
             // Else divide and conquer by breaking the current region in smaller ones
             // By definition the sub-regions will be in range of at most the same number of bots
             // This is why the priority queue approach works (it will zero in on the best region)
-            current.divide_into(&bots, &mut queue);
+            current.divide_into(bots, &mut queue);
         }
     }
 

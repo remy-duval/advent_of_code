@@ -70,7 +70,7 @@ fn paint_hull(memory: &[i64], hull: &mut HashMap<Point, u8>) -> Result<String, I
         max.1 = max.1.max(position.y);
     }
 
-    Ok(hull_representation(&hull, position, min, max))
+    Ok(hull_representation(hull, position, min, max))
 }
 
 /// Computes the String representation of the current painting job

@@ -98,7 +98,7 @@ fn produce_fuel_from_ore(number: u64, reactions: &HashMap<String, Reaction>) -> 
 /// Find the maximum amount of fuel that can be produced with the given amount of ore.
 fn maximum_fuel_produced_from(ore: u64, reactions: &HashMap<String, Reaction>) -> u64 {
     binary_search(0, ore, ore, |number| {
-        produce_fuel_from_ore(number, &reactions)
+        produce_fuel_from_ore(number, reactions)
     })
 }
 

@@ -27,12 +27,12 @@ impl Problem for Day {
 
 /// Finds the maximum output with the single loop phases
 fn single_loop(memory: &[i64]) -> i64 {
-    maximum_output(&memory, &[0, 1, 2, 3, 4])
+    maximum_output(memory, &[0, 1, 2, 3, 4])
 }
 
 /// Finds the maximum output with the feedback loop phases
 fn feedback_loop(memory: &[i64]) -> i64 {
-    maximum_output(&memory, &[5, 6, 7, 8, 9])
+    maximum_output(memory, &[5, 6, 7, 8, 9])
 }
 
 /// Finds the maximum output of the process with the given memory and possible phases
