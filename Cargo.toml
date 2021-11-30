@@ -3,7 +3,8 @@ members = [
     "commons",
     "year2018",
     "year2019",
-    "year2020"
+    "year2020",
+    "year2021"
 ]
 
 [profile.release]
