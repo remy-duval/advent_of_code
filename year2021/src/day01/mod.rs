@@ -29,11 +29,7 @@ fn first_part(measurements: &[i32]) -> usize {
 }
 
 fn second_part(measurements: &[i32]) -> usize {
-    let windows = measurements
-        .windows(3)
-        .map(|window| window[0] + window[1] + window[2]);
-
-    increases(windows)
+    increases(measurements.windows(3).map(|w| w.iter().sum()))
 }
 
 fn increases(mut measurements: impl Iterator<Item = i32>) -> usize {
