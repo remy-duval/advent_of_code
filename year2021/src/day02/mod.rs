@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use color_eyre::eyre::{bail, Report, Result};
 use commons::parse::LineSep;
 
@@ -19,7 +17,7 @@ impl Problem for Day {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Command {
     Forward(u8),
     Up(u8),
@@ -64,7 +62,7 @@ fn second_part(commands: &[Command]) -> u32 {
             Command::Forward(forward) => {
                 let forward = forward as u32;
                 horizontal += forward;
-                depth += (forward * aim);
+                depth += forward * aim;
             }
             Command::Up(up) => aim -= up as u32,
             Command::Down(down) => aim += down as u32,

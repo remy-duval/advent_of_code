@@ -25,8 +25,8 @@ use color_eyre::eyre::{eyre, Result};
 
 mod day01;
 mod day02;
-/* mod day03;
-mod day04;
+mod day03;
+/* mod day04;
 mod day05;
 mod day06;
 mod day07;
@@ -57,8 +57,8 @@ pub fn solve_problem(day: u8, input: &str) -> Result<()> {
     match day {
         1 => solve::<day01::Day>(input),
         2 => solve::<day02::Day>(input),
-        /* 3 => solve::<day03::Day>(input),
-        4 => solve::<day04::Day>(input),
+        3 => solve::<day03::Day>(input),
+        /* 4 => solve::<day04::Day>(input),
         5 => solve::<day05::Day>(input),
         6 => solve::<day06::Day>(input),
         7 => solve::<day07::Day>(input),
