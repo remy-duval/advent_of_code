@@ -151,7 +151,7 @@ impl FromStr for Reaction {
 
         let ingredients = ingredients
             .split(',')
-            .map(|data| parse_ingredient(data))
+            .map(parse_ingredient)
             .collect::<Option<HashMap<_, _>>>()
             .ok_or_else(|| eyre!("Could not parse the ingredients"))?;
         let (result, times) =

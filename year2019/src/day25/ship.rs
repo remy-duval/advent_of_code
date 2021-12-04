@@ -135,7 +135,7 @@ impl Room {
         let checkpoint = text
             .split_terminator("\n\n")
             .next()
-            .and_then(|description| description.strip_prefix("== ")?.splitn(2, " ==").next())
+            .and_then(|description| Some(description.strip_prefix("== ")?.split_once(" ==")?.0))
             .map_or(false, |name| {
                 println!("Discovered room: {}", name);
                 name == Self::CHECKPOINT

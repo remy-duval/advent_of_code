@@ -7,21 +7,17 @@ use itertools::Itertools;
 pub type Day = (u8, u8);
 
 /// The events, sorted
+#[non_exhaustive] // To prevent Events from being constructed outside `new`
 #[derive(Debug, Clone)]
 pub struct Events {
     pub events: Vec<TimedEvent>,
-    /// To prevent Events from being constructed outside `new`
-    private: (),
 }
 
 impl Events {
     /// Build the events, sorting them in their timestamp order
     pub fn new(mut events: Vec<TimedEvent>) -> Self {
         events.sort_unstable_by(|a, b| a.timestamp.cmp(&b.timestamp));
-        Self {
-            events,
-            private: (),
-        }
+        Self { events }
     }
 }
 
