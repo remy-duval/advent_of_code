@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use color_eyre::eyre::{bail, ensure, Report, Result};
+use commons::eyre::{bail, ensure, Report, Result};
 use itertools::Itertools;
 
 use commons::parse::LineSep;

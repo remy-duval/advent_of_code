@@ -1,4 +1,4 @@
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 use hashbrown::{hash_map::Entry, HashMap, HashSet};
 
 use commons::Problem;

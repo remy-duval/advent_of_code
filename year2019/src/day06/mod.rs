@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use color_eyre::eyre::{eyre, Result};
+use commons::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
 use commons::parse::LineSep;

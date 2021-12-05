@@ -1,5 +1,4 @@
-use color_eyre::eyre::{eyre, Result};
-
+use commons::eyre::{eyre, Result};
 use commons::Problem;
 
 pub struct Day;
@@ -17,17 +16,16 @@ impl Problem for Day {
 }
 
 /// Parsed values from the input
-#[derive(Clone, Debug)]
 pub struct Binaries {
     /// All the binary ratings that were parsed from the input
-    pub data: Vec<Binary>,
+    data: Vec<Binary>,
     /// The number of bits for each of the binaries we have
-    pub bits: usize,
+    bits: usize,
 }
 
 /// A number that is parsed from a binary
 #[derive(Copy, Clone, Debug)]
-pub struct Binary(pub u16);
+struct Binary(pub u16);
 
 impl Binary {
     /// Check if the given bit is zero

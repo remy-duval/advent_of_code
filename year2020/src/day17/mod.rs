@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 use hashbrown::{HashMap, HashSet};
 use itertools::iproduct;
 

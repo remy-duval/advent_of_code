@@ -21,7 +21,7 @@
     unused_qualifications
 )]
 
-use color_eyre::eyre::{eyre, Result};
+use commons::eyre::{eyre, Result};
 
 mod day01;
 mod day02;

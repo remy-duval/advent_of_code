@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result, WrapErr};
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashSet;
 use itertools::Itertools;
 

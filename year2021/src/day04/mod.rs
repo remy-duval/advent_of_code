@@ -1,5 +1,4 @@
-use color_eyre::eyre::{eyre, Report, Result, WrapErr};
-
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::Problem;
 
 pub struct Day;
@@ -17,7 +16,6 @@ impl Problem for Day {
 }
 
 /// All the bingo boards and the draw order for the puzzle
-#[derive(Clone, Debug)]
 pub struct Bingo {
     draws: Vec<u8>,
     boards: Vec<Board>,
@@ -50,19 +48,21 @@ impl Bingo {
         let mut boards: Vec<_> = self
             .boards
             .iter()
-            .map(|b| Some((b, BoardCompletion::default())))
+            .map(|b| (b, BoardCompletion::default()))
             .collect();
 
         let mut last = None;
         self.draws.iter().for_each(|&draw| {
-            boards.iter_mut().for_each(|non_completed_board| {
-                if let Some((board, completion)) = non_completed_board {
-                    if board.fill_with(draw, completion) && completion.is_complete() {
-                        last = Some(board.score(draw, completion));
-                        *non_completed_board = None;
-                    }
+            let mut i = 0;
+            while i < boards.len() {
+                let (board, completion) = &mut boards[i];
+                if board.fill_with(draw, completion) && completion.is_complete() {
+                    last = Some(board.score(draw, completion));
+                    boards.swap_remove(i);
+                } else {
+                    i += 1;
                 }
-            });
+            }
         });
 
         last.ok_or_else(|| eyre!("No board has won after all draws !"))
@@ -70,7 +70,6 @@ impl Bingo {
 }
 
 /// A bingo board for the puzzle
-#[derive(Clone, Debug)]
 struct Board([[u8; Board::COLUMNS]; Board::COLUMNS]);
 
 impl Board {

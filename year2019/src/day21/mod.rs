@@ -34,7 +34,7 @@
 
 use std::io::{stdout, BufWriter, Write};
 
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 
 use commons::Problem;
 

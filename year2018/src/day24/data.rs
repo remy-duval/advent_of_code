@@ -2,7 +2,7 @@ use std::cmp::Reverse;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result, WrapErr};
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;

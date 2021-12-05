@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use color_eyre::eyre::{ensure, eyre, Report, Result, WrapErr};
 use itertools::Itertools;
-use num_integer::{ExtendedGcd, Integer};
 
+use commons::eyre::{ensure, eyre, Report, Result, WrapErr};
+use commons::num::integer::{ExtendedGcd, Integer};
 use commons::Problem;
 
 pub type Timestamp = i128;

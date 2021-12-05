@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
-use color_eyre::Result;
-
+use commons::eyre::Result;
 use commons::Problem;
 
 pub struct Day;

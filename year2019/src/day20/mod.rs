@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Result};
+use commons::eyre::{eyre, Result};
 use hashbrown::{HashMap, HashSet};
 
 use commons::grid::{Direction, Point};

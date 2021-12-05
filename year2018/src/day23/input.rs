@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result, WrapErr};
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use itertools::{process_results, Itertools};
 
 /// The type of the dimensions of the point

@@ -1,4 +1,4 @@
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 
 use commons::parse::LineSep;
 use commons::Problem;

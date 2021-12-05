@@ -9,7 +9,7 @@ impl Problem for Day {
     type Input = SortedAdapters;
     const TITLE: &'static str = "Day 10: Adapter Array";
 
-    fn solve(data: Self::Input) -> color_eyre::Result<()> {
+    fn solve(data: Self::Input) -> commons::eyre::Result<()> {
         let (ones, threes) = first_part(&data);
 
         println!(

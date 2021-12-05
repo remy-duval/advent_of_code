@@ -1,10 +1,10 @@
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
-use color_eyre::eyre::{bail, eyre, Report, Result};
-use num_integer::Integer;
+use commons::eyre::{bail, eyre, Report, Result};
 
 use commons::grid::Grid;
+use commons::num::integer::Integer;
 use commons::Problem;
 
 pub struct Day;

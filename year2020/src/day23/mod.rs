@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result};
+use commons::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
 use commons::Problem;

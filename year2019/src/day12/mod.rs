@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 use hashbrown::HashMap;
-use num_integer::lcm;
 
+use commons::num::integer::lcm;
 use commons::Problem;
 
 const DIMENSIONS: usize = 3;

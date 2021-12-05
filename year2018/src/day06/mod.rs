@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Result, WrapErr};
 use itertools::Itertools;
 
-use color_eyre::Report;
+use commons::eyre::Report;
+use commons::eyre::{eyre, Result, WrapErr};
 use commons::grid::Point;
 use commons::Problem;
 

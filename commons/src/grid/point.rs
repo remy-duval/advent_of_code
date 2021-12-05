@@ -8,53 +8,81 @@ use std::{
     ops::{Add, Sub},
 };
 
+use num::{Num, Signed, ToPrimitive};
+
 /// Represents a point in a plane (x is from West to East, y from North to South)
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct Point {
-    pub x: i64,
-    pub y: i64,
+pub struct Point<Coordinate = i64> {
+    pub x: Coordinate,
+    pub y: Coordinate,
 }
 
-impl Point {
+impl<Coordinate> Point<Coordinate> {
     /// Simple constructor for Point.
-    pub const fn new(x: i64, y: i64) -> Point {
+    #[inline]
+    pub const fn new(x: Coordinate, y: Coordinate) -> Self {
         Self { x, y }
     }
+}
 
+impl<Coordinate: Num + Clone> Point<Coordinate> {
     /// Addition for a Point
-    pub const fn addition(&self, other: &Point) -> Point {
-        Point::new(self.x + other.x, self.y + other.y)
+    #[inline]
+    pub fn addition(&self, other: &Self) -> Self {
+        Self {
+            x: self.x.clone() + other.x.clone(),
+            y: self.y.clone() + other.y.clone(),
+        }
     }
 
     /// Subtraction for a point
-    pub const fn subtract(&self, other: &Point) -> Point {
-        Point::new(self.x - other.x, self.y - other.y)
-    }
-
-    /// Return a Point moved in the given direction.
-    pub const fn moved(&self, direction: Direction) -> Point {
-        self.addition(&direction.offset())
-    }
-
-    /// Manhattan Distance between this point and the origin.
-    pub const fn manhattan_distance(&self) -> i64 {
-        self.x.abs() + self.y.abs()
+    #[inline]
+    pub fn subtract(&self, other: &Self) -> Self {
+        Self {
+            x: self.x.clone() - other.x.clone(),
+            y: self.y.clone() - other.y.clone(),
+        }
     }
 
     /// Multiply all the coordinates of this point with the given value
-    pub const fn multiply(&self, mul: i64) -> Point {
-        Point::new(self.x * mul, self.y * mul)
+    #[inline]
+    pub fn multiply(&self, mul: Coordinate) -> Self {
+        Self {
+            x: self.x.clone() * mul.clone(),
+            y: self.y.clone() * mul,
+        }
     }
 
     /// Divide all the coordinates of this point with the divisor
-    pub const fn divide(&self, divisor: i64) -> Point {
-        Point::new(self.x / divisor, self.y / divisor)
+    #[inline]
+    pub fn divide(&self, divisor: Coordinate) -> Self {
+        Self {
+            x: self.x.clone() / divisor.clone(),
+            y: self.y.clone() / divisor,
+        }
+    }
+}
+
+impl<Coordinate: Signed + Clone> Point<Coordinate> {
+    /// Return a Point moved in the given direction.
+    #[inline]
+    pub fn moved(&self, direction: Direction) -> Self {
+        self.addition(&direction.offset::<Coordinate>())
     }
 
+    /// Manhattan Distance between this point and the origin.
+    #[inline]
+    pub fn manhattan_distance(&self) -> Coordinate {
+        self.x.clone().abs() + self.y.clone().abs()
+    }
+}
+
+impl<Coordinate: ToPrimitive + Clone> Point<Coordinate> {
     /// The polar coordinates this point
+    #[inline]
     pub fn polar_coordinates(&self) -> (f64, f64) {
-        let x = self.x as f64;
-        let y = self.y as f64;
+        let x = self.x.to_f64().unwrap_or_default();
+        let y = self.y.to_f64().unwrap_or_default();
         let r = (x.powi(2) + y.powi(2)).sqrt();
         let theta = if y.is_sign_negative() {
             y.atan2(x) + 2.0 * consts::PI
@@ -66,36 +94,44 @@ impl Point {
     }
 }
 
-impl Display for Point {
+impl<Coordinate: Display> Display for Point<Coordinate> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
     }
 }
 
-impl Add<Point> for Point {
-    type Output = Point;
-    fn add(self, rhs: Point) -> Point {
+impl<Coordinate: Signed + Clone> Add<Point<Coordinate>> for Point<Coordinate> {
+    type Output = Point<Coordinate>;
+
+    #[inline]
+    fn add(self, rhs: Point<Coordinate>) -> Self::Output {
         self.addition(&rhs)
     }
 }
 
-impl Add<&Point> for Point {
-    type Output = Point;
-    fn add(self, rhs: &Point) -> Point {
+impl<Coordinate: Signed + Clone> Add<&Point<Coordinate>> for Point<Coordinate> {
+    type Output = Point<Coordinate>;
+
+    #[inline]
+    fn add(self, rhs: &Point<Coordinate>) -> Self::Output {
         self.addition(rhs)
     }
 }
 
-impl Sub<Point> for Point {
-    type Output = Point;
-    fn sub(self, rhs: Point) -> Point {
+impl<Coordinate: Signed + Clone> Sub<Point<Coordinate>> for Point<Coordinate> {
+    type Output = Point<Coordinate>;
+
+    #[inline]
+    fn sub(self, rhs: Point<Coordinate>) -> Self::Output {
         self.subtract(&rhs)
     }
 }
 
-impl Sub<&Point> for Point {
-    type Output = Point;
-    fn sub(self, rhs: &Point) -> Point {
+impl<Coordinate: Signed + Clone> Sub<&Point<Coordinate>> for Point<Coordinate> {
+    type Output = Point<Coordinate>;
+
+    #[inline]
+    fn sub(self, rhs: &Point<Coordinate>) -> Self::Output {
         self.subtract(rhs)
     }
 }
@@ -119,6 +155,7 @@ impl Direction {
     ];
 
     /// All the directions as a static method
+    #[inline]
     pub const fn all() -> [Direction; 4] {
         Self::ALL
     }
@@ -129,6 +166,7 @@ impl Direction {
     }
 
     /// The direction to the right of this one.
+    #[inline]
     pub const fn right(self) -> Direction {
         match self {
             Direction::North => Direction::East,
@@ -139,6 +177,7 @@ impl Direction {
     }
 
     /// The direction to the left of this one.
+    #[inline]
     pub const fn left(self) -> Direction {
         match self {
             Direction::North => Direction::West,
@@ -149,6 +188,7 @@ impl Direction {
     }
 
     /// The direction to the back of this one.
+    #[inline]
     pub const fn back(self) -> Direction {
         match self {
             Direction::North => Direction::South,
@@ -159,6 +199,7 @@ impl Direction {
     }
 
     /// A simple char representation of this direction.
+    #[inline]
     pub const fn char(self) -> char {
         match self {
             Direction::North => '^',
@@ -169,12 +210,13 @@ impl Direction {
     }
 
     /// The offset of this direction on a grid (x is from West to East, y from North to South)
-    pub const fn offset(self) -> Point {
+    #[inline]
+    pub fn offset<Coordinate: Signed + Clone>(self) -> Point<Coordinate> {
         match self {
-            Direction::North => Point::new(0, -1),
-            Direction::South => Point::new(0, 1),
-            Direction::East => Point::new(1, 0),
-            Direction::West => Point::new(-1, 0),
+            Direction::North => Point::new(Coordinate::zero(), -Coordinate::one()),
+            Direction::South => Point::new(Coordinate::zero(), Coordinate::one()),
+            Direction::East => Point::new(Coordinate::one(), Coordinate::zero()),
+            Direction::West => Point::new(-Coordinate::one(), Coordinate::zero()),
         }
     }
 }

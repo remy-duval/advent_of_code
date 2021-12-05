@@ -23,7 +23,7 @@ impl Problem for Day {
     type Input = Ferry;
     const TITLE: &'static str = "Day 11: Seating System";
 
-    fn solve(data: Self::Input) -> color_eyre::Result<()> {
+    fn solve(data: Self::Input) -> commons::eyre::Result<()> {
         let first = first_part(data.clone());
 
         println!(

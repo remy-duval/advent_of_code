@@ -1,5 +1,4 @@
-use color_eyre::eyre::Result;
-
+use commons::eyre::Result;
 use commons::parse::LineSep;
 use commons::Problem;
 
@@ -10,15 +9,8 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 1: Sonar Sweep";
 
     fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "1. {} measurements larger than the previous one",
-            first_part(&data.data)
-        );
-
-        println!(
-            "2. {} three sums measurements larger than the previous one",
-            second_part(&data.data)
-        );
+        println!("1. Increases {}", first_part(&data.data));
+        println!("2. 3-sum increases {}", second_part(&data.data));
 
         Ok(())
     }

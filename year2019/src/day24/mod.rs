@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 use itertools::Itertools;
 
 use commons::Problem;

@@ -1,7 +1,7 @@
 use std::iter::Iterator;
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result};
+use commons::eyre::{eyre, Report, Result};
 use hashbrown::HashMap;
 
 use commons::parse::LineSep;

@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result};
-use num_integer::{mod_floor, ExtendedGcd, Integer};
+use commons::eyre::{eyre, Report, Result};
 
+use commons::num::integer::{mod_floor, ExtendedGcd, Integer};
 use commons::parse::LineSep;
 use commons::Problem;
 

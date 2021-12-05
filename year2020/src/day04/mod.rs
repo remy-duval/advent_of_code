@@ -1,4 +1,4 @@
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;

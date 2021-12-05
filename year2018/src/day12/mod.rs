@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result};
+use commons::eyre::{eyre, Report, Result};
 use hashbrown::HashSet;
 use itertools::Itertools;
 

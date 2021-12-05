@@ -21,6 +21,11 @@
     unused_qualifications
 )]
 
+/// Re-export of eyre error library
+pub use color_eyre::eyre;
+/// Re-export of num library
+pub use num;
+
 pub use arguments::Day;
 pub use problem::Problem;
 pub use problem::{load, solve};

@@ -1,4 +1,4 @@
-use color_eyre::eyre::Result;
+use commons::eyre::Result;
 use itertools::iproduct;
 
 use commons::grid::Grid;

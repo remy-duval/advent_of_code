@@ -1,7 +1,6 @@
 #![allow(unused)]
 
-use color_eyre::eyre::{eyre, Result};
-
+use commons::eyre::{eyre, Result};
 use commons::Problem;
 
 pub struct Day;

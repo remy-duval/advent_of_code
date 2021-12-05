@@ -1,6 +1,5 @@
-use color_eyre::eyre::{bail, Report, Result};
+use commons::eyre::{bail, Report, Result};
 use commons::parse::LineSep;
-
 use commons::Problem;
 
 pub struct Day;
@@ -17,7 +16,7 @@ impl Problem for Day {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub enum Command {
     Forward(u8),
     Up(u8),

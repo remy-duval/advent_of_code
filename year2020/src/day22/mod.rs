@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 use std::hash::{BuildHasher, Hash, Hasher};
 use std::str::FromStr;
 
-use color_eyre::eyre::{eyre, Report, Result, WrapErr};
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 

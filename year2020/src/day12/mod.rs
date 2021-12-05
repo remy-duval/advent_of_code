@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use color_eyre::eyre::{ensure, eyre, Report, Result, WrapErr};
+use commons::eyre::{ensure, eyre, Report, Result, WrapErr};
 
 use commons::grid::{Direction, Point};
 use commons::parse::LineSep;

@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use color_eyre::eyre::{eyre, Result};
+use commons::eyre::{eyre, Result};
 
 use commons::Problem;
 

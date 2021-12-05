@@ -3,7 +3,7 @@
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 
-use color_eyre::eyre::{eyre, Report, Result};
+use commons::eyre::{eyre, Report, Result};
 use hashbrown::HashMap;
 use itertools::Itertools;
 

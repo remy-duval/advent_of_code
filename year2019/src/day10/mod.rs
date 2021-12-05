@@ -5,12 +5,12 @@ use std::io::{stdin, stdout, BufWriter, Write};
 use std::str::FromStr;
 use std::time::Duration;
 
-use color_eyre::eyre::{eyre, Result, WrapErr};
+use commons::eyre::{eyre, Result, WrapErr};
 use hashbrown::HashSet;
 use itertools::Itertools;
-use num_integer::gcd;
 
 use commons::grid::Point;
+use commons::num::integer::gcd;
 use commons::parse::LineSep;
 use commons::Problem;
 use commons::{CLEAR_COMMAND, TO_TOP};

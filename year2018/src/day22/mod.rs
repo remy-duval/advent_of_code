@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
-use color_eyre::eyre::{eyre, Result};
+use commons::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
 use commons::Problem;

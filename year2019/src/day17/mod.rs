@@ -5,7 +5,7 @@ use std::{
     str::FromStr,
 };
 
-use color_eyre::eyre::{eyre, Result};
+use commons::eyre::{eyre, Result};
 use itertools::Itertools;
 
 use commons::grid::{Direction, Point};

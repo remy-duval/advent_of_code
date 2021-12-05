@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use color_eyre::eyre::{eyre, Result};
+use commons::eyre::{eyre, Result};
 use itertools::Itertools;
 
 use commons::Problem;
