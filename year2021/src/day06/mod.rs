@@ -1,6 +1,4 @@
-#![allow(unused)]
-
-use commons::eyre::{eyre, Result};
+use commons::eyre::Result;
 use commons::parse::CommaSep;
 use commons::Problem;
 
@@ -40,18 +38,21 @@ fn second_part(initial: &[u8]) -> usize {
 /// The number of fish alive after the given number of days
 fn simulate(initial: &[u8], days: usize) -> usize {
     // The index of the array is the remaining timer for the fish count that is the value
-    let mut current = [0; 9];
-    initial.iter().for_each(|i| current[*i as usize] += 1);
+    let mut first = [0; 9];
+    initial.iter().for_each(|i| first[*i as usize] += 1);
 
-    (0..days).for_each(|_| {
-        let mut previous = std::mem::take(&mut current);
-        // 0 -> reproduce, becoming 6, with their offspring becoming 8
-        current[6] += previous[0];
-        current[8] += previous[0];
-        // > 0 -> reduce by 1
-        (1..9usize).for_each(|i| current[i - 1] += previous[i]);
-    });
-    current.iter().sum()
+    (0..days)
+        .fold(first, |previous, _| {
+            let mut current = [0; 9];
+            // 0 -> reproduce, becoming 6, with their offspring becoming 8
+            current[6] += previous[0];
+            current[8] += previous[0];
+            // > 0 -> reduce by 1
+            (1..9usize).for_each(|i| current[i - 1] += previous[i]);
+            current
+        })
+        .into_iter()
+        .sum()
 }
 
 #[cfg(test)]
