@@ -6,23 +6,23 @@ const MAIN: &str = include_str!("data.txt");
 #[test]
 fn first_part_example() {
     let mut data = Day::parse(EXAMPLE).unwrap();
-    assert_eq!(first_part(&mut data.data).unwrap(), 37);
+    assert_eq!(first_part(&mut data.data), 37);
 }
 
 #[test]
 fn first_part_main() {
     let mut data = Day::parse(MAIN).unwrap();
-    assert_eq!(first_part(&mut data.data).unwrap(), 356_958);
+    assert_eq!(first_part(&mut data.data), 356_958);
 }
 
 #[test]
 fn second_part_example() {
     let data = Day::parse(EXAMPLE).unwrap();
-    assert_eq!(second_part(&data.data).unwrap(), 168);
+    assert_eq!(second_part(&data.data), 168);
 }
 
 #[test]
 fn second_part_main() {
     let data = Day::parse(MAIN).unwrap();
-    assert_eq!(second_part(&data.data).unwrap(), 105_461_913);
+    assert_eq!(second_part(&data.data), 105_461_913);
 }

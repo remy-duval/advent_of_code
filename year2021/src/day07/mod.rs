@@ -1,4 +1,4 @@
-use commons::eyre::{ensure, Result};
+use commons::eyre::Result;
 use commons::parse::CommaSep;
 use commons::Problem;
 
@@ -9,18 +9,20 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 7: The Treachery of Whales";
 
     fn solve(mut data: Self::Input) -> Result<()> {
-        println!("1. Linear fuel cost {}", first_part(&mut data.data)?);
-        println!("1. Quadratic fuel cost {}", second_part(&mut data.data)?);
+        println!("1. Linear fuel cost {}", first_part(&mut data.data));
+        println!("1. Quadratic fuel cost {}", second_part(&data.data));
 
         Ok(())
     }
 }
 
 /// Find the minimum sum of distances to a central point where the distance is linear
-fn first_part(points: &mut [i32]) -> Result<i32> {
-    ensure!(!points.is_empty(), "Empty points for computing the mean");
+fn first_part(points: &mut [i32]) -> i32 {
+    if points.is_empty() {
+        return 0;
+    }
 
-    // Find the median point, which minimizes the distance of all points to it
+    // Find the approximation of the median point, which minimizes the distance of all points to it
     points.sort_unstable();
     let middle = points.len() / 2;
     let median = if points.len() % 2 == 1 {
@@ -29,41 +31,45 @@ fn first_part(points: &mut [i32]) -> Result<i32> {
         points[middle]
     };
 
-    // Then compute said sum of distance to the mean point
-    Ok(points.iter().map(|&p| (p - median).abs()).sum())
+    improve_min_cost(median, |center| {
+        points.iter().fold(0, |acc, p| acc + (center - *p).abs())
+    })
 }
 
 /// Find the minimum sum of distance to a central point where the distance is (n + 1) * n / 2
-fn second_part(points: &[i32]) -> Result<i32> {
-    // Total fuel cost for a move from the given points to the center
-    fn cost(center: i32, points: &[i32]) -> i32 {
-        points
-            .iter()
-            .map(|p| {
-                let distance = (*p - center).abs();
-                distance * (distance + 1) / 2
-            })
-            .sum()
+fn second_part(points: &[i32]) -> i32 {
+    if points.is_empty() {
+        return 0;
     }
 
-    // Search for the minimum cost from the given point
-    // Stop as soon as the costs are not diminishing
-    // This should work since the cost function is an upside-down parabola
-    fn search(mut current: i32, step: i32, points: &[i32]) -> i32 {
+    // The mean is a good starting approximation
+    let mean = points.iter().sum::<i32>() / points.len() as i32;
+    improve_min_cost(mean, |center| {
+        points.iter().fold(0, |acc, p| {
+            let distance = (center - *p).abs();
+            acc + distance * (distance + 1) / 2
+        })
+    })
+}
+
+/// Improve the given approximation of the min cost by looking around it
+fn improve_min_cost<Cost: Fn(i32) -> i32>(approximation: i32, cost: Cost) -> i32 {
+    // Search in the given direction to minimize the cost
+    // Stop as soon the the cost is no longer decreasing (assuming the local min is the global one)
+    let search = |mut current, step| {
         let mut min = i32::MAX;
         loop {
-            let tentative = cost(current, points);
+            let tentative = cost(current);
             if min < tentative {
                 break min;
             }
             min = tentative;
             current += step;
         }
-    }
+    };
 
-    ensure!(!points.is_empty(), "Empty points for computing the mean");
-    let mean = points.iter().sum::<i32>() / points.len() as i32;
-    Ok(search(mean, 1, points).min(search(mean - 1, -1, points)))
+    // Find the minimum in both directions around the central point
+    search(approximation, 1).min(search(approximation - 1, -1))
 }
 
 #[cfg(test)]
