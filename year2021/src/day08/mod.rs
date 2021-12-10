@@ -103,7 +103,7 @@ struct WireBitSet {
 
 /// Link between the scrambled wires and the correct wires
 /// Either Ok(known) or Err(set of possibilities) for each wire
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct Possibilities([Result<u8, WireBitSet>; WIRES]);
 
 impl Outputs {

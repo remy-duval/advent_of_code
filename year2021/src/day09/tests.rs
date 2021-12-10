@@ -15,7 +15,6 @@ fn first_part_main() {
     assert_eq!(first_part(&grid), 562);
 }
 
-
 #[test]
 fn second_part_example() {
     let grid = Day::parse(EXAMPLE).unwrap();

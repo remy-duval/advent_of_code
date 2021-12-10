@@ -39,7 +39,6 @@ fn second_part(map: &HeightMap) -> usize {
     a * b * c
 }
 
-#[derive(Debug)]
 pub struct HeightMap {
     grid: Grid<u8>,
 }
@@ -105,8 +104,11 @@ impl std::str::FromStr for HeightMap {
         first
             .chars()
             .chain(lines.flat_map(move |f| f.chars()))
-            .map(|c| c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c)))
-            .try_for_each(|i| -> Result<()> { Ok(storage.push(i? as u8)) })?;
+            .try_for_each(|c| -> Result<()> {
+                let i = c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c))?;
+                storage.push(i as u8);
+                Ok(())
+            })?;
 
         let grid = Grid::from_vec(width, storage);
         Ok(Self { grid })
