@@ -8,9 +8,9 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 10: Syntax Scoring";
 
     fn solve(data: Self::Input) -> Result<()> {
-        let (completion, errors) = check_all(&data);
-        println!("1. Errors score {}", errors);
-        println!("1. Completion score {}", completion);
+        let (errors, completion) = check_all(&data);
+        println!("1. Syntax error score is {}", errors);
+        println!("2. Completion score is {}", completion);
 
         Ok(())
     }
@@ -21,31 +21,24 @@ impl Problem for Day {
 /// Total error score is the sum of all errored lines score
 /// Total completion score is the median of all successful lines autocompletion
 fn check_all(lines: &str) -> (u32, u64) {
-    let mut buffer = Vec::with_capacity(100);
-    let mut completions = Vec::with_capacity(100);
-    let errors = lines
-        .lines()
-        .fold(0, |errors, line| match check(line, &mut buffer) {
-            Ok(completed) => {
-                completions.push(completed);
-                errors
-            }
-            Err(bad) => errors + bad.error_score(),
-        });
+    let mut buf = Vec::with_capacity(64);
+    let mut completions = Vec::with_capacity(64);
+    let mut errors = 0;
+    lines.lines().for_each(|line| match check(line, &mut buf) {
+        Ok(completed) => completions.push(completed),
+        Err(bad) => errors += bad.error_score(),
+    });
 
     completions.sort_unstable();
-    if completions.is_empty() {
-        (errors, 0)
-    } else {
-        (errors, completions[completions.len() / 2])
-    }
+    let completion = completions.get(completions.len() / 2).map_or(0, |x| *x);
+    (errors, completion)
 }
 
 /// Check if this line is syntactically correct, and autocomplete it if possible
 ///
 /// ### Params
 /// * `line` - The line to autocomplete
-/// * `open` - A common buffer to avoid allocating too much
+/// * `open` - A common allocation for an open delimiters stack
 ///
 /// ### Returns
 /// - `Ok(completion_score)` - if the line is correct and was autocompleted
@@ -56,26 +49,28 @@ fn check(line: &str, open: &mut Vec<Delimiter>) -> Result<u64, Delimiter> {
         if let Some(o) = Delimiter::open(b) {
             open.push(o);
         } else if let Some(c) = Delimiter::closing(b) {
+            // Check if this closing delimiter matches the last open delimiter of the stack
+            // If not it's a syntax error
             if open.pop().map_or(true, |x| c != x) {
-                open.push(c);
                 return Err(c);
             }
         }
     }
 
+    // No errors, compute the completion score
+    // This uses the reverse of the remaining open stack as the expected closing elements
     let score = open
         .iter()
-        .rev()
-        .fold(0, |total, d| total * 5 + d.completion_score() as u64);
+        .rfold(0, |total, d| total * 5 + d.completion_score());
     Ok(score)
 }
 
 /// A delimiter in the syntax
 #[derive(Copy, Clone, Eq, PartialEq)]
 enum Delimiter {
-    Brace,
-    Bracket,
     Parens,
+    Bracket,
+    Brace,
     Angled,
 }
 
@@ -105,19 +100,19 @@ impl Delimiter {
     /// The score of this delimiter when it is a syntax error
     fn error_score(self) -> u32 {
         match self {
-            Delimiter::Brace => 1_197,
-            Delimiter::Bracket => 57,
             Delimiter::Parens => 3,
+            Delimiter::Bracket => 57,
+            Delimiter::Brace => 1_197,
             Delimiter::Angled => 25_137,
         }
     }
 
     /// The score of this delimiter when it is part of an auto-completion
-    fn completion_score(self) -> u32 {
+    fn completion_score(self) -> u64 {
         match self {
-            Delimiter::Brace => 3,
-            Delimiter::Bracket => 2,
             Delimiter::Parens => 1,
+            Delimiter::Bracket => 2,
+            Delimiter::Brace => 3,
             Delimiter::Angled => 4,
         }
     }
