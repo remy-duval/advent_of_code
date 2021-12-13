@@ -35,8 +35,8 @@ mod day09;
 mod day10;
 mod day11;
 mod day12;
-/* mod day13;
-mod day14;
+mod day13;
+/* mod day14;
 mod day15;
 mod day16;
 mod day17;
@@ -67,8 +67,8 @@ pub fn solve_problem(day: u8, input: &str) -> Result<()> {
         10 => solve::<day10::Day>(input),
         11 => solve::<day11::Day>(input),
         12 => solve::<day12::Day>(input),
-        /* 13 => solve::<day13::Day>(input),
-        14 => solve::<day14::Day>(input),
+        13 => solve::<day13::Day>(input),
+        /* 14 => solve::<day14::Day>(input),
         15 => solve::<day15::Day>(input),
         16 => solve::<day16::Day>(input),
         17 => solve::<day17::Day>(input),
