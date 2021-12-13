@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::time::Instant;
 
-use color_eyre::eyre::{eyre, Result};
+use eyre::{eyre, Result};
 
 pub trait Problem {
     /// The type of the data that is required for the solving the problem

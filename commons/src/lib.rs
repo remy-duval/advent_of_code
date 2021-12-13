@@ -22,7 +22,7 @@
 )]
 
 /// Re-export of eyre error library
-pub use color_eyre::eyre;
+pub use eyre;
 /// Re-export of num library
 pub use num;
 

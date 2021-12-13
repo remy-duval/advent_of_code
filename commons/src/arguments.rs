@@ -3,15 +3,10 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use clap::{value_t, App, Arg};
-use color_eyre::{eyre::eyre, Report, Result};
+use eyre::{eyre, Report, Result};
 
 /// Parse the advent of code arguments
 pub fn setup(name: &str) -> Arguments {
-    if std::env::var("RUST_LIB_BACKTRACE").is_err() {
-        std::env::set_var("RUST_LIB_BACKTRACE", "1")
-    }
-    color_eyre::install().expect("color_eyre setup failure");
-
     let matches = App::new(name)
         .version(clap::crate_version!())
         .author(clap::crate_authors!())

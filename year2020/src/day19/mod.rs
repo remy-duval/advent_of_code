@@ -104,10 +104,10 @@ fn build_parser(
                         }
                     })
                     .while_some()
-                    .fold1(|a, b| Rc::new(Void::new(And(a, b))))
+                    .reduce(|a, b| Rc::new(Void::new(And(a, b))))
             })
             .while_some()
-            .fold1(|a, b| Rc::new(Void::new(Or(a, b))))?;
+            .reduce(|a, b| Rc::new(Void::new(Or(a, b))))?;
         cached.insert(current.to_owned(), Rc::clone(&created));
         Some(created)
     }
