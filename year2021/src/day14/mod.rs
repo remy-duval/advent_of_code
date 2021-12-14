@@ -12,82 +12,63 @@ impl Problem for Day {
     const TITLE: &'static str = "Day 14: Extended Polymerization";
 
     fn solve(polymer: Self::Input) -> Result<()> {
-        // The capacity of the cache is huge to avoid a ton of re-allocations
-        let mut cache = HashMap::with_capacity(3400);
-
-        let one = polymer.min_max_after(10, &mut cache);
+        let one = min_max_rates(&polymer.initial, &polymer.rules, 10);
         println!("1. After 10 steps: {}", one.1 - one.0);
 
-        let two = polymer.min_max_after(40, &mut cache);
+        let two = min_max_rates(&polymer.initial, &polymer.rules, 40);
         println!("2. After 40 steps: {}", two.1 - two.0);
 
         Ok(())
     }
 }
 
+/// The puzzle input for the day
 pub struct Polymer {
+    /// Initial sequence of polymer, from 0 to 25
     initial: Vec<u8>,
+    /// What the next step should insert between a pair of polymer
     rules: HashMap<(u8, u8), u8>,
 }
 
-type Counts = [u64; 26];
+/// Find the min and maximum counts of polymers after the given number of steps
+///
+/// Uses a far more optimized solution using pair counting proposed by a colleague
+/// See previous commit for initial solution, using dynamic programming
+/// This solution is at least 2 - 3 times faster than the original one
+fn min_max_rates(initial: &[u8], rules: &HashMap<(u8, u8), u8>, steps: usize) -> (u64, u64) {
+    // Number of element (indexed by the character)
+    let mut rates: [u64; 26] = [0; 26];
+    initial.iter().for_each(|&i| rates[i as usize] += 1);
 
-impl Polymer {
-    /// Find the min and maximum counts of polymers after the given number of steps
-    /// Caches intermediates results in the given cache
-    fn min_max_after(&self, n: u8, cache: &mut HashMap<(u8, u8, u8), Counts>) -> (u64, u64) {
-        let mut rates = Counts::default();
-        self.initial.iter().for_each(|&i| rates[i as usize] += 1);
-        self.initial.windows(2).for_each(|w| {
-            if let [from, to] = w {
-                self.rates_between_after((*from, *to), n, cache)
-                    .iter()
-                    .zip(rates.iter_mut())
-                    .for_each(|(a, dest)| {
-                        *dest += *a;
-                    });
-            }
-        });
-
-        rates
-            .into_iter()
-            .filter(|&c| c > 0)
-            .minmax()
-            .into_option()
-            .unwrap_or_default()
-    }
-
-    /// Find the counts of polymers generated between two polymers after the given number of steps
-    /// Caches intermediates results in the given cache
-    fn rates_between_after(
-        &self,
-        (from, to): (u8, u8),
-        steps: u8,
-        cache: &mut HashMap<(u8, u8, u8), Counts>,
-    ) -> Counts {
-        if steps == 0 {
-            return Counts::default();
-        }
-        let key = (from, to, steps);
-        if let Some(result) = cache.get(&key).copied() {
-            result
-        } else {
-            let mut result = Counts::default();
-            if let Some(&mid) = self.rules.get(&(from, to)) {
-                result[mid as usize] += 1;
-                self.rates_between_after((from, mid), steps - 1, cache)
-                    .into_iter()
-                    .zip(self.rates_between_after((mid, to), steps - 1, cache))
-                    .zip(result.iter_mut())
-                    .for_each(|((a, b), dest)| {
-                        *dest += a + b;
-                    });
-            }
-
-            cache.insert(key, result);
-            result
+    // Current pairs of elements
+    let mut pairs: HashMap<(u8, u8), u64> = HashMap::with_capacity(rules.len());
+    for window in initial.windows(2) {
+        if let [from, to] = window {
+            *pairs.entry((*from, *to)).or_default() += 1;
         }
     }
+
+    let mut next_pairs = HashMap::with_capacity(rules.len());
+    for _ in 0..steps {
+        for (pair, count) in pairs.drain() {
+            if let Some(&mid) = rules.get(&pair) {
+                rates[mid as usize] += count;
+                *next_pairs.entry((pair.0, mid)).or_default() += count;
+                *next_pairs.entry((mid, pair.1)).or_default() += count;
+            } else {
+                *next_pairs.entry(pair).or_default() += count;
+            }
+        }
+
+        std::mem::swap(&mut pairs, &mut next_pairs);
+    }
+
+    rates
+        .into_iter()
+        .filter(|&c| c > 0) // Exclude characters that are not present
+        .minmax()
+        .into_option()
+        .unwrap_or_default()
 }
 
 impl std::str::FromStr for Polymer {
