@@ -1,33 +1,39 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
-use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
-pub struct Day;
+pub const TITLE: &str = "Day 23: Crab Cups";
 
-impl Problem for Day {
-    type Input = TenCups;
-    const TITLE: &'static str = "Day 23: Crab Cups";
+pub fn run(raw: String) -> Result<()> {
+    let cups = parse(&raw)?;
+    println!(
+        "Part 1: The order after 100 moves is '{}'",
+        first_part(&cups)
+    );
 
-    fn solve(cups: Self::Input) -> Result<()> {
-        println!(
-            "Part 1: The order after 100 moves is '{}'",
-            first_part(&cups.0)
-        );
+    let (first, second) = second_part(&cups);
+    println!(
+        "Part 2: The cups to the right of 1 are {} and {}, with a product of {}",
+        first,
+        second,
+        first * second
+    );
 
-        let (first, second) = second_part(&cups.0);
-        println!(
-            "Part 2: The cups to the right of 1 are {} and {}, with a product of {}",
-            first,
-            second,
-            first * second
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Vec<usize>> {
+    s.trim()
+        .chars()
+        .map(|c| {
+            c.to_digit(10).map_or_else(
+                || Err(eyre!("'{}' is not a valid base 10 digit", c)),
+                |ok| Ok(ok as usize - 1),
+            )
+        })
+        .collect::<Result<Vec<usize>>>()
 }
 
 fn first_part(cups: &[usize]) -> String {
@@ -46,28 +52,6 @@ fn second_part(cups: &[usize]) -> (usize, usize) {
     (first + 1, second + 1)
 }
 
-/// The input cups arrangement
-#[derive(Debug, Clone)]
-pub struct TenCups(Vec<usize>);
-
-impl FromStr for TenCups {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        Ok(Self(
-            s.trim()
-                .chars()
-                .map(|c| {
-                    c.to_digit(10).map_or_else(
-                        || Err(eyre!("'{}' is not a valid base 10 digit", c)),
-                        |ok| Ok(ok as usize - 1),
-                    )
-                })
-                .collect::<Result<Vec<usize>>>()?,
-        ))
-    }
-}
-
 /// The representation of the cup ring in the problem
 ///
 /// ### Optimization
@@ -78,7 +62,7 @@ impl FromStr for TenCups {
 /// * Retrieving the cups clockwise from 1 is pretty cheap too
 ///
 /// Much thanks to the solution thread of r/adventofcode/ for this very nice idea
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct CupRing {
     current: usize,
     storage: Vec<usize>,

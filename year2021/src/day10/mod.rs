@@ -1,19 +1,12 @@
 use commons::eyre::Result;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 10: Syntax Scoring";
 
-impl Problem for Day {
-    type Input = String;
-    const TITLE: &'static str = "Day 10: Syntax Scoring";
-
-    fn solve(data: Self::Input) -> Result<()> {
-        let (errors, completion) = check_all(&data);
-        println!("1. Syntax error score is {}", errors);
-        println!("2. Completion score is {}", completion);
-
-        Ok(())
-    }
+pub fn run(data: String) -> Result<()> {
+    let (errors, completion) = check_all(&data);
+    println!("1. Syntax error score is {}", errors);
+    println!("2. Completion score is {}", completion);
+    Ok(())
 }
 
 /// Check all lines, returning `(completion_score, error_score)`

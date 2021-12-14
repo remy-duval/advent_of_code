@@ -4,7 +4,7 @@ const DATA: &str = include_str!("data.txt");
 
 #[test]
 fn solve_test() {
-    let memory = Day::parse(DATA).unwrap().data;
+    let memory = parse(DATA).unwrap().data;
     let mut test_process = Processor::with_initial_inputs(&memory, &[1]);
     let mut output_count: usize = 0;
     let mut current: i64 = 0;

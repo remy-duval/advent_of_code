@@ -1,52 +1,39 @@
-use std::str::FromStr;
-
-use commons::eyre::{Report, Result, WrapErr};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{Result, WrapErr};
 
 mod folder;
 
-pub struct Day;
+pub const TITLE: &str = "Day 8: Memory Maneuver";
 
-impl Problem for Day {
-    type Input = Tree;
-    const TITLE: &'static str = "Day 8: Memory Maneuver";
+pub fn run(raw: String) -> Result<()> {
+    let tree = parse(&raw)?;
+    println!("The metadata sum is {}", tree.metadata_sum());
+    println!("The root node value is {}", tree.root_node_value());
+    Ok(())
+}
 
-    fn solve(tree: Self::Input) -> Result<()> {
-        println!("The metadata sum is {}", tree.metadata_sum());
-        println!("The root node value is {}", tree.root_node_value());
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Tree> {
+    Ok(Tree(
+        s.split_whitespace()
+            .map(str::parse)
+            .try_collect()
+            .wrap_err("failed to parse the tree")?,
+    ))
 }
 
 /// A flattened tree
-#[derive(Debug, Clone)]
-pub struct Tree(pub Vec<u32>);
+struct Tree(pub Vec<u32>);
 
 impl Tree {
     /// Sum the metadata values in the tree for each node
-    pub fn metadata_sum(&self) -> u32 {
+    fn metadata_sum(&self) -> u32 {
         folder::fold(folder::MetadataSum, self).unwrap_or_default()
     }
 
     /// The value of the root node
-    pub fn root_node_value(&self) -> u32 {
+    fn root_node_value(&self) -> u32 {
         folder::fold(folder::NodeValues, self).unwrap_or_default()
-    }
-}
-
-impl FromStr for Tree {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(
-            s.split_whitespace()
-                .map(str::parse)
-                .try_collect()
-                .wrap_err("failed to parse a tree")?,
-        ))
     }
 }
 

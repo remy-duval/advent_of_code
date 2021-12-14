@@ -9,6 +9,7 @@ This is mostly a learning experience with Rust, so the solutions are probably me
 * 2018 - `advent_of_code_2018`
 * 2019 - `advent_of_code_2019`
 * 2020 - `advent_of_code_2020`
+* 2021 - `advent_of_code_2021` (In progress)
 
 ### Output
 

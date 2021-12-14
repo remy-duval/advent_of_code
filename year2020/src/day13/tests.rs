@@ -12,7 +12,7 @@ fn test_chinese_remainder_theorem() {
 
 #[test]
 fn first_part_test_a() {
-    let resource = Day::parse(A).unwrap();
+    let resource = parse(A).unwrap();
     let (bus, time) = earliest(&resource).unwrap();
     assert_eq!(bus, 59);
     assert_eq!(time, 5);
@@ -21,7 +21,7 @@ fn first_part_test_a() {
 
 #[test]
 fn first_part_test_b() {
-    let resource = Day::parse(B).unwrap();
+    let resource = parse(B).unwrap();
     let (bus, time) = earliest(&resource).unwrap();
     assert_eq!(bus, 443);
     assert_eq!(time, 5);
@@ -65,14 +65,14 @@ fn second_part_example_e() {
 
 #[test]
 fn second_part_test_a() {
-    let resource = Day::parse(A).unwrap();
+    let resource = parse(A).unwrap();
     let timestamp = second_part(&resource.lines).unwrap().unwrap();
     assert_eq!(timestamp, 1_068_781);
 }
 
 #[test]
 fn second_part_test_b() {
-    let resource = Day::parse(B).unwrap();
+    let resource = parse(B).unwrap();
     let timestamp = second_part(&resource.lines).unwrap().unwrap();
     assert_eq!(timestamp, 1_058_443_396_696_792);
 }

@@ -1,41 +1,37 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
-use commons::Problem;
 
+pub const TITLE: &str = "Day 3: No Matter How You Slice It";
 const DIMENSION: usize = 1000;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let tissue = Tissue::new(parse(&raw)?.data);
 
-impl Problem for Day {
-    type Input = LineSep<Claim>;
-    const TITLE: &'static str = "Day 3: No Matter How You Slice It";
+    println!(
+        "{} squares of the tissue are claimed multiple times",
+        tissue.multiple_claims()
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let tissue = Tissue::new(data.data);
+    println!(
+        "The claim #{} is intact",
+        tissue
+            .find_intact_claim()
+            .ok_or_else(|| eyre!("Could not find the intact claim on the tissue"))?
+            .id
+    );
 
-        println!(
-            "{} squares of the tissue are claimed multiple times",
-            tissue.multiple_claims()
-        );
-
-        println!(
-            "The claim #{} is intact",
-            tissue
-                .find_intact_claim()
-                .ok_or_else(|| eyre!("Could not find the intact claim on the tissue"))?
-                .id
-        );
-
-        Ok(())
-    }
+    Ok(())
 }
 
-#[derive(Debug, Clone)]
-pub struct Tissue {
+fn parse(s: &str) -> Result<LineSep<Claim>> {
+    s.parse()
+}
+
+struct Tissue {
     /// * 0 - Means that a square is not claimed
     /// * Negative number - Means that a square is claimed multiple times
     /// * Positive number - square is claimed by only this claim
@@ -45,7 +41,7 @@ pub struct Tissue {
 
 impl Tissue {
     /// Build the tissue definition
-    pub fn new(claims: Vec<Claim>) -> Self {
+    fn new(claims: Vec<Claim>) -> Self {
         let mut squares = vec![[0; DIMENSION]; DIMENSION];
         claims.iter().for_each(|claim| {
             let (left, top) = claim.top_left();
@@ -64,7 +60,7 @@ impl Tissue {
     }
 
     /// Count the number of squares that are claimed multiple times (ie negative values)
-    pub fn multiple_claims(&self) -> usize {
+    fn multiple_claims(&self) -> usize {
         self.squares
             .iter()
             .flatten()
@@ -73,7 +69,7 @@ impl Tissue {
     }
 
     /// Find a claim that has all its squares belonging only to it
-    pub fn find_intact_claim(&self) -> Option<&Claim> {
+    fn find_intact_claim(&self) -> Option<&Claim> {
         self.claims.iter().find(|&claim| {
             let (left, top) = claim.top_left();
             let (right, bottom) = claim.bottom_right();
@@ -88,8 +84,7 @@ impl Tissue {
 }
 
 /// A claim from an elf on the tissue
-#[derive(Debug, Clone)]
-pub struct Claim {
+struct Claim {
     id: i16,
     position: (i16, i16),
     size: (i16, i16),

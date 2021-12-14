@@ -1,33 +1,47 @@
 use std::fmt::{Debug, Display, Formatter};
-use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
+pub const TITLE: &str = "Day 8: Space Image Format";
 const WIDTH: usize = 25;
 const HEIGHT: usize = 6;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let mut image = parse(&raw)?;
+    let (_, w, t) = image.check_sum();
+    image.build();
+    println!("Image checksum is {} * {} =  {}", w, t, w * t);
+    println!("{}", image);
 
-impl Problem for Day {
-    type Input = Image;
-    const TITLE: &'static str = "Day 8: Space Image Format";
-
-    fn solve(data: Self::Input) -> Result<()> {
-        let mut image = data;
-        let (_, w, t) = image.check_sum();
-        image.build();
-        println!("Image checksum is {} * {} =  {}", w, t, w * t);
-        println!("{}", image);
-
-        Ok(())
-    }
+    Ok(())
 }
 
-#[derive(Clone)]
-pub struct Image {
+fn parse(s: &str) -> Result<Image> {
+    let size_hint = s.len() / WIDTH / HEIGHT;
+    let mut chars = s.chars();
+    let layers: Option<Vec<_>> = (0..size_hint)
+        .map(move |_| {
+            let mut layer = [[0u8; WIDTH]; HEIGHT];
+            for line in layer.iter_mut() {
+                for pixel in line.iter_mut() {
+                    let digit: u8 = chars.next()?.to_digit(10)? as u8;
+                    *pixel = digit;
+                }
+            }
+
+            Some(layer)
+        })
+        .collect();
+
+    Ok(Image::new(match layers {
+        Some(ok) => ok,
+        None => return Err(eyre!("Could not build the Image.")),
+    }))
+}
+
+struct Image {
     layers: Vec<[[u8; WIDTH]; HEIGHT]>,
     built_image: Option<[[u8; WIDTH]; HEIGHT]>,
 }
@@ -50,33 +64,6 @@ impl Debug for Image {
             .map(|l| Self::layer_representation(*l))
             .join("\n\n");
         write!(f, "Layers:\n{}", repr)
-    }
-}
-
-impl FromStr for Image {
-    type Err = Report;
-
-    fn from_str(data: &str) -> Result<Self, Self::Err> {
-        let size_hint = data.len() / WIDTH / HEIGHT;
-        let mut chars = data.chars();
-        let layers: Option<Vec<_>> = (0..size_hint)
-            .map(move |_| {
-                let mut layer = [[0u8; WIDTH]; HEIGHT];
-                for line in layer.iter_mut() {
-                    for pixel in line.iter_mut() {
-                        let digit: u8 = chars.next()?.to_digit(10)? as u8;
-                        *pixel = digit;
-                    }
-                }
-
-                Some(layer)
-            })
-            .collect();
-
-        Ok(Self::new(match layers {
-            Some(ok) => ok,
-            None => return Err(eyre!("Could not build the Image.")),
-        }))
     }
 }
 

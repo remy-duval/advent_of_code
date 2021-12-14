@@ -26,7 +26,7 @@ fn rotations() {
 
 #[test]
 fn first_part_test_a() {
-    let instructions = Day::parse(A).unwrap().data;
+    let instructions = parse(A).unwrap().data;
     let result = first_part(&instructions);
     assert_eq!(Point { x: 17, y: 8 }, result);
     assert_eq!(25, result.manhattan_distance());
@@ -34,7 +34,7 @@ fn first_part_test_a() {
 
 #[test]
 fn first_part_test_b() {
-    let instructions = Day::parse(B).unwrap().data;
+    let instructions = parse(B).unwrap().data;
     let result = first_part(&instructions);
     assert_eq!(Point { x: -112, y: 470 }, result);
     assert_eq!(582, result.manhattan_distance());
@@ -42,7 +42,7 @@ fn first_part_test_b() {
 
 #[test]
 fn second_part_test_a() {
-    let instructions = Day::parse(A).unwrap().data;
+    let instructions = parse(A).unwrap().data;
     let result = second_part(&instructions);
     assert_eq!(Point { x: 214, y: 72 }, result);
     assert_eq!(286, result.manhattan_distance());
@@ -50,7 +50,7 @@ fn second_part_test_a() {
 
 #[test]
 fn second_part_test_b() {
-    let instructions = Day::parse(B).unwrap().data;
+    let instructions = parse(B).unwrap().data;
     let result = second_part(&instructions);
     assert_eq!(Point { x: 15039, y: 37030 }, result);
     assert_eq!(52069, result.manhattan_distance());

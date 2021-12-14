@@ -1,31 +1,27 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
-use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashSet;
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Result, WrapErr};
 use commons::grid::Point;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 10: The Stars Align";
 
-impl Problem for Day {
-    type Input = Message;
-    const TITLE: &'static str = "Day 10: The Stars Align";
+pub fn run(raw: String) -> Result<()> {
+    let message = parse(&raw)?;
+    let (minimum, time) = message.into_minimum_size();
+    println!("The message took {}s to appear, it is:\n{}", time, minimum);
+    Ok(())
+}
 
-    fn solve(message: Self::Input) -> Result<()> {
-        let (minimum, time) = message.into_minimum_size();
-        println!("The message took {}s to appear, it is:\n{}", time, minimum);
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Message> {
+    Ok(Message::new(s.lines().map(str::parse).try_collect()?))
 }
 
 /// The message formed from a gathering of points of light
 /// Use the display trait to get the actual message representation
-#[derive(Debug, Clone)]
-pub struct Message {
+struct Message {
     lights: Vec<Light>,
     max: Point,
     min: Point,
@@ -33,14 +29,14 @@ pub struct Message {
 
 impl Message {
     /// Create the message from the individual lights
-    pub fn new(lights: Vec<Light>) -> Self {
+    fn new(lights: Vec<Light>) -> Self {
         let (max, min) = Self::compute_bounds(&lights);
         Self { lights, max, min }
     }
 
     /// Advance the message until its points are the most clustered (minimum size)
     /// We assume that the message will be formed at that point (i.e. there are no stray points)
-    pub fn into_minimum_size(mut self) -> (Self, usize) {
+    fn into_minimum_size(mut self) -> (Self, usize) {
         let mut seconds: usize = 0;
         let mut size: i64 = self.size();
         let mut previous: i64 = size;
@@ -58,7 +54,7 @@ impl Message {
     }
 
     /// Advance the state of the message by one step
-    pub fn advance(&mut self) {
+    fn advance(&mut self) {
         self.lights.iter_mut().for_each(Light::advance);
         let (max, min) = Self::compute_bounds(&self.lights);
         self.max = max;
@@ -66,7 +62,7 @@ impl Message {
     }
 
     /// Reverse the state of the message by one step
-    pub fn reverse(&mut self) {
+    fn reverse(&mut self) {
         self.lights.iter_mut().for_each(Light::reverse);
         let (max, min) = Self::compute_bounds(&self.lights);
         self.max = max;
@@ -74,7 +70,7 @@ impl Message {
     }
 
     /// The size of the message
-    pub fn size(&self) -> i64 {
+    fn size(&self) -> i64 {
         (self.max - self.min).manhattan_distance()
     }
 
@@ -90,14 +86,6 @@ impl Message {
         );
 
         (Point::new(max.0 + 1, max.1 + 1), Point::new(min.0, min.1))
-    }
-}
-
-impl FromStr for Message {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::new(s.lines().map(str::parse).try_collect()?))
     }
 }
 
@@ -121,7 +109,7 @@ impl Display for Message {
 
 /// The coordinates of a light in the message
 #[derive(Debug, Clone)]
-pub struct Light {
+struct Light {
     position: Point,
     velocity: Point,
 }
@@ -138,8 +126,8 @@ impl Light {
     }
 }
 
-impl FromStr for Light {
-    type Err = Report;
+impl std::str::FromStr for Light {
+    type Err = commons::eyre::Report;
 
     fn from_str(s: &str) -> Result<Self> {
         fn parse_int(int: &str) -> Result<i64> {

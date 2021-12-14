@@ -1,45 +1,42 @@
 use std::fmt::{Display, Formatter};
 
-use commons::eyre::Result;
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::Result;
 use commons::{CLEAR_COMMAND, TO_TOP};
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
+pub const TITLE: &str = "Day 13: Care Package";
 /// The delay in milliseconds between printing each frame
 const FRAME_DELAY: u64 = 0;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    println!("{}", CLEAR_COMMAND);
+    let mut memory = parse(&raw)?.data;
+    memory[0] = 2;
+    let mut engine = Processor::new(&memory);
+    let mut state = GameState::default();
+    let (score, (remaining, total_blocks)) =
+        state.run_with_decider(&mut engine, true, simple_decider);
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 13: Care Package";
+    println!(
+        "Final score: {} with {}/{} blocks remaining.",
+        score, remaining, total_blocks
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("{}", CLEAR_COMMAND);
-        let mut memory = data.data;
-        memory[0] = 2;
-        let mut engine = Processor::new(&memory);
-        let mut state = GameState::default();
-        let (score, (remaining, total_blocks)) =
-            state.run_with_decider(&mut engine, true, simple_decider);
+    Ok(())
+}
 
-        println!(
-            "Final score: {} with {}/{} blocks remaining.",
-            score, remaining, total_blocks
-        );
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 fn simple_decider(state: &GameState) -> i64 {
     (state.ball.unwrap().0 as i64 - state.player.unwrap().0 as i64).signum()
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Default)]
 struct GameState {
     score: i64,
     width: usize,

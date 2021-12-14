@@ -1,28 +1,27 @@
-use commons::eyre::{eyre, Result};
 use hashbrown::HashSet;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
 use super::instructions::{Int, Program};
 
-pub struct Day;
+pub const TITLE: &str = "Day 21: Chronal Conversion";
 
-impl Problem for Day {
-    type Input = Program;
-    const TITLE: &'static str = "Day 21: Chronal Conversion";
+pub fn run(raw: String) -> Result<()> {
+    let mut program = parse(&raw)?;
+    println!(
+        "The program will halt after the fewest cycles for input {}",
+        first_exit_value(&mut program)?.ok_or_else(|| eyre!("No exit values were found"))?
+    );
+    println!(
+        "The program will halt after the most cycles for input {}",
+        last_exit_value(&mut program)?.ok_or_else(|| eyre!("No exit values were found"))?
+    );
 
-    fn solve(mut program: Self::Input) -> Result<()> {
-        println!(
-            "The program will halt after the fewest cycles for input {}",
-            first_exit_value(&mut program)?.ok_or_else(|| eyre!("No exit values were found"))?
-        );
-        println!(
-            "The program will halt after the most cycles for input {}",
-            last_exit_value(&mut program)?.ok_or_else(|| eyre!("No exit values were found"))?
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Program> {
+    s.parse()
 }
 
 /// Find the first possible exit value of a program

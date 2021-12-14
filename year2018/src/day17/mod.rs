@@ -1,22 +1,20 @@
 use commons::eyre::Result;
 
-use commons::Problem;
-
 mod spring;
 
-pub struct Day;
+pub const TITLE: &str = "Day 17: Reservoir Research";
 
-impl Problem for Day {
-    type Input = spring::Scan;
-    const TITLE: &'static str = "Day 17: Reservoir Research";
+pub fn run(raw: String) -> Result<()> {
+    let mut scan = parse(&raw)?;
+    scan.fill();
+    println!("The scan contains {} wet tiles", scan.wet_tiles());
+    println!("The scan contains {} water tiles", scan.water());
 
-    fn solve(mut scan: Self::Input) -> Result<()> {
-        scan.fill();
-        println!("The scan contains {} wet tiles", scan.wet_tiles());
-        println!("The scan contains {} water tiles", scan.water());
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<spring::Scan> {
+    s.parse()
 }
 
 #[cfg(test)]

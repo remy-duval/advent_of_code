@@ -1,30 +1,28 @@
 use commons::eyre::Result;
-
 use commons::parse::LineSep;
-use commons::Problem;
 
 mod input;
 mod partition;
 
-pub struct Day;
+pub const TITLE: &str = "Day 23: Experimental Emergency Teleportation";
 
-impl Problem for Day {
-    type Input = LineSep<input::Bot>;
-    const TITLE: &'static str = "Day 23: Experimental Emergency Teleportation";
+pub fn run(raw: String) -> Result<()> {
+    let bots = parse(&raw)?;
+    println!(
+        "The bots with the largest radius has {} bots in range",
+        first_part(&bots.data)
+    );
 
-    fn solve(bots: Self::Input) -> Result<()> {
-        println!(
-            "The bots with the largest radius has {} bots in range",
-            first_part(&bots.data)
-        );
+    println!(
+        "The point in range to the most bots is {} units away from the center",
+        second_part(&bots.data)
+    );
 
-        println!(
-            "The point in range to the most bots is {} units away from the center",
-            second_part(&bots.data)
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<input::Bot>> {
+    s.parse()
 }
 
 /// Find the bot with the largest radius, compute the number of bots within its range (itself too)

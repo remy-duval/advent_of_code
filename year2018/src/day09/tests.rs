@@ -58,13 +58,13 @@ fn first_part_example_f() {
 
 #[test]
 fn first_part_main() {
-    let rules = Day::parse(MAIN).unwrap();
+    let rules = parse(MAIN).unwrap();
     assert_eq!(winning_score(&rules), 383_475);
 }
 
 #[test]
 fn second_part_main() {
-    let mut rules = Day::parse(MAIN).unwrap();
+    let mut rules = parse(MAIN).unwrap();
     rules.points *= 100;
     assert_eq!(winning_score(&rules), 3_148_209_772);
 }

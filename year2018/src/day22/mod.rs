@@ -1,31 +1,30 @@
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
-use commons::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 use data::{Cavern, Point, Tool};
 
 /// The data structures to represent the cavern
 mod data;
 
-pub struct Day;
+pub const TITLE: &str = "Day 22: Mode Maze";
 
-impl Problem for Day {
-    type Input = Cavern;
-    const TITLE: &'static str = "Day 22: Mode Maze";
+pub fn run(raw: String) -> Result<()> {
+    let mut cavern = parse(&raw)?;
+    let risk = cavern.risk_level();
+    println!("The total danger level in the maze is {}", risk);
 
-    fn solve(mut cavern: Self::Input) -> Result<()> {
-        let risk = cavern.risk_level();
-        println!("The total danger level in the maze is {}", risk);
+    let shortest = shortest_path(&mut cavern)
+        .ok_or_else(|| eyre!("Could not find the shortest path to the target"))?;
+    println!("The shortest path to the target is {}", shortest);
 
-        let shortest = shortest_path(&mut cavern)
-            .ok_or_else(|| eyre!("Could not find the shortest path to the target"))?;
-        println!("The shortest path to the target is {}", shortest);
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Cavern> {
+    s.parse()
 }
 
 /// Find the length of the shortest path to reach a position with the given tool
@@ -94,7 +93,7 @@ fn for_each_neighbour((x, y): Point, mut action: impl FnMut(Point)) {
 
 /// A struct to hold the current state of a path inside a BinaryHeap as a priority queue
 /// The elements are ordered according to the 3rd element
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 struct WeightedPoint(Point, Tool, u32);
 
 impl Ord for WeightedPoint {

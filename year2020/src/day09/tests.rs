@@ -7,14 +7,14 @@ const B_EXPECTED: u64 = 70639851;
 
 #[test]
 fn first_part_test_a() {
-    let data = Day::parse(A).unwrap().data;
+    let data = parse(A).unwrap().data;
     let first = first_not_sum(&data, 5).expect("Should have been found");
     assert_eq!(A_EXPECTED, first);
 }
 
 #[test]
 fn first_part_test_b() {
-    let data = Day::parse(B).unwrap().data;
+    let data = parse(B).unwrap().data;
     let first = first_not_sum(&data, PREAMBLE).expect("Should have been found");
     assert_eq!(B_EXPECTED, first);
 }
@@ -47,7 +47,7 @@ fn contiguous_test_c() {
 
 #[test]
 fn second_part_test_a() {
-    let data = Day::parse(A).unwrap().data;
+    let data = parse(A).unwrap().data;
     let (min, max) = second_part(&data, 127).expect("Should have been found");
     assert_eq!(15, min);
     assert_eq!(47, max);
@@ -55,7 +55,7 @@ fn second_part_test_a() {
 
 #[test]
 fn second_part_test_b() {
-    let data = Day::parse(B).unwrap().data;
+    let data = parse(B).unwrap().data;
     let (min, max) = second_part(&data, B_EXPECTED).expect("Should have been found");
     assert_eq!(3474524, min);
     assert_eq!(4774716, max);

@@ -1,41 +1,39 @@
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::grid::Grid;
 use commons::parse::sep_by_empty_lines;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 16: Ticket Translation";
 
-impl Problem for Day {
-    type Input = Tickets;
-    const TITLE: &'static str = "Day 16: Ticket Translation";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("The ticket scanning error rate is {}", data.error_rate);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("The ticket scanning error rate is {}", data.error_rate);
+    let headers = data
+        .find_headers()
+        .ok_or_else(|| eyre!("Could not find the headers for the tickets"))?;
 
-        let headers = data
-            .find_headers()
-            .ok_or_else(|| eyre!("Could not find the headers for the tickets"))?;
+    data.print_ticket(&headers)?;
 
-        data.print_ticket(&headers)?;
+    println!(
+        "The product of the 'departure' header values is {}",
+        data.departure_product(headers)
+    );
 
-        println!(
-            "The product of the 'departure' header values is {}",
-            data.departure_product(headers)
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Tickets> {
+    s.parse()
 }
 
 /// The scanned tickets and their rules
-#[derive(Debug, Clone)]
-pub struct Tickets {
+struct Tickets {
     rules: HashMap<String, Rule>,
     ticket: Vec<u16>,
     valid: Grid<u16>,
@@ -44,7 +42,7 @@ pub struct Tickets {
 
 impl Tickets {
     /// Find the corresponding headers for each column
-    pub fn find_headers(&self) -> Option<Vec<&str>> {
+    fn find_headers(&self) -> Option<Vec<&str>> {
         let width = self.ticket.len();
 
         // First compute the possible header for each column
@@ -91,7 +89,7 @@ impl Tickets {
     }
 
     /// Print the ticket to stdout
-    pub fn print_ticket(&self, headers: &[&str]) -> std::io::Result<()> {
+    fn print_ticket(&self, headers: &[&str]) -> std::io::Result<()> {
         use std::io::prelude::*;
         use std::io::{stdout, BufWriter};
         let mut out = BufWriter::new(stdout());
@@ -107,7 +105,7 @@ impl Tickets {
     }
 
     /// The product of all values in our ticket that start with "departure"
-    pub fn departure_product(&self, headers: Vec<&str>) -> u64 {
+    fn departure_product(&self, headers: Vec<&str>) -> u64 {
         headers
             .into_iter()
             .enumerate()
@@ -124,12 +122,11 @@ impl Tickets {
 }
 
 /// The rule for a field
-#[derive(Debug, Clone)]
-pub struct Rule(RangeInclusive<u16>, RangeInclusive<u16>);
+struct Rule(RangeInclusive<u16>, RangeInclusive<u16>);
 
 impl Rule {
     /// Check if a number is valid for a rule
-    pub fn is_valid_for(&self, number: &u16) -> bool {
+    fn is_valid_for(&self, number: &u16) -> bool {
         self.0.contains(number) || self.1.contains(number)
     }
 }

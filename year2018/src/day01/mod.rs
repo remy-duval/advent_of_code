@@ -1,24 +1,23 @@
-use commons::eyre::Result;
 use hashbrown::HashSet;
 
+use commons::eyre::Result;
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 1: Chronal Calibration";
 
-impl Problem for Day {
-    type Input = LineSep<i32>;
-    const TITLE: &'static str = "Day 1: Chronal Calibration";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("The sum of frequencies is {}", sum(&data.data));
+    println!(
+        "The first repeated frequency is {}",
+        first_repeated(&data.data)
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("The sum of frequencies is {}", sum(&data.data));
-        println!(
-            "The first repeated frequency is {}",
-            first_repeated(&data.data)
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<i32>> {
+    Ok(s.parse()?)
 }
 
 /// The sum of all frequencies

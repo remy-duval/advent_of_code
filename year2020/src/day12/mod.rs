@@ -1,36 +1,34 @@
 use std::str::FromStr;
 
 use commons::eyre::{ensure, eyre, Report, Result, WrapErr};
-
 use commons::grid::{Direction, Point};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 12: Rain Risk";
 
-impl Problem for Day {
-    type Input = LineSep<Instruction>;
-    const TITLE: &'static str = "Day 12: Rain Risk";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let first = first_part(&data.data);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let first = first_part(&data.data);
+    println!(
+        "First instructions: arrived at {:?} (manhattan distance is {} units)",
+        first,
+        first.manhattan_distance()
+    );
 
-        println!(
-            "First instructions: arrived at {:?} (manhattan distance is {} units)",
-            first,
-            first.manhattan_distance()
-        );
+    let second = second_part(&data.data);
 
-        let second = second_part(&data.data);
+    println!(
+        "Second instructions: arrived at {:?} (manhattan distance is {} units)",
+        second,
+        second.manhattan_distance()
+    );
 
-        println!(
-            "Second instructions: arrived at {:?} (manhattan distance is {} units)",
-            second,
-            second.manhattan_distance()
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Instruction>> {
+    s.parse()
 }
 
 /// Move will move the ship directly
@@ -54,12 +52,12 @@ fn second_part(instructions: &[Instruction]) -> Point {
 }
 
 /// Rotate a point by 90 degree right around the center
-pub fn rotate_right(point: Point) -> Point {
+fn rotate_right(point: Point) -> Point {
     Point::new(-point.y, point.x)
 }
 
 /// Rotate a point by 90 degree left around the center
-pub fn rotate_left(point: Point) -> Point {
+fn rotate_left(point: Point) -> Point {
     Point::new(point.y, -point.x)
 }
 
@@ -69,7 +67,7 @@ pub fn rotate_left(point: Point) -> Point {
 /// * `initial` - The ship initial state
 /// * `instructions` - The instructions to follow
 /// * `on_move` - The action to execute on a Move instruction with (mutable Ship, movement)
-pub fn move_ship<F>(initial: Ship, instructions: &[Instruction], mut on_move: F) -> Ship
+fn move_ship<F>(initial: Ship, instructions: &[Instruction], mut on_move: F) -> Ship
 where
     F: FnMut(&mut Ship, Point),
 {
@@ -90,7 +88,7 @@ where
 
 /// The current state of the ship
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Ship {
+struct Ship {
     /// The ship current position
     position: Point,
     /// The ship current waypoint, followed by the Forward instruction
@@ -99,7 +97,7 @@ pub struct Ship {
 
 impl Ship {
     /// The ship at its initial position with the given waypoint
-    pub fn new(waypoint: Point) -> Self {
+    fn new(waypoint: Point) -> Self {
         Self {
             position: Point::default(),
             waypoint,
@@ -109,7 +107,7 @@ impl Ship {
 
 /// An instruction to follow when moving the ship in this problem
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum Instruction {
+enum Instruction {
     /// Depends on the part: either move the ship directly, or move its waypoint
     Move(Direction, i64),
     /// Move the ship directly by n * its waypoint

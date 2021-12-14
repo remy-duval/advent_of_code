@@ -1,35 +1,40 @@
-use commons::eyre::{eyre, Report, Result};
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
-pub struct Day;
+pub const TITLE: &str = "Day 11: Dumbo Octopus";
 
-impl Problem for Day {
-    type Input = Grid;
-    const TITLE: &'static str = "Day 11: Dumbo Octopus";
-
-    fn solve(mut data: Self::Input) -> Result<()> {
-        println!("1. {} flashes after 100 steps", first_part(&data));
-        println!("2. Synchronized after {} steps", second_part(&mut data));
-
-        Ok(())
-    }
+pub fn run(raw: String) -> Result<()> {
+    let grid = parse(&raw)?;
+    println!("1. {} flashes after 100 steps", first_part(grid));
+    println!("2. Synchronized after {} steps", second_part(grid));
+    Ok(())
 }
 
-/// Parser of the 10x10 puzzle grid
-pub struct Grid([u8; 100]);
+fn parse(s: &str) -> Result<[u8; 100]> {
+    let mut grid = [0; 100];
+    s.lines()
+        .flat_map(|s| s.chars())
+        .take(grid.len())
+        .enumerate()
+        .try_for_each(|(index, c)| -> Result<()> {
+            let number = c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c))?;
+            grid[index] = number as u8;
+            Ok(())
+        })?;
+
+    Ok(grid)
+}
 
 /// Count the number of flashes for the 100 first steps
-fn first_part(grid: &Grid) -> usize {
+fn first_part(mut grid: [u8; 100]) -> usize {
     let mut flashed = [false; 100];
-    let mut grid = grid.0;
     (0..100).fold(0, |total, _| total + next(&mut grid, &mut flashed))
 }
 
 /// Iterate until one step produces 100 flashes
-fn second_part(grid: &mut Grid) -> usize {
+fn second_part(mut grid: [u8; 100]) -> usize {
     let mut flashed = [false; 100];
     let mut i = 1;
-    while next(&mut grid.0, &mut flashed) != 100 {
+    while next(&mut grid, &mut flashed) != 100 {
         i += 1;
     }
     i
@@ -92,25 +97,6 @@ fn increase_adjacent(i: usize, g: &mut [u8; 100]) {
         increase_opt(i.checked_sub(9), g);
         increase(i + 1, g);
         increase(i + 11, g);
-    }
-}
-
-impl std::str::FromStr for Grid {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        let mut grid = [0; 100];
-        s.lines()
-            .flat_map(|s| s.chars())
-            .take(grid.len())
-            .enumerate()
-            .try_for_each(|(index, c)| -> Result<()> {
-                let number = c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c))?;
-                grid[index] = number as u8;
-                Ok(())
-            })?;
-
-        Ok(Self(grid))
     }
 }
 

@@ -1,42 +1,35 @@
 use std::ops::Add;
 
 use commons::eyre::Result;
-
 use commons::grid::Point;
-use commons::Problem;
 
 mod parsers;
 mod shortest_path;
 
-pub struct Day;
+pub const TITLE: &str = "Day 18: Many-Worlds Interpretation";
 
-impl Problem for Day {
-    type Input = String;
-    const TITLE: &'static str = "Day 18: Many-Worlds Interpretation";
+pub fn run(raw: String) -> Result<()> {
+    // First part
+    let (start, keys, map) = parsers::parse_and_optimize_map(&raw);
+    println!("Map size : {}", map.len());
+    let shortest = shortest_path::find_shortest_path(&map, start, keys);
+    println!("Shortest path is {} steps long", shortest);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        // First part
-        let (start, keys, map) = parsers::parse_and_optimize_map(&data);
-        println!("Map size : {}", map.len());
-        let shortest = shortest_path::find_shortest_path(&map, start, keys);
-        println!("Shortest path is {} steps long", shortest);
+    // Second part
+    let split = parsers::split_maze_in_four(&raw, start, true);
+    let shortest: usize = split
+        .iter()
+        .map(|data| {
+            let (start, keys, map) = parsers::parse_and_optimize_map(data);
+            // We need to subtract because for we add the start point on the middle line
+            // Which makes the path longer by 1 step for each robot
+            shortest_path::find_shortest_path(&map, start, keys) - 1
+        })
+        .sum();
 
-        // Second part
-        let split = parsers::split_maze_in_four(&data, start, true);
-        let shortest: usize = split
-            .iter()
-            .map(|data| {
-                let (start, keys, map) = parsers::parse_and_optimize_map(data);
-                // We need to subtract because for we add the start point on the middle line
-                // Which makes the path longer by 1 step for each robot
-                shortest_path::find_shortest_path(&map, start, keys) - 1
-            })
-            .sum();
+    println!("Shortest path is {} steps long", shortest);
 
-        println!("Shortest path is {} steps long", shortest);
-
-        Ok(())
-    }
+    Ok(())
 }
 
 /// A hallway in the maze
@@ -55,22 +48,22 @@ impl Keys {
     const FULL: u32 = (1 << 26) - 1;
 
     /// Gets if all keys in the right hand side are present in this
-    pub fn contains(self, other: Self) -> bool {
+    fn contains(self, other: Self) -> bool {
         self.0 & other.0 == other.0
     }
 
     /// Combine the keys of this and the keys of the argument
-    pub fn combine(self, other: Self) -> Self {
+    fn combine(self, other: Self) -> Self {
         Self(self.0 | other.0)
     }
 
     /// True if this has no keys
-    pub fn is_empty(self) -> bool {
+    fn is_empty(self) -> bool {
         self.0 == 0
     }
 
     /// True if this contains all the keys from 0 to 25
-    pub fn is_full(self) -> bool {
+    fn is_full(self) -> bool {
         self.0 == Self::FULL
     }
 }

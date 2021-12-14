@@ -1,50 +1,70 @@
-//! This solution is really really messy
-//!
-//! It took me the entire afternoon to complete the problem though, so that will have to do
-
 use std::fmt::{Display, Formatter, Result as FmtResult};
-use std::str::FromStr;
 
-use commons::eyre::{bail, eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
-use commons::parse::sep_by_empty_lines;
-use commons::Problem;
+use commons::eyre::{bail, eyre, Result, WrapErr};
 
+pub const TITLE: &str = "Day 20: Jurassic Jigsaw";
 const IMAGE_WIDTH: usize = 12;
-
 const SEA_MONSTER: [&str; 3] = [
     "                  # ",
     "#    ##    ##    ###",
     " #  #  #  #  #  #   ",
 ];
-
 const SEA_MONSTER_LEN: usize = SEA_MONSTER[0].len();
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let tiles = parse(&raw)?;
+    let image =
+        match_tiles(tiles, IMAGE_WIDTH).ok_or_else(|| eyre!("Could not build the image"))?;
 
-impl Problem for Day {
-    type Input = JigsawImage;
-    const TITLE: &'static str = "Day 20: Jurassic Jigsaw";
+    println!(
+        "The corners ID product is {}",
+        first_part(&image, IMAGE_WIDTH)
+            .ok_or_else(|| eyre!("Could not find the corners of the image"))?
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let tiles = data.tiles;
-        let image =
-            match_tiles(tiles, IMAGE_WIDTH).ok_or_else(|| eyre!("Could not build the image"))?;
+    println!(
+        "The water roughness (every square that is not a monster) is {}",
+        second_part(FullImage::assemble(image, IMAGE_WIDTH))
+    );
+    Ok(())
+}
 
-        println!(
-            "The corners ID product is {}",
-            first_part(&image, IMAGE_WIDTH)
-                .ok_or_else(|| eyre!("Could not find the corners of the image"))?
-        );
+fn parse(s: &str) -> Result<Vec<Tile>> {
+    let result = commons::parse::sep_by_empty_lines(s)
+        .map(|blk| {
+            let mut lines = blk.lines();
+            let id = lines
+                .next()
+                .and_then(|line| line.trim().strip_prefix("Tile "))
+                .and_then(|line| line.strip_suffix(':'))
+                .ok_or_else(|| eyre!("Did not find the ID field of a tile in:\n{}", s))?;
 
-        println!(
-            "The water roughness (every square that is not a monster) is {}",
-            second_part(FullImage::assemble(image, IMAGE_WIDTH))
-        );
-        Ok(())
-    }
+            let id: u16 = id
+                .parse()
+                .wrap_err_with(|| format!("Could not parse the tile ID ({})", s))?;
+            let mut data = [[false; 10]; 10];
+            for (y, line) in lines.enumerate() {
+                for (x, char) in line.chars().enumerate() {
+                    match data.get_mut(y).and_then(|row| row.get_mut(x)) {
+                        Some(current) => *current = char == '#',
+                        None =>
+                            bail!(
+                                "Too many elements for a tile (expected 10 * 10, got ({}, {})) in a tile line:\n{}",
+                                x, y, s
+                            ),
+                    };
+                }
+            }
+
+            Ok(Tile::all_possibilities(id, data))
+        })
+        .collect::<Result<Vec<_>>>()?
+        .concat();
+
+    Ok(result)
 }
 
 /// From an ordered array of tiles, get the four corners and multiply their ID
@@ -284,51 +304,6 @@ impl Display for FullImage {
         self.data.iter().try_for_each(|line| {
             line.iter().try_for_each(|&char| f.write_char(char))?;
             f.write_char('\n')
-        })
-    }
-}
-
-/// This type exists only to parse the input String, with a FromStr implementation
-pub struct JigsawImage {
-    tiles: Vec<Tile>,
-}
-
-impl FromStr for JigsawImage {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let results: Vec<_> = sep_by_empty_lines(s)
-            .map(|blk| {
-                let mut lines = blk.lines();
-                let id = lines
-                    .next()
-                    .and_then(|line| line.trim().strip_prefix("Tile "))
-                    .and_then(|line| line.strip_suffix(':'))
-                    .ok_or_else(|| eyre!("Did not find the ID field of a tile in:\n{}", s))?;
-
-                let id: u16 = id
-                    .parse()
-                    .wrap_err_with(|| format!("Could not parse the tile ID ({})", s))?;
-                let mut data = [[false; 10]; 10];
-                for (y, line) in lines.enumerate() {
-                    for (x, char) in line.chars().enumerate() {
-                        match data.get_mut(y).and_then(|row| row.get_mut(x)) {
-                            Some(current) => *current = char == '#',
-                            None =>
-                            bail!(
-                                "Too many elements for a tile (expected 10 * 10, got ({}, {})) in a tile line:\n{}",
-                                x, y, s
-                            ),
-                        };
-                    }
-                }
-
-                Ok(Tile::all_possibilities(id, data))
-            })
-            .try_collect()?;
-
-        Ok(Self {
-            tiles: results.concat(),
         })
     }
 }

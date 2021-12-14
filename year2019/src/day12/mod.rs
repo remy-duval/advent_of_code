@@ -1,36 +1,44 @@
-use std::str::FromStr;
-
-use commons::eyre::Result;
+use commons::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
 use commons::num::integer::lcm;
-use commons::Problem;
 
+pub const TITLE: &str = "Day 12: The N-Body Problem";
 const DIMENSIONS: usize = 3;
 const MOONS: usize = 4;
 const STEPS: usize = 1000;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let mut moons = parse(&raw)?;
+    // First part
+    (0..STEPS).for_each(|_| moons.next());
+    let total_energy = moons.energy();
+    println!(
+        "The total energy of the system after {} steps is {}",
+        STEPS, total_energy
+    );
+    // Second part
+    let period = find_periodicity(moons);
+    println!("The moons periodicity is {}", period);
 
-impl Problem for Day {
-    type Input = Moons;
-    const TITLE: &'static str = "Day 12: The N-Body Problem";
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let mut moons: Moons = data;
-        // First part
-        (0..STEPS).for_each(|_| moons.next());
-        let total_energy = moons.energy();
-        println!(
-            "The total energy of the system after {} steps is {}",
-            STEPS, total_energy
-        );
-        // Second part
-        let period = find_periodicity(moons);
-        println!("The moons periodicity is {}", period);
+fn parse(s: &str) -> Result<Moons> {
+    let mut lines = s.lines();
+    let mut next = move || match lines.next() {
+        Some(line) => Ok(line),
+        _ => Err(eyre!("Could not get one of the moon description")),
+    };
 
-        Ok(())
-    }
+    let moons = [
+        Moons::single_moon_from_str(next()?)?,
+        Moons::single_moon_from_str(next()?)?,
+        Moons::single_moon_from_str(next()?)?,
+        Moons::single_moon_from_str(next()?)?,
+    ];
+
+    Ok(Moons::new(moons))
 }
 
 /// Finds the period of the system movement.
@@ -64,7 +72,7 @@ fn find_periodicity(mut moons: Moons) -> i64 {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Moons {
+struct Moons {
     x: [i32; MOONS],
     y: [i32; MOONS],
     z: [i32; MOONS],
@@ -74,26 +82,6 @@ pub struct Moons {
     initial_x: [i32; MOONS],
     initial_y: [i32; MOONS],
     initial_z: [i32; MOONS],
-}
-
-impl FromStr for Moons {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut lines = s.lines();
-        let mut next = move || match lines.next() {
-            Some(line) => Ok(line),
-            _ => Err("Could not get one of the moon description"),
-        };
-
-        let moons = [
-            Self::single_moon_from_str(next()?)?,
-            Self::single_moon_from_str(next()?)?,
-            Self::single_moon_from_str(next()?)?,
-            Self::single_moon_from_str(next()?)?,
-        ];
-
-        Ok(Moons::new(moons))
-    }
 }
 
 impl Moons {
@@ -196,7 +184,7 @@ impl Moons {
     }
 
     /// Parse a single moon from a string slice.
-    fn single_moon_from_str(data: &str) -> Result<[i32; DIMENSIONS], <Moons as FromStr>::Err> {
+    fn single_moon_from_str(data: &str) -> Result<[i32; DIMENSIONS]> {
         let values: HashMap<char, i32> = data
             .split(',')
             .filter_map(|key_value| {
@@ -219,7 +207,7 @@ impl Moons {
 
         match (values.get(&'x'), values.get(&'y'), values.get(&'z')) {
             (Some(x), Some(y), Some(z)) => Ok([*x, *y, *z]),
-            _ => Err("Could not parse x, y or z from the moon"),
+            _ => Err(eyre!("Could not parse x, y or z from the moon: {}", data)),
         }
     }
 }

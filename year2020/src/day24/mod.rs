@@ -1,27 +1,26 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result};
 use hashbrown::{HashMap, HashSet};
 
+use commons::eyre::{eyre, Report, Result};
 use commons::grid::Point;
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 24: Lobby Layout";
 
-impl Problem for Day {
-    type Input = LineSep<Path>;
-    const TITLE: &'static str = "Day 24: Lobby Layout";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let initial_state = initial_state(data.data);
+    println!("Day   0: {:<4} tiles are up", initial_state.len());
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let initial_state = initial_state(data.data);
-        println!("Day   0: {:<4} tiles are up", initial_state.len());
+    let final_state = compute_next_state(initial_state, 100);
+    println!("Day 100: {:<4} tiles are up", final_state.len());
 
-        let final_state = compute_next_state(initial_state, 100);
-        println!("Day 100: {:<4} tiles are up", final_state.len());
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Path>> {
+    s.parse()
 }
 
 /// Compute the initial state of the tiles from the paths
@@ -75,7 +74,7 @@ fn compute_next_state(mut current: HashSet<Point>, n: usize) -> HashSet<Point> {
 /// The directions used in the problem
 ///
 /// east, southeast, southwest, west, northwest, and northeast
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum Direction {
     East,
     West,
@@ -117,7 +116,6 @@ impl Direction {
 }
 
 /// The path to follow to get to a specific tile
-#[derive(Debug, Clone)]
 pub struct Path(Vec<Direction>);
 
 impl Path {

@@ -1,19 +1,17 @@
 use commons::eyre::Result;
 
-use commons::Problem;
+pub const TITLE: &str = "Day 1 : The Tyranny of the Rocket Equation";
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let (first, second) = solve(&data.data);
+    println!("Fuel for single stage : {}", first);
+    println!("Fuel complete : {}", second);
+    Ok(())
+}
 
-impl Problem for Day {
-    type Input = commons::parse::LineSep<i64>;
-    const TITLE: &'static str = "Day 1 : The Tyranny of the Rocket Equation";
-
-    fn solve(data: Self::Input) -> Result<()> {
-        let (first, second) = solve(&data.data);
-        println!("Fuel for single stage : {}", first);
-        println!("Fuel complete : {}", second);
-        Ok(())
-    }
+fn parse(s: &str) -> Result<commons::parse::LineSep<i64>> {
+    Ok(s.parse()?)
 }
 
 fn solve(masses: &[i64]) -> (i64, i64) {

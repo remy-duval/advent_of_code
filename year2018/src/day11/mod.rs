@@ -1,25 +1,18 @@
-use commons::eyre::Result;
 use itertools::iproduct;
 
+use commons::eyre::Result;
 use commons::grid::Grid;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 11: Chronal Charge";
 
-impl Problem for Day {
-    type Input = isize;
-    const TITLE: &'static str = "Day 11: Chronal Charge";
-
-    fn solve(serial_number: Self::Input) -> Result<()> {
-        let grid = PartialSumGrid::new(serial_number);
-        let (x, y) = first_part(&grid);
-        println!("The 3x3 square with the highest power is {},{}", x, y);
-
-        let (x, y, s) = second_part(&grid);
-        println!("The square with the highest power is {},{},{}", x, y, s);
-
-        Ok(())
-    }
+pub fn run(raw: String) -> Result<()> {
+    let serial_number = raw.parse()?;
+    let grid = PartialSumGrid::new(serial_number);
+    let (x, y) = first_part(&grid);
+    println!("The 3x3 square with the highest power is {},{}", x, y);
+    let (x, y, s) = second_part(&grid);
+    println!("The square with the highest power is {},{},{}", x, y, s);
+    Ok(())
 }
 
 fn first_part(grid: &PartialSumGrid) -> (isize, isize) {
@@ -35,8 +28,7 @@ fn second_part(grid: &PartialSumGrid) -> (isize, isize, isize) {
 /// A [`Summed Area Table`] of the power grid to facilitate the square sums
 ///
 /// [`Summed Area Table`]: https://en.wikipedia.org/wiki/Summed-area_table
-#[derive(Debug, Clone)]
-pub struct PartialSumGrid {
+struct PartialSumGrid {
     grid: Grid<i32>,
 }
 
@@ -44,7 +36,7 @@ impl PartialSumGrid {
     const WIDTH: usize = 300;
 
     /// Build the partial sum grid for a serial number
-    pub fn new(serial_number: isize) -> Self {
+    fn new(serial_number: isize) -> Self {
         // Compute the power level of a fuel cell
         fn power_level(serial_number: isize, (x, y): (isize, isize)) -> i32 {
             let id = x + 10;
@@ -77,7 +69,7 @@ impl PartialSumGrid {
     /// ### Returns
     /// None if the square is out of bound of the grid
     /// Some(sum) containing the sum of all elements in the square
-    pub fn sum(&self, (x, y): (isize, isize), size: isize) -> i32 {
+    fn sum(&self, (x, y): (isize, isize), size: isize) -> i32 {
         let start_x = x - 1;
         let end_x = start_x + size;
         let start_y = y - 1;
@@ -98,7 +90,7 @@ impl PartialSumGrid {
     }
 
     /// Find the square with the maximum total power in the grid
-    pub fn maximum_square(&self, min_size: isize, max_size: isize) -> (isize, isize, isize) {
+    fn maximum_square(&self, min_size: isize, max_size: isize) -> (isize, isize, isize) {
         let width = Self::WIDTH as isize;
         (min_size..=max_size)
             .filter_map(|size| {

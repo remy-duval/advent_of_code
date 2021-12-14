@@ -5,7 +5,7 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn example() {
-    let mut scan = Day::parse(EXAMPLE).unwrap();
+    let mut scan = parse(EXAMPLE).unwrap();
     scan.fill();
     assert_eq!(scan.wet_tiles(), 57);
     assert_eq!(scan.water(), 29);
@@ -13,7 +13,7 @@ fn example() {
 
 #[test]
 fn main() {
-    let mut scan = Day::parse(MAIN).unwrap();
+    let mut scan = parse(MAIN).unwrap();
     scan.fill();
     assert_eq!(scan.wet_tiles(), 36_171);
     assert_eq!(scan.water(), 28_204);

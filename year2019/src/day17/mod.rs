@@ -5,58 +5,56 @@ use std::{
     str::FromStr,
 };
 
-use commons::eyre::{eyre, Result};
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Point};
-use commons::Problem;
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
-pub struct Day;
+pub const TITLE: &str = "Day 17: Set and Forget";
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 17: Set and Forget";
+pub fn run(raw: String) -> Result<()> {
+    let memory = parse(&raw)?.data;
+    let scaffold = Scaffold::from_camera_program(&memory, true)
+        .ok_or_else(|| eyre!("The camera program should have worked !"))?;
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let memory = data.data;
-        let scaffold = Scaffold::from_camera_program(&memory, true)
-            .ok_or_else(|| eyre!("The camera program should have worked !"))?;
+    // First part
+    let calibration = scaffold.intersections_sum();
+    println!("The calibration sum is {}", calibration);
 
-        // First part
-        let calibration = scaffold.intersections_sum();
-        println!("The calibration sum is {}", calibration);
+    // Second part
+    let path = scaffold.straight_ahead_path();
+    println!("The path is {}", path.iter().join(","));
+    let (main, a, b, c) =
+        compression(&path, (5, 20)).ok_or_else(|| eyre!("The compression should succeed !"))?;
+    println!(
+        "We can send it as {} with \nA = {}\nB = {} \nC = {}",
+        main, a, b, c
+    );
 
-        // Second part
-        let path = scaffold.straight_ahead_path();
-        println!("The path is {}", path.iter().join(","));
-        let (main, a, b, c) =
-            compression(&path, (5, 20)).ok_or_else(|| eyre!("The compression should succeed !"))?;
-        println!(
-            "We can send it as {} with \nA = {}\nB = {} \nC = {}",
-            main, a, b, c
-        );
+    // Run the robot with the path
+    let mut robot: Processor = {
+        let mut robot_mem = memory;
+        robot_mem[0] = 2;
+        robot_mem[..].into()
+    };
 
-        // Run the robot with the path
-        let mut robot: Processor = {
-            let mut robot_mem = memory;
-            robot_mem[0] = 2;
-            robot_mem[..].into()
-        };
+    let mut stdout = BufWriter::new(stdout());
+    robot.run_with_ascii_callbacks(
+        [&main, &a, &b, &c, "n"].iter(),
+        |iterator| Some(format!("{}\n", iterator.next()?)),
+        |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
+    );
+    stdout.flush()?;
 
-        let mut stdout = BufWriter::new(stdout());
-        robot.run_with_ascii_callbacks(
-            [&main, &a, &b, &c, "n"].iter(),
-            |iterator| Some(format!("{}\n", iterator.next()?)),
-            |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
-        );
-        stdout.flush()?;
+    println!("The robot finished working, see above for last output.");
 
-        println!("The robot finished working, see above for last output.");
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 /// Try to compress a full path into a combination of 3 smaller paths as a main path

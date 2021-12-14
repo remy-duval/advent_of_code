@@ -6,35 +6,35 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_test_example() {
-    let input = Day::parse(EXAMPLE).unwrap();
+    let input = parse(EXAMPLE);
     let result = first_part(&input).unwrap();
     assert_eq!(result, 2);
 }
 
 #[test]
 fn first_part_test_example_two() {
-    let input = Day::parse(EXAMPLE_TWO).unwrap();
+    let input = parse(EXAMPLE_TWO);
     let result = first_part(&input).unwrap();
     assert_eq!(result, 3);
 }
 
 #[test]
 fn first_part_test_main() {
-    let input = Day::parse(MAIN).unwrap();
+    let input = parse(MAIN);
     let result = first_part(&input).unwrap();
     assert_eq!(result, 195);
 }
 
 #[test]
 fn second_part_test_example_two() {
-    let input = Day::parse(EXAMPLE_TWO).unwrap();
+    let input = parse(EXAMPLE_TWO);
     let result = second_part(input).unwrap();
     assert_eq!(result, 12);
 }
 
 #[test]
 fn second_part_test_main() {
-    let input = Day::parse(MAIN).unwrap();
+    let input = parse(MAIN);
     let result = second_part(input).unwrap();
     assert_eq!(result, 309);
 }

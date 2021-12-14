@@ -1,31 +1,25 @@
 use std::collections::VecDeque;
-use std::str::FromStr;
 
-use commons::eyre::{eyre, Result};
 use hashbrown::{HashMap, HashSet};
 
+use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Point};
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 20: Donut Maze";
 
-impl Problem for Day {
-    type Input = Maze;
-    const TITLE: &'static str = "Day 20: Donut Maze";
+pub fn run(raw: String) -> Result<()> {
+    let data = Maze::parse(&raw);
+    println!(
+        "The distance from AA to ZZ without recursion is {}",
+        first_part(&data)?
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "The distance from AA to ZZ without recursion is {}",
-            first_part(&data)?
-        );
+    println!(
+        "The distance from AA to ZZ with recursion is {}",
+        second_part(&data)?
+    );
 
-        println!(
-            "The distance from AA to ZZ with recursion is {}",
-            second_part(&data)?
-        );
-
-        Ok(())
-    }
+    Ok(())
 }
 
 fn first_part(maze: &Maze) -> Result<usize> {
@@ -40,7 +34,7 @@ fn second_part(maze: &Maze) -> Result<usize> {
 
 /// Represent the maze to traverse in this problem.
 #[derive(Debug, Clone)]
-pub struct Maze {
+struct Maze {
     graph: HashMap<Point, Vec<Transition>>,
     portals: HashMap<String, Portal>,
 }
@@ -227,17 +221,9 @@ impl Maze {
     }
 }
 
-impl FromStr for Maze {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::parse(s))
-    }
-}
-
 /// Represent a transition to a neighbor in the maze.
 #[derive(Debug, Clone)]
-pub struct Transition {
+struct Transition {
     recursion: Recursion,
     destination: Point,
 }

@@ -1,24 +1,18 @@
 use std::ops::Add;
 
-use commons::eyre::Result;
 use hashbrown::{HashMap, HashSet};
 
+use commons::eyre::Result;
 use commons::grid::Point;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 20: A Regular Map";
 
-impl Problem for Day {
-    type Input = String;
-    const TITLE: &'static str = "Day 20: A Regular Map";
+pub fn run(regex: String) -> Result<()> {
+    let map = build_map(&regex);
+    println!("The furthest room is {} doors away", first_part(&map));
+    println!("{} rooms are more than 1000 doors away", second_part(&map));
 
-    fn solve(regex: Self::Input) -> Result<()> {
-        let map = build_map(&regex);
-        println!("The furthest room is {} doors away", first_part(&map));
-        println!("{} rooms are more than 1000 doors away", second_part(&map));
-
-        Ok(())
-    }
+    Ok(())
 }
 
 /// Find the furthest room in the facility, returns the length of its path

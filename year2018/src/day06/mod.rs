@@ -1,40 +1,51 @@
-use std::str::FromStr;
-
 use itertools::Itertools;
 
-use commons::eyre::Report;
 use commons::eyre::{eyre, Result, WrapErr};
 use commons::grid::Point;
-use commons::Problem;
 
+pub const TITLE: &str = "Day 6: Chronal Coordinates";
 const MAXIMUM_DISTANCE: i64 = 10_000;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!(
+        "The largest finite area is of size {}",
+        data.largest_finite_area()
+            .ok_or_else(|| eyre!("Could not find a finite area"))?
+    );
 
-impl Problem for Day {
-    type Input = Coordinates;
-    const TITLE: &'static str = "Day 6: Chronal Coordinates";
+    println!(
+        "{} points are less than {} from all the coordinates",
+        data.near_points(MAXIMUM_DISTANCE),
+        MAXIMUM_DISTANCE
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "The largest finite area is of size {}",
-            data.largest_finite_area()
-                .ok_or_else(|| eyre!("Could not find a finite area"))?
-        );
+    Ok(())
+}
 
-        println!(
-            "{} points are less than {} from all the coordinates",
-            data.near_points(MAXIMUM_DISTANCE),
-            MAXIMUM_DISTANCE
-        );
+fn parse(s: &str) -> Result<Coordinates> {
+    let points = s
+        .lines()
+        .map(|line| {
+            let (x, y) = line
+                .splitn(2, ',')
+                .map(|part| {
+                    part.trim()
+                        .parse::<i64>()
+                        .wrap_err_with(|| format!("Could not parse a number {0}", part))
+                })
+                .collect_tuple::<(_, _)>()
+                .ok_or_else(|| eyre!("Expected '<X>, <Y>' but got: {}", line))?;
 
-        Ok(())
-    }
+            Ok(Point::new(x?, y?))
+        })
+        .collect::<Result<Vec<Point>>>()?;
+
+    Ok(Coordinates::new(points))
 }
 
 /// All the coordinates that were returned
-#[derive(Debug, Clone)]
-pub struct Coordinates {
+struct Coordinates {
     /// The coordinates to consider
     points: Vec<Point>,
     /// The maximum coordinates of the plane containing the points (minimum are (0, 0))
@@ -43,7 +54,7 @@ pub struct Coordinates {
 
 impl Coordinates {
     /// Create the coordinates from a set of points
-    pub fn new(points: Vec<Point>) -> Self {
+    fn new(points: Vec<Point>) -> Self {
         let (max_x, max_y) = points.iter().fold((0, 0), |(max_x, max_y), point| {
             (max_x.max(point.x), max_y.max(point.y))
         });
@@ -55,7 +66,7 @@ impl Coordinates {
     }
 
     /// Compute the area of each coordinate in the grid, then find the largest finite one
-    pub fn largest_finite_area(&self) -> Option<i32> {
+    fn largest_finite_area(&self) -> Option<i32> {
         let mut areas = vec![0; self.points.len()];
         let mut finite = vec![true; self.points.len()];
         (0..self.max.x)
@@ -77,7 +88,7 @@ impl Coordinates {
     }
 
     /// Count the total of points for which the total distance is less than `maximum_distance`
-    pub fn near_points(&self, maximum_distance: i64) -> usize {
+    fn near_points(&self, maximum_distance: i64) -> usize {
         // This depends on the hypothesis than the near points will be contained
         // In the (0, 0) x (max_x, max_y) Grid
         // Since the maximum_distance is not that huge it should work fine
@@ -98,7 +109,7 @@ impl Coordinates {
 
     /// Find the position in the vector of the nearest coordinate to this point
     /// If multiple coordinates are tied, this returns None
-    pub fn nearest_coordinate(&self, point: Point) -> Option<usize> {
+    fn nearest_coordinate(&self, point: Point) -> Option<usize> {
         let mut previous_min: i64 = i64::MAX;
         let mut min: i64 = i64::MAX;
         let mut pos: Option<usize> = None;
@@ -117,31 +128,6 @@ impl Coordinates {
         } else {
             pos
         }
-    }
-}
-
-impl FromStr for Coordinates {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let points = s
-            .lines()
-            .map(|line| {
-                let (x, y) = line
-                    .splitn(2, ',')
-                    .map(|part| {
-                        part.trim()
-                            .parse::<i64>()
-                            .wrap_err_with(|| format!("Could not parse a number {0}", part))
-                    })
-                    .collect_tuple::<(_, _)>()
-                    .ok_or_else(|| eyre!("Expected '<X>, <Y>' but got: {}", line))?;
-
-                Ok(Point::new(x?, y?))
-            })
-            .collect::<Result<Vec<Point>>>()?;
-
-        Ok(Coordinates::new(points))
     }
 }
 

@@ -1,28 +1,27 @@
-use commons::eyre::Result;
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::Result;
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
-pub struct Day;
+pub const TITLE: &str = "Day 7: Amplification Circuit";
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 7: Amplification Circuit";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!(
+        "The best output with single cycle is {}",
+        single_loop(&data.data)
+    );
+    println!(
+        "The best output with feedback loop is {}",
+        feedback_loop(&data.data)
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "The best output with single cycle is {}",
-            single_loop(&data.data)
-        );
-        println!(
-            "The best output with feedback loop is {}",
-            feedback_loop(&data.data)
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 /// Finds the maximum output with the single loop phases

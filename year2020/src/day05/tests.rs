@@ -41,16 +41,16 @@ fn ordering_test() {
 
 #[test]
 fn first_part_test() {
-    let passes = Day::parse(DATA).unwrap().data;
-    let max = first_part(&passes).unwrap();
+    let passes = parse(DATA).unwrap();
+    let max = first_part(&passes.data).unwrap();
 
     assert_eq!(866, max);
 }
 
 #[test]
 fn second_part_test() {
-    let passes = Day::parse(DATA).unwrap().data;
-    let missing = second_part(passes).unwrap();
+    let passes = parse(DATA).unwrap();
+    let missing = second_part(passes.data).unwrap();
 
     assert_eq!(583, missing);
 }

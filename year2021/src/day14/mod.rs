@@ -1,29 +1,56 @@
 use hashbrown::HashMap;
 use itertools::Itertools;
 
-use commons::eyre::{ensure, eyre, Report, Result};
+use commons::eyre::{ensure, eyre, Result};
 use commons::parse::sep_by_empty_lines;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 14: Extended Polymerization";
 
-impl Problem for Day {
-    type Input = Polymer;
-    const TITLE: &'static str = "Day 14: Extended Polymerization";
+pub fn run(raw: String) -> Result<()> {
+    let polymer = parse(&raw)?;
+    let one = min_max_rates(&polymer.initial, &polymer.rules, 10);
+    println!("1. After 10 steps: {}", one.1 - one.0);
 
-    fn solve(polymer: Self::Input) -> Result<()> {
-        let one = min_max_rates(&polymer.initial, &polymer.rules, 10);
-        println!("1. After 10 steps: {}", one.1 - one.0);
+    let two = min_max_rates(&polymer.initial, &polymer.rules, 40);
+    println!("2. After 40 steps: {}", two.1 - two.0);
 
-        let two = min_max_rates(&polymer.initial, &polymer.rules, 40);
-        println!("2. After 40 steps: {}", two.1 - two.0);
+    Ok(())
+}
 
-        Ok(())
+fn parse(s: &str) -> Result<Polymer> {
+    fn alpha_index(b: u8) -> Result<u8> {
+        b.to_ascii_uppercase()
+            .checked_sub(b'A')
+            .ok_or_else(|| eyre!("Bad character {}", b))
     }
+
+    let (initial, rules) = sep_by_empty_lines(s)
+        .collect_tuple::<(_, _)>()
+        .ok_or_else(|| eyre!("Missing empty line between polymer and rules in {}", s))?;
+
+    let initial = initial.bytes().map(alpha_index).collect::<Result<_>>()?;
+    let rules = rules
+        .lines()
+        .map(|r| -> Result<_> {
+            let (from, to) = r
+                .split_once("->")
+                .ok_or_else(|| eyre!("Missing '->' in {}", r))?;
+            let from = from.trim().as_bytes();
+            let to = to.trim().as_bytes();
+            ensure!(from.len() == 2, "Not 2 elements left of {}", r);
+            ensure!(to.len() == 1, "Not 1 element right of {}", r);
+            Ok((
+                (alpha_index(from[0])?, alpha_index(from[1])?),
+                alpha_index(to[0])?,
+            ))
+        })
+        .collect::<Result<HashMap<_, _>>>()?;
+
+    Ok(Polymer { initial, rules })
 }
 
 /// The puzzle input for the day
-pub struct Polymer {
+struct Polymer {
     /// Initial sequence of polymer, from 0 to 25
     initial: Vec<u8>,
     /// What the next step should insert between a pair of polymer
@@ -69,42 +96,6 @@ fn min_max_rates(initial: &[u8], rules: &HashMap<(u8, u8), u8>, steps: usize) ->
         .minmax()
         .into_option()
         .unwrap_or_default()
-}
-
-impl std::str::FromStr for Polymer {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        fn alpha_index(b: u8) -> Result<u8> {
-            b.to_ascii_uppercase()
-                .checked_sub(b'A')
-                .ok_or_else(|| eyre!("Bad character {}", b))
-        }
-
-        let (initial, rules) = sep_by_empty_lines(s)
-            .collect_tuple::<(_, _)>()
-            .ok_or_else(|| eyre!("Missing empty line between polymer and rules in {}", s))?;
-
-        let initial = initial.bytes().map(alpha_index).collect::<Result<_>>()?;
-        let rules = rules
-            .lines()
-            .map(|r| -> Result<_> {
-                let (from, to) = r
-                    .split_once("->")
-                    .ok_or_else(|| eyre!("Missing '->' in {}", r))?;
-                let from = from.trim().as_bytes();
-                let to = to.trim().as_bytes();
-                ensure!(from.len() == 2, "Not 2 elements left of {}", r);
-                ensure!(to.len() == 1, "Not 1 element right of {}", r);
-                Ok((
-                    (alpha_index(from[0])?, alpha_index(from[1])?),
-                    alpha_index(to[0])?,
-                ))
-            })
-            .collect::<Result<HashMap<_, _>>>()?;
-
-        Ok(Self { initial, rules })
-    }
 }
 
 #[cfg(test)]

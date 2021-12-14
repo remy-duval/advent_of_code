@@ -8,30 +8,30 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example_one() {
-    let points = Day::parse(ONE).unwrap().data;
+    let points = parse(ONE).unwrap().data;
     assert_eq!(count_constellations(&points), 2);
 }
 
 #[test]
 fn first_part_example_two() {
-    let points = Day::parse(TWO).unwrap().data;
+    let points = parse(TWO).unwrap().data;
     assert_eq!(count_constellations(&points), 4);
 }
 
 #[test]
 fn first_part_example_three() {
-    let points = Day::parse(THREE).unwrap().data;
+    let points = parse(THREE).unwrap().data;
     assert_eq!(count_constellations(&points), 3);
 }
 
 #[test]
 fn first_part_example_four() {
-    let points = Day::parse(FOUR).unwrap().data;
+    let points = parse(FOUR).unwrap().data;
     assert_eq!(count_constellations(&points), 8);
 }
 
 #[test]
 fn first_part_main() {
-    let points = Day::parse(MAIN).unwrap().data;
+    let points = parse(MAIN).unwrap().data;
     assert_eq!(count_constellations(&points), 310);
 }

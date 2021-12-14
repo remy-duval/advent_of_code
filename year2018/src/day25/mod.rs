@@ -1,22 +1,21 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 25: Four-Dimensional Adventure";
 
-impl Problem for Day {
-    type Input = LineSep<Point4>;
-    const TITLE: &'static str = "Day 25: Four-Dimensional Adventure";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let count = count_constellations(&data.data);
+    println!("The number of constellations is {}", count);
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let count = count_constellations(&data.data);
-        println!("The number of constellations is {}", count);
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Point4>> {
+    s.parse()
 }
 
 /// Count the number of constellations formed by the given points

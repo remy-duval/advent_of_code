@@ -1,26 +1,24 @@
 use commons::eyre::Result;
 
-use commons::Problem;
-
 mod data;
 
-pub struct Day;
+pub const TITLE: &str = "Day 24: Immune System Simulator 20XX";
 
-impl Problem for Day {
-    type Input = data::Battle;
-    const TITLE: &'static str = "Day 24: Immune System Simulator 20XX";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!(
+        "The winning army ends with {} units",
+        first_part(data.clone())
+    );
+    println!(
+        "The least amount of units the immune system has after winning is {}",
+        second_part(data)
+    );
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "The winning army ends with {} units",
-            first_part(data.clone())
-        );
-        println!(
-            "The least amount of units the immune system has after winning is {}",
-            second_part(data)
-        );
-        Ok(())
-    }
+fn parse(s: &str) -> Result<data::Battle> {
+    s.parse()
 }
 
 /// First part: execute the full battle with no changes

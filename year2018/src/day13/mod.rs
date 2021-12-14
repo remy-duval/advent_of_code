@@ -1,30 +1,66 @@
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
-use std::str::FromStr;
 
-use commons::eyre::Result;
 use hashbrown::HashMap;
 
+use commons::eyre::Result;
 use commons::grid::Direction;
-use commons::Problem;
 
 use crate::points::Point;
 
-pub struct Day;
+pub const TITLE: &str = "Day 13: Mine Cart Madness";
 
-impl Problem for Day {
-    type Input = Network;
-    const TITLE: &'static str = "Day 13: Mine Cart Madness";
+pub fn run(raw: String) -> Result<()> {
+    let mut network = parse(&raw);
+    let crash = first_part(&mut network);
+    println!("The first crash happened at {},{}", crash.x, crash.y);
 
-    fn solve(mut network: Self::Input) -> Result<()> {
-        let crash = first_part(&mut network);
-        println!("The first crash happened at {},{}", crash.x, crash.y);
+    let last = second_part(&mut network);
+    println!("The last cart is at {},{}", last.x, last.y);
 
-        let last = second_part(&mut network);
-        println!("The last cart is at {},{}", last.x, last.y);
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Network {
+    let mut next_id = 0;
+    let mut carts = BTreeMap::new();
+    let mut tracks = HashMap::with_capacity(s.len());
+
+    s.lines().enumerate().for_each(|(y, line)| {
+        line.chars().enumerate().for_each(|(x, c)| {
+            let point = Point::new(x as i64, y as i64);
+            let track: Option<Track> = match c {
+                '-' => Some(Track::Horizontal),
+                '|' => Some(Track::Vertical),
+                '\\' => Some(Track::AntiSlash),
+                '/' => Some(Track::Slash),
+                '+' => Some(Track::Intersection),
+                '^' | '>' | '<' | 'v' => {
+                    let (track, direction) = match c {
+                        '^' => (Track::Vertical, Direction::North),
+                        'v' => (Track::Vertical, Direction::South),
+                        '>' => (Track::Horizontal, Direction::East),
+                        _ => (Track::Horizontal, Direction::West),
+                    };
+                    let cart = Cart {
+                        id: next_id,
+                        turn: Default::default(),
+                        direction,
+                    };
+                    carts.insert(point, cart);
+                    next_id += 1;
+                    Some(track)
+                }
+                _ => None,
+            };
+
+            if let Some(track) = track {
+                tracks.insert(point, track);
+            }
+        });
+    });
+
+    Network { carts, tracks }
 }
 
 /// Run the network until the first crash, returning its position
@@ -45,8 +81,7 @@ fn second_part(network: &mut Network) -> Point {
     }
 }
 /// The rail network and the carts on it
-#[derive(Debug, Clone)]
-pub struct Network {
+struct Network {
     /// The mine carts indexed by their position (ordered correctly since this is a BTreeMap)
     carts: BTreeMap<Point, Cart>,
     /// The rail way tracks
@@ -55,7 +90,7 @@ pub struct Network {
 
 impl Network {
     /// Get the position of the last cart if there is only one left, None otherwise
-    pub fn last_cart(&self) -> Option<Point> {
+    fn last_cart(&self) -> Option<Point> {
         match self.carts.len() {
             1 => Some(*self.carts.iter().next()?.0),
             0 => panic!("No cart remains after the last crash"),
@@ -64,7 +99,7 @@ impl Network {
     }
 
     /// Compute the next tick of the network, returns an Option of any crash that happened
-    pub fn next_tick(&mut self) -> Option<Point> {
+    fn next_tick(&mut self) -> Option<Point> {
         let mut crash = None;
         self.carts
             .clone()
@@ -129,54 +164,8 @@ impl Display for Network {
     }
 }
 
-impl FromStr for Network {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut next_id = 0;
-        let mut carts = BTreeMap::new();
-        let mut tracks = HashMap::with_capacity(s.len());
-
-        s.lines().enumerate().for_each(|(y, line)| {
-            line.chars().enumerate().for_each(|(x, c)| {
-                let point = Point::new(x as i64, y as i64);
-                let track: Option<Track> = match c {
-                    '-' => Some(Track::Horizontal),
-                    '|' => Some(Track::Vertical),
-                    '\\' => Some(Track::AntiSlash),
-                    '/' => Some(Track::Slash),
-                    '+' => Some(Track::Intersection),
-                    '^' | '>' | '<' | 'v' => {
-                        let (track, direction) = match c {
-                            '^' => (Track::Vertical, Direction::North),
-                            'v' => (Track::Vertical, Direction::South),
-                            '>' => (Track::Horizontal, Direction::East),
-                            _ => (Track::Horizontal, Direction::West),
-                        };
-                        let cart = Cart {
-                            id: next_id,
-                            turn: Default::default(),
-                            direction,
-                        };
-                        carts.insert(point, cart);
-                        next_id += 1;
-                        Some(track)
-                    }
-                    _ => None,
-                };
-
-                if let Some(track) = track {
-                    tracks.insert(point, track);
-                }
-            });
-        });
-
-        Ok(Self { carts, tracks })
-    }
-}
-
 /// The state of a mine cart
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 struct Cart {
     /// A unique ID for the cart
     /// Checked when taking the cart turn to see if the cart was not already replaced
@@ -214,7 +203,7 @@ impl Cart {
 }
 
 /// The inner memory of a mine cart about the next turn to make
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 enum Turn {
     /// next turn is to the left
     Left,
@@ -251,7 +240,7 @@ impl Turn {
 }
 
 /// A track in the network
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 enum Track {
     /// a straight '|'
     Horizontal,

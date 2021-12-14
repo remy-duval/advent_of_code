@@ -3,32 +3,30 @@ use std::str::FromStr;
 use hashbrown::HashSet;
 
 use commons::eyre::Result;
-use commons::parse::SepByEmptyLine;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 6: Custom Customs";
 
-impl Problem for Day {
-    type Input = SepByEmptyLine<String>;
-    const TITLE: &'static str = "Day 6: Custom Customs";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw);
+    println!(
+        "The total of YES answers for any participant of each group is {}",
+        first_part(&data)
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "The total of YES answers for any participant of each group is {}",
-            first_part(&data.data)
-        );
+    println!(
+        "The total of YES answers for all participant of each group is {}",
+        second_part(&data)
+    );
 
-        println!(
-            "The total of YES answers for all participant of each group is {}",
-            second_part(&data.data)
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Vec<&str> {
+    commons::parse::sep_by_empty_lines(s).collect()
 }
 
 /// Compute the sum of yes answers for any participant of a group
-fn first_part(groups: &[String]) -> usize {
+fn first_part(groups: &[&str]) -> usize {
     groups
         .iter()
         .map(|group| group.parse::<AnyYesAnswers>().map_or(0, |ans| ans.0))
@@ -36,7 +34,7 @@ fn first_part(groups: &[String]) -> usize {
 }
 
 /// Compute the sum of yes answers for all participants of a group
-fn second_part(groups: &[String]) -> usize {
+fn second_part(groups: &[&str]) -> usize {
     groups
         .iter()
         .map(|group| group.parse::<AllYesAnswers>().map_or(0, |ans| ans.0))

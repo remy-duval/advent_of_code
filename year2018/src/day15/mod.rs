@@ -1,26 +1,24 @@
 use commons::eyre::{eyre, Result};
 
-use commons::Problem;
-
 mod data;
 
-pub struct Day;
+pub const TITLE: &str = "Day 15: Beverage Bandits";
 
-impl Problem for Day {
-    type Input = data::Fight;
-    const TITLE: &'static str = "Day 15: Beverage Bandits";
+pub fn run(raw: String) -> Result<()> {
+    let fight = parse(&raw)?;
+    let (remaining, hp) = fight.clone().first_part();
+    println!("The fight finishes with an outcome of {}", remaining * hp);
 
-    fn solve(fight: Self::Input) -> Result<()> {
-        let (remaining, hp) = fight.clone().first_part();
-        println!("The fight finishes with an outcome of {}", remaining * hp);
+    let (remaining, hp) = fight
+        .second_part()
+        .ok_or_else(|| eyre!("Didn't find an outcome where the elves won without casualties"))?;
+    println!("The elves win with an outcome of {}", remaining * hp);
 
-        let (remaining, hp) = fight.second_part().ok_or_else(|| {
-            eyre!("Didn't find an outcome where the elves won without casualties")
-        })?;
-        println!("The elves win with an outcome of {}", remaining * hp);
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<data::Fight> {
+    Ok(s.parse()?)
 }
 
 #[cfg(test)]

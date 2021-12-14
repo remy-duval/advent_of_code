@@ -1,19 +1,17 @@
 use commons::eyre::Result;
 use commons::parse::CommaSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 6: Lanternfish";
 
-impl Problem for Day {
-    type Input = CommaSep<u8>;
-    const TITLE: &'static str = "Day 6: Lanternfish";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. After 80 days: {} fish", first_part(&data.data));
+    println!("2. After 256 days: {} fish", second_part(&data.data));
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1. After 80 days: {} fish", first_part(&data.data));
-        println!("2. After 256 days: {} fish", second_part(&data.data));
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<CommaSep<u8>> {
+    Ok(s.parse()?)
 }
 
 fn first_part(initial: &[u8]) -> usize {

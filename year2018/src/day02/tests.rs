@@ -6,27 +6,23 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example() {
-    let input = Day::parse(ONE).unwrap().data;
-    assert_eq!(check_sum(&input), 12);
+    assert_eq!(check_sum(ONE), 12);
 }
 
 #[test]
 fn first_part_main() {
-    let input = Day::parse(MAIN).unwrap().data;
-    assert_eq!(check_sum(&input), 6422);
+    assert_eq!(check_sum(MAIN), 6422);
 }
 
 #[test]
 fn second_part_example() {
-    let input = Day::parse(TWO).unwrap().data;
-    assert_eq!(find_different_by_one(&input).unwrap().as_str(), "fgij");
+    assert_eq!(find_different_by_one(TWO).unwrap().as_str(), "fgij");
 }
 
 #[test]
 fn second_part_main() {
-    let input = Day::parse(MAIN).unwrap().data;
     assert_eq!(
-        find_different_by_one(&input).unwrap().as_str(),
+        find_different_by_one(MAIN).unwrap().as_str(),
         "qcslyvphgkrmdawljuefotxbh"
     );
 }

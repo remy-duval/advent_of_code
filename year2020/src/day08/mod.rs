@@ -1,38 +1,36 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashSet;
 
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 8: Handheld Halting";
 
-impl Problem for Day {
-    type Input = LineSep<Operation>;
-    const TITLE: &'static str = "Day 8: Handheld Halting";
+pub fn run(raw: String) -> Result<()> {
+    let mut state = ProgramState::new(parse(&raw)?.data);
+    let (cause, accumulator) = run_until_duplicate_execution(&mut state);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let mut state = ProgramState::new(data.data);
-        let (cause, accumulator) = run_until_duplicate_execution(&mut state);
+    println!(
+        "A loop was detected (caused by {pos}), the accumulator was at {acc}",
+        pos = cause,
+        acc = accumulator
+    );
 
-        println!(
-            "A loop was detected (caused by {pos}), the accumulator was at {acc}",
-            pos = cause,
-            acc = accumulator
-        );
+    // Part 2
+    let (last, accumulator) = replace_and_run(&mut state);
+    println!(
+        "Ran program until {pos}/{max}, the accumulator was at {acc}",
+        pos = last,
+        max = state.operations.len(),
+        acc = accumulator
+    );
 
-        // Part 2
-        let (last, accumulator) = replace_and_run(&mut state);
-        println!(
-            "Ran program until {pos}/{max}, the accumulator was at {acc}",
-            pos = last,
-            max = state.operations.len(),
-            acc = accumulator
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Operation>> {
+    s.parse()
 }
 
 fn run_until_duplicate_execution(state: &mut ProgramState) -> (usize, i32) {
@@ -69,8 +67,7 @@ fn replace_and_run(state: &mut ProgramState) -> (usize, i32) {
 }
 
 /// The state of the program
-#[derive(Debug, Clone, Default)]
-pub struct ProgramState {
+struct ProgramState {
     operations: Vec<Operation>,
     /// The current instruction pointer
     instruction_pointer: usize,
@@ -83,7 +80,8 @@ impl ProgramState {
     fn new(operations: Vec<Operation>) -> Self {
         Self {
             operations,
-            ..Self::default()
+            instruction_pointer: 0,
+            accumulator: 0,
         }
     }
 
@@ -109,7 +107,7 @@ impl ProgramState {
 
 /// An operation to execute in the system
 #[derive(Debug, Copy, Clone)]
-pub enum Operation {
+enum Operation {
     /// Increase the global accumulator by this value, then advance the instruction pointer
     Acc(i32),
     /// Jump to the instruction located relative to itself by its argument

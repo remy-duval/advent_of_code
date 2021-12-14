@@ -2,31 +2,27 @@ use std::fmt::{Display, Formatter};
 
 use commons::eyre::{eyre, Result};
 
-use commons::Problem;
-
 use super::int_code::{IntCodeInput, Processor, Status};
 
+pub const TITLE: &str = "Day 23: Category Six";
 const NETWORK_SIZE: usize = 50;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let memory = parse(&raw)?.data;
+    let output = run_until_nat_packet(&memory)
+        .ok_or_else(|| eyre!("No NAT packet received, but the network has stopped"))?;
+    println!("First NAT packet was : {}\n", output);
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 23: Category Six";
+    println!("Starting network with NAT ON");
+    let output = run_until_duplicate_wakeup(&memory)
+        .ok_or_else(|| eyre!("The network stopped before sending twice the same wakeup"))?;
+    println!("Duplicate Y wake-up was : {}", output);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let memory = data.data;
-        let output = run_until_nat_packet(&memory)
-            .ok_or_else(|| eyre!("No NAT packet received, but the network has stopped"))?;
-        println!("First NAT packet was : {}\n", output);
+    Ok(())
+}
 
-        println!("Starting network with NAT ON");
-        let output = run_until_duplicate_wakeup(&memory)
-            .ok_or_else(|| eyre!("The network stopped before sending twice the same wakeup"))?;
-        println!("Duplicate Y wake-up was : {}", output);
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 /// Runs the network for first part.

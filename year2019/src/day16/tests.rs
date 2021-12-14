@@ -35,7 +35,7 @@ fn patterns_test() {
 #[test]
 fn naive_fft_test() {
     fn assertion(data: &str, steps: usize, expected: [i32; 8]) {
-        let input: Vec<i32> = Day::parse(data).unwrap().0;
+        let input: Vec<i32> = parse(data).unwrap();
         assert_eq!(&expected, &naive_fft(&input, steps)[..8])
     }
 
@@ -52,7 +52,7 @@ fn naive_fft_test() {
 #[test]
 fn fast_second_half_fft_test() {
     fn assertion(data: &str, steps: usize, expected: [i32; 8]) {
-        let input: Vec<i32> = Day::parse(data).unwrap().0;
+        let input: Vec<i32> = parse(data).unwrap();
         assert_eq!(&expected, &fast_second_half_fft(&input, steps)[..])
     }
 

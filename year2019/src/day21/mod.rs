@@ -36,22 +36,20 @@ use std::io::{stdout, BufWriter, Write};
 
 use commons::eyre::Result;
 
-use commons::Problem;
-
 use super::int_code::{IntCodeInput, Processor, Status};
 
-pub struct Day;
+pub const TITLE: &str = "Day 21: Springdroid Adventure";
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 21: Springdroid Adventure";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    first_part(&data.data)?;
+    println!();
+    second_part(&data.data)?;
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        first_part(&data.data)?;
-        println!();
-        second_part(&data.data)?;
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 fn first_part(memory: &[i64]) -> std::io::Result<()> {

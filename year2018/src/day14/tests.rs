@@ -12,10 +12,7 @@ fn first_part_example() {
 
 #[test]
 fn first_part_main() {
-    assert_eq!(
-        first_part(Day::parse(MAIN).unwrap().full_number()),
-        "3811491411"
-    );
+    assert_eq!(first_part(parse(MAIN).full_number()), "3811491411");
 }
 
 #[test]
@@ -28,5 +25,5 @@ fn second_part_example() {
 
 #[test]
 fn second_part_main() {
-    assert_eq!(second_part(Day::parse(MAIN).unwrap()), 20_408_083);
+    assert_eq!(second_part(parse(MAIN)), 20_408_083);
 }

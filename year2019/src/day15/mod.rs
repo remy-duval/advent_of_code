@@ -1,43 +1,40 @@
 use std::collections::VecDeque;
 
-use commons::eyre::{eyre, Result};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Point};
-use commons::Problem;
 use commons::TO_TOP;
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
+pub const TITLE: &str = "Day 15: Oxygen System";
 const FRAME_DELAY: u64 = 0;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let memory = parse(&raw)?.data;
+    let map = explore_map(&memory, true);
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 15: Oxygen System";
+    // First part
+    let (oxygen, path_length) = first_part(&map)?;
+    println!(
+        "The shortest path to the oxygen {} takes {} steps",
+        oxygen, path_length
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let memory = data.data;
-        let map = explore_map(&memory, true);
+    // Second part
+    let path_length = second_part(&map, oxygen)?;
+    println!(
+        "The longest path from the oxygen is {length} steps long, so it would take {length} minutes to fill the area",
+        length = path_length
+    );
 
-        // First part
-        let (oxygen, path_length) = first_part(&map)?;
-        println!(
-            "The shortest path to the oxygen {} takes {} steps",
-            oxygen, path_length
-        );
+    Ok(())
+}
 
-        // Second part
-        let path_length = second_part(&map, oxygen)?;
-        println!(
-            "The longest path from the oxygen is {length} steps long, so it would take {length} minutes to fill the area",
-            length = path_length
-        );
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize)> {

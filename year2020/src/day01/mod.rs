@@ -1,36 +1,35 @@
-use commons::eyre::{eyre, Result};
 use hashbrown::HashSet;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
-pub struct Day;
+pub const TITLE: &str = "Day 1: Report Repair";
 
-impl Problem for Day {
-    type Input = commons::parse::LineSep<u64>;
-    const TITLE: &'static str = "Day 1: Report Repair";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let (first, second) = first_part(&data.data)
+        .ok_or_else(|| eyre!("No 2020 2-elements sum found in {:?}", data.data))?;
+    println!(
+        "2 expenses that sum to 2020: {a} * {b} = {product}",
+        a = first,
+        b = second,
+        product = first * second
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let (first, second) = first_part(&data.data)
-            .ok_or_else(|| eyre!("No 2020 2-elements sum found in {:?}", data.data))?;
-        println!(
-            "2 expenses that sum to 2020: {a} * {b} = {product}",
-            a = first,
-            b = second,
-            product = first * second
-        );
+    let (first, second, third) = second_part(&data.data)
+        .ok_or_else(|| eyre!("No 2020 3-elements sum found in {:?}", data.data))?;
 
-        let (first, second, third) = second_part(&data.data)
-            .ok_or_else(|| eyre!("No 2020 3-elements sum found in {:?}", data.data))?;
+    println!(
+        "3 expenses that sum to 2020: {a} * {b} * {c} = {product}",
+        a = first,
+        b = second,
+        c = third,
+        product = first * second * third
+    );
+    Ok(())
+}
 
-        println!(
-            "3 expenses that sum to 2020: {a} * {b} * {c} = {product}",
-            a = first,
-            b = second,
-            c = third,
-            product = first * second * third
-        );
-        Ok(())
-    }
+fn parse(s: &str) -> Result<commons::parse::LineSep<u64>> {
+    Ok(s.parse()?)
 }
 
 /// Find two elements of `data` that sum to `wanted`.

@@ -1,54 +1,37 @@
-use std::convert::TryInto;
-use std::str::FromStr;
-
-use commons::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
+pub const TITLE: &str = "Day 16: Flawed Frequency Transmission";
 const REPEAT: usize = 10000;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let signal = parse(&raw)?;
+    // First part
+    let output = naive_fft(&signal, 100).into_iter().take(8).join("");
+    println!("The first 8 digits of the simple output are {}", output);
 
-impl Problem for Day {
-    type Input = Signal;
-    const TITLE: &'static str = "Day 16: Flawed Frequency Transmission";
+    // Second part
+    let output = fast_second_half_fft(&signal, 100)
+        .into_iter()
+        .take(8)
+        .join("");
+    println!(
+        "The first 8 digits of the repeated {} times output are {}",
+        REPEAT, output
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        // First part
-        let output = naive_fft(&data.0, 100).into_iter().take(8).join("");
-        println!("The first 8 digits of the simple output are {}", output);
-
-        // Second part
-        let output = fast_second_half_fft(&data.0, 100)
-            .into_iter()
-            .take(8)
-            .join("");
-        println!(
-            "The first 8 digits of the repeated {} times output are {}",
-            REPEAT, output
-        );
-
-        Ok(())
-    }
+    Ok(())
 }
 
-pub struct Signal(Vec<i32>);
+fn parse(s: &str) -> Result<Vec<i32>> {
+    let data: Option<Vec<i32>> = s
+        .chars()
+        .filter(|c| c.is_numeric())
+        .map(|c| c.to_digit(10).and_then(|d| d.try_into().ok()))
+        .collect::<Option<_>>();
 
-impl FromStr for Signal {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let data: Option<Vec<i32>> = s
-            .chars()
-            .filter(|c| c.is_numeric())
-            .map(|c| c.to_digit(10).and_then(|d| d.try_into().ok()))
-            .collect::<Option<_>>();
-
-        Ok(Signal(
-            data.ok_or_else(|| eyre!("Error parsing the input !"))?,
-        ))
-    }
+    data.ok_or_else(|| eyre!("Error parsing the input !"))
 }
 
 /// Applies the FFT using the algorithm given. It is correct but slow.

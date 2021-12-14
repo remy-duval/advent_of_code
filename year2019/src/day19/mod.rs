@@ -1,35 +1,32 @@
 use commons::eyre::Result;
-
 use commons::grid::Point;
-use commons::Problem;
 
 use super::int_code::{IntCodeInput, Processor};
 
-pub struct Day;
+pub const TITLE: &str = "Day 19: Tractor Beam";
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 19: Tractor Beam";
+pub fn run(raw: String) -> Result<()> {
+    let memory = parse(&raw)?.data;
+    // First part
+    let affected = count_pulled(&memory, Point::new(0, 0), Point::new(50, 50));
+    println!(
+        "{} tiles are affected by the beam in the (0,0) (49, 49) square",
+        affected
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let memory = data.data;
-        // First part
-        let affected = count_pulled(&memory, Point::new(0, 0), Point::new(50, 50));
-        println!(
-            "{} tiles are affected by the beam in the (0,0) (49, 49) square",
-            affected
-        );
+    // Second part
+    let first = find_first_square(&memory, 100);
+    println!(
+        "The first point for the square is {}, with code {}",
+        first,
+        first.x * 10_000 + first.y
+    );
 
-        // Second part
-        let first = find_first_square(&memory, 100);
-        println!(
-            "The first point for the square is {}, with code {}",
-            first,
-            first.x * 10_000 + first.y
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 /// Check a range of positive Points to get the number of affected tiles.

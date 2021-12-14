@@ -2,50 +2,66 @@ use std::cmp::Ordering;
 use std::f64::consts;
 use std::fmt::{Display, Formatter};
 use std::io::{stdin, stdout, BufWriter, Write};
-use std::str::FromStr;
 use std::time::Duration;
 
-use commons::eyre::{eyre, Result, WrapErr};
 use hashbrown::HashSet;
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Result, WrapErr};
 use commons::grid::Point;
 use commons::num::integer::gcd;
-use commons::parse::LineSep;
-use commons::Problem;
 use commons::{CLEAR_COMMAND, TO_TOP};
 
-pub struct Day;
+pub const TITLE: &str = "Day 10: Monitoring Station";
 
-impl Problem for Day {
-    type Input = AsteroidField;
-    const TITLE: &'static str = "Day 10: Monitoring Station";
+pub fn run(raw: String) -> Result<()> {
+    let mut asteroids = parse(&raw);
+    let (station, station_view) = asteroids
+        .find_surveillance_point()
+        .ok_or_else(|| eyre!("Not found any surveillance point"))?;
+    asteroids.set_station(station);
+    println!("{}", asteroids);
+    println!(
+        "The best view point is {} which has a view on {} asteroids\n",
+        station,
+        station_view.len()
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let mut asteroids = data;
-        let (station, station_view) = asteroids
-            .find_surveillance_point()
-            .ok_or_else(|| eyre!("Not found any surveillance point"))?;
-        asteroids.set_station(station);
-        println!("{}", asteroids);
-        println!(
-            "The best view point is {} which has a view on {} asteroids\n",
-            station,
-            station_view.len()
-        );
+    // Wait for user input before destroying asteroids
+    println!("Press enter to continue");
+    stdin().read_line(&mut String::new())?;
 
-        // Wait for user input before destroying asteroids
-        println!("Press enter to continue");
-        stdin().read_line(&mut String::new())?;
+    let ordered = field_ordering(&station, station_view);
+    let two_hundredth = ordered[199];
+    asteroids.set_marked(two_hundredth);
+    visualize(&mut asteroids, ordered).wrap_err("IO error during visualization")?;
+    println!("200th destroyed asteroid is {}", two_hundredth);
 
-        let ordered = field_ordering(&station, station_view);
-        let two_hundredth = ordered[199];
-        asteroids.set_marked(two_hundredth);
-        visualize(&mut asteroids, ordered).wrap_err("IO error during visualization")?;
-        println!("200th destroyed asteroid is {}", two_hundredth);
+    Ok(())
+}
 
-        Ok(())
-    }
+struct AsteroidField {
+    max: (usize, usize),
+    field: HashSet<Point>,
+    station: Option<Point>,
+    marked: Option<Point>,
+}
+
+fn parse(s: &str) -> AsteroidField {
+    let field: HashSet<Point> = s
+        .lines()
+        .enumerate()
+        .flat_map(|(y, line)| {
+            line.chars()
+                .enumerate()
+                .filter_map(move |(x, asteroid)| match asteroid {
+                    '#' => Some(Point::new(x as i64, y as i64)),
+                    _ => None,
+                })
+        })
+        .collect();
+
+    AsteroidField::new(field)
 }
 
 /// Orders the field around the given center point (the station)
@@ -83,35 +99,6 @@ fn visualize<T: IntoIterator<Item = Point>>(
         std::thread::sleep(Duration::from_millis(10));
     }
     Ok(())
-}
-
-pub struct AsteroidField {
-    max: (usize, usize),
-    field: HashSet<Point>,
-    station: Option<Point>,
-    marked: Option<Point>,
-}
-
-impl FromStr for AsteroidField {
-    type Err = std::convert::Infallible;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let field: HashSet<Point> = s
-            .parse::<LineSep<String>>()?
-            .data
-            .iter()
-            .enumerate()
-            .flat_map(|(y, line)| {
-                line.chars()
-                    .enumerate()
-                    .filter_map(move |(x, asteroid)| match asteroid {
-                        '#' => Some(Point::new(x as i64, y as i64)),
-                        _ => None,
-                    })
-            })
-            .collect();
-
-        Ok(AsteroidField::new(field))
-    }
 }
 
 impl Display for AsteroidField {

@@ -14,7 +14,7 @@ fn first_part_example_b() {
 
 #[test]
 fn first_part_main() {
-    let serial = Day::parse(MAIN).unwrap();
+    let serial = MAIN.parse().unwrap();
     assert_eq!(first_part(&PartialSumGrid::new(serial)), (21, 77));
 }
 
@@ -30,6 +30,6 @@ fn second_part_example_b() {
 
 #[test]
 fn second_part_main() {
-    let serial = Day::parse(MAIN).unwrap();
+    let serial = MAIN.parse().unwrap();
     assert_eq!(second_part(&PartialSumGrid::new(serial)), (224, 222, 27));
 }

@@ -1,40 +1,57 @@
-use std::str::FromStr;
-
 use itertools::Itertools;
 
-use commons::eyre::{ensure, eyre, Report, Result, WrapErr};
+use commons::eyre::{ensure, eyre, Result, WrapErr};
 use commons::num::integer::{ExtendedGcd, Integer};
-use commons::Problem;
 
-pub type Timestamp = i128;
+pub const TITLE: &str = "Day 13: Shuttle Search";
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let (bus, time) = earliest(&data).ok_or_else(|| eyre!("No bus to find the earliest one"))?;
 
-impl Problem for Day {
-    type Input = Schedule;
-    const TITLE: &'static str = "Day 13: Shuttle Search";
+    println!(
+        "The earliest bus to depart with is {bus} by waiting {min}, product is {product}",
+        bus = bus,
+        min = time,
+        product = bus * time
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let (bus, time) =
-            earliest(&data).ok_or_else(|| eyre!("No bus to find the earliest one"))?;
+    let timestamp = second_part(&data.lines).ok_or_else(|| eyre!("No bus for second part"))??;
 
-        println!(
-            "The earliest bus to depart with is {bus} by waiting {min}, product is {product}",
-            bus = bus,
-            min = time,
-            product = bus * time
-        );
+    println!(
+        "The earliest timestamp at which all lines will start 1 min after the other is {time}",
+        time = timestamp
+    );
 
-        let timestamp =
-            second_part(&data.lines).ok_or_else(|| eyre!("No bus for second part"))??;
+    Ok(())
+}
 
-        println!(
-            "The earliest timestamp at which all lines will start 1 min after the other is {time}",
-            time = timestamp
-        );
+type Timestamp = i128;
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Schedule> {
+    let (first, second) = s.lines().collect_tuple::<(_, _)>().ok_or_else(|| {
+        eyre!(
+            "Expected two lines: earliest timestamp then comma separated bus lines, got {}",
+            s
+        )
+    })?;
+
+    let timestamp: Timestamp = first
+        .parse()
+        .wrap_err_with(|| format!("Could not parse a bus line, got {}", first))?;
+
+    let lines: Vec<Option<Timestamp>> = second
+        .split(',')
+        .map(|elt| match elt.trim() {
+            "x" => Ok(None),
+            number => number
+                .parse::<Timestamp>()
+                .map(Some)
+                .wrap_err_with(|| format!("Could not parse a timestamp, got {}", number)),
+        })
+        .try_collect()?;
+
+    Ok(Schedule { timestamp, lines })
 }
 
 /// Find the earliest departure after the schedule timestamp
@@ -111,42 +128,11 @@ fn chinese_remainder_theorem_2(
 }
 
 /// The bus schedules
-#[derive(Debug, Clone)]
-pub struct Schedule {
+struct Schedule {
     /// The earliest timestamp at which we can depart
     timestamp: Timestamp,
     /// The bus lines (None means unavailable, Some(id) is bus that departs every id minutes)
     lines: Vec<Option<Timestamp>>,
-}
-
-impl FromStr for Schedule {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (first, second) = s.lines().collect_tuple::<(_, _)>().ok_or_else(|| {
-            eyre!(
-                "Expected two lines: earliest timestamp then comma separated bus lines, got {}",
-                s
-            )
-        })?;
-
-        let timestamp: Timestamp = first
-            .parse()
-            .wrap_err_with(|| format!("Could not parse a bus line, got {}", first))?;
-
-        let lines: Vec<Option<Timestamp>> = second
-            .split(',')
-            .map(|elt| match elt.trim() {
-                "x" => Ok(None),
-                number => number
-                    .parse::<Timestamp>()
-                    .map(Some)
-                    .wrap_err_with(|| format!("Could not parse a timestamp, got {}", number)),
-            })
-            .try_collect()?;
-
-        Ok(Self { timestamp, lines })
-    }
 }
 
 #[cfg(test)]

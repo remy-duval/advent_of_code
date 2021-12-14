@@ -1,29 +1,28 @@
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Report, Result};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 7: The Sum of Its Parts";
 
-impl Problem for Day {
-    type Input = LineSep<Step>;
-    const TITLE: &'static str = "Day 7: The Sum of Its Parts";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let requirements = build_requirements(&data.data);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let requirements = build_requirements(&data.data);
+    let steps = process_steps(requirements.clone());
+    println!("The build steps are {}", steps);
 
-        let steps = process_steps(requirements.clone());
-        println!("The build steps are {}", steps);
+    let time = count_time(requirements, 5, 60);
+    println!("The time to finish the sleigh is {}s", time);
 
-        let time = count_time(requirements, 5, 60);
-        println!("The time to finish the sleigh is {}s", time);
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Step>> {
+    s.parse()
 }
 
 /// Build the requirements between steps that will be used everywhere else
@@ -116,8 +115,7 @@ fn count_time(
 }
 
 /// A step in building the sleigh
-#[derive(Debug)]
-pub struct Step {
+struct Step {
     step: char,
     requires: char,
 }

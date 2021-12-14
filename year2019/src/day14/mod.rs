@@ -1,39 +1,36 @@
 use std::iter::Iterator;
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result};
 use hashbrown::HashMap;
 
+use commons::eyre::{eyre, Report, Result};
 use commons::parse::LineSep;
-use commons::Problem;
 
+pub const TITLE: &str = "Day 14: Space Stoichiometry";
 const ORE: &str = "ORE";
 const FUEL: &str = "FUEL";
 const TRILLION: u64 = 1_000_000_000_000;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let reactions = as_reaction_map(parse(&raw)?.data);
+    // Part one
+    let cost_for_one_fuel = produce_fuel_from_ore(1, &reactions);
+    println!(
+        "To produce 1 {} we need {} {}",
+        FUEL, cost_for_one_fuel, ORE
+    );
 
-impl Problem for Day {
-    type Input = LineSep<Reaction>;
-    const TITLE: &'static str = "Day 14: Space Stoichiometry";
+    let maximum_amount = maximum_fuel_produced_from(TRILLION, &reactions);
+    println!(
+        "With {} {} we can produce {} {}",
+        TRILLION, ORE, maximum_amount, FUEL
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let reactions = as_reaction_map(data.data);
-        // Part one
-        let cost_for_one_fuel = produce_fuel_from_ore(1, &reactions);
-        println!(
-            "To produce 1 {} we need {} {}",
-            FUEL, cost_for_one_fuel, ORE
-        );
+    Ok(())
+}
 
-        let maximum_amount = maximum_fuel_produced_from(TRILLION, &reactions);
-        println!(
-            "With {} {} we can produce {} {}",
-            TRILLION, ORE, maximum_amount, FUEL
-        );
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Reaction>> {
+    s.parse()
 }
 
 /// Group the reactions by name
@@ -122,8 +119,7 @@ where
     }
 }
 
-#[derive(Debug)]
-pub struct Reaction {
+struct Reaction {
     result: String,
     times: u64,
     ingredients: HashMap<String, u64>,

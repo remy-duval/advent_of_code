@@ -1,32 +1,24 @@
-use commons::eyre::{eyre, Result};
 use hashbrown::HashMap;
 
-use commons::parse::LineSep;
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
-pub struct Day;
+pub const TITLE: &str = "Day 2: Inventory Management System";
 
-impl Problem for Day {
-    type Input = LineSep<String>;
-    const TITLE: &'static str = "Day 2: Inventory Management System";
+pub fn run(raw: String) -> Result<()> {
+    println!("The checksum is {}", check_sum(&raw));
+    println!(
+        "The common part of the two found box is {}",
+        find_different_by_one(&raw).ok_or_else(|| eyre!("Could not find the two common boxes"))?
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("The checksum is {}", check_sum(&data.data));
-        println!(
-            "The common part of the two found box is {}",
-            find_different_by_one(&data.data)
-                .ok_or_else(|| eyre!("Could not find the two common boxes"))?
-        );
-
-        Ok(())
-    }
+    Ok(())
 }
 
 /// Compute the check sum, (boxes with 2 repeated char * boxes with 3 repeated char)
-fn check_sum(boxes: &[String]) -> u32 {
+fn check_sum(boxes: &str) -> u32 {
     let mut counts: HashMap<char, u32> = HashMap::with_capacity(26);
     let (two, three) = boxes
-        .iter()
+        .lines()
         .fold((0, 0), |(exactly_two, exactly_three), next| {
             next.chars().for_each(|char| {
                 *counts.entry(char).or_insert(0) += 1;
@@ -48,10 +40,10 @@ fn check_sum(boxes: &[String]) -> u32 {
 }
 
 /// Find the two box that differ by one character, and compute the common parts of the two
-fn find_different_by_one(boxes: &[String]) -> Option<String> {
-    let (first, second) = boxes.iter().enumerate().skip(1).find_map(|(i, a)| {
+fn find_different_by_one(boxes: &str) -> Option<String> {
+    let (first, second) = boxes.lines().enumerate().skip(1).find_map(|(i, a)| {
         boxes
-            .iter()
+            .lines()
             .take(i)
             .find(|b| {
                 // Check if the number of differing characters is exactly one
@@ -62,7 +54,7 @@ fn find_different_by_one(boxes: &[String]) -> Option<String> {
                     .count()
                     == 1
             })
-            .map(|b| (a.as_str(), b.as_str()))
+            .map(|b| (a, b))
     })?;
 
     Some(

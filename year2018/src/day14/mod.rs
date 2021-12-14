@@ -1,27 +1,42 @@
-use std::str::FromStr;
-
-use commons::eyre::Result;
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::Result;
 
-pub struct Day;
+pub const TITLE: &str = "Day 14: Chocolate Charts";
 
-impl Problem for Day {
-    type Input = Rules;
-    const TITLE: &'static str = "Day 14: Chocolate Charts";
+pub fn run(raw: String) -> Result<()> {
+    let rules = parse(&raw);
+    println!(
+        "The last ten numbers are {}",
+        first_part(rules.full_number())
+    );
+    println!(
+        "The given scores appear after {} recipes",
+        second_part(rules)
+    );
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "The last ten numbers are {}",
-            first_part(data.full_number())
-        );
-        println!(
-            "The given scores appear after {} recipes",
-            second_part(data)
-        );
-        Ok(())
+/// The rules of the recipe search
+struct Rules(pub Vec<u8>);
+
+impl Rules {
+    /// The number of recipe for the first part
+    fn full_number(&self) -> usize {
+        self.0
+            .iter()
+            .fold(0usize, |acc, &next| acc * 10 + next as usize)
     }
+}
+
+fn parse(s: &str) -> Rules {
+    Rules(
+        s.trim()
+            .chars()
+            .filter_map(|c| char::to_digit(c, 10))
+            .map(|i| i as u8)
+            .collect(),
+    )
 }
 
 fn first_part(after: usize) -> String {
@@ -33,8 +48,7 @@ fn second_part(rules: Rules) -> usize {
 }
 
 /// Iterator on the next elements of the recipe
-#[derive(Debug, Clone)]
-pub struct Recipes {
+struct Recipes {
     first: usize,
     second: usize,
     inner: Vec<u8>,
@@ -43,7 +57,7 @@ pub struct Recipes {
 
 impl Recipes {
     /// Build a new iterator of recipes
-    pub fn new(capacity: usize) -> Self {
+    fn new(capacity: usize) -> Self {
         let mut inner = Vec::with_capacity(capacity);
         inner.push(3);
         inner.push(7);
@@ -56,7 +70,7 @@ impl Recipes {
     }
 
     /// Find the first index of a sequence of elements in the recipes
-    pub fn find(&mut self, needle: &[u8]) -> usize {
+    fn find(&mut self, needle: &[u8]) -> usize {
         assert!(!needle.is_empty());
         let first = needle[0];
         let rest = &needle[1..];
@@ -128,33 +142,6 @@ impl Iterator for Recipes {
         }
         self.current += n;
         self.next()
-    }
-}
-
-/// The rules of the recipe search
-#[derive(Debug, Clone)]
-pub struct Rules(pub Vec<u8>);
-
-impl Rules {
-    /// The number of recipe for the first part
-    pub fn full_number(&self) -> usize {
-        self.0
-            .iter()
-            .fold(0usize, |acc, &next| acc * 10 + next as usize)
-    }
-}
-
-impl FromStr for Rules {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(
-            s.trim()
-                .chars()
-                .filter_map(|c| char::to_digit(c, 10))
-                .map(|i| i as u8)
-                .collect(),
-        ))
     }
 }
 

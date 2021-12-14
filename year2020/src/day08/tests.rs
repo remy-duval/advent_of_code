@@ -5,7 +5,7 @@ const B: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_a() {
-    let data = Day::parse(A).unwrap();
+    let data = parse(A).unwrap();
     let mut state = ProgramState::new(data.data);
 
     let (pos, acc) = run_until_duplicate_execution(&mut state);
@@ -15,7 +15,7 @@ fn first_part_a() {
 
 #[test]
 fn first_part_b() {
-    let data = Day::parse(B).unwrap();
+    let data = parse(B).unwrap();
     let mut state = ProgramState::new(data.data);
 
     let (pos, acc) = run_until_duplicate_execution(&mut state);
@@ -25,7 +25,7 @@ fn first_part_b() {
 
 #[test]
 fn second_part_a() {
-    let data = Day::parse(A).unwrap();
+    let data = parse(A).unwrap();
     let mut state = ProgramState::new(data.data);
 
     let (pos, acc) = replace_and_run(&mut state);
@@ -35,7 +35,7 @@ fn second_part_a() {
 
 #[test]
 fn second_part_b() {
-    let data = Day::parse(B).unwrap();
+    let data = parse(B).unwrap();
     let mut state = ProgramState::new(data.data);
 
     let (pos, acc) = replace_and_run(&mut state);

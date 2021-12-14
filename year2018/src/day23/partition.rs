@@ -177,7 +177,7 @@ impl Cube {
 fn overlaps_test() {
     use super::*;
 
-    let bots = Day::parse(include_str!("example_2.txt")).unwrap().data;
+    let bots = parse(include_str!("example_2.txt")).unwrap().data;
     let base = Cube::new(Point3::new(12, 12, 12), 1);
     assert_eq!(bots.iter().filter(|bot| base.intersects(bot)).count(), 5);
 }

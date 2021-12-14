@@ -10,7 +10,7 @@ const TEST_SIX: &str = include_str!("6.txt");
 #[test]
 fn single_fuel_production() {
     fn assertion(data: &str, requested_fuel: u64, expected_cost: u64) {
-        let parsed = Day::parse(data).expect("Could not parse");
+        let parsed = parse(data).expect("Could not parse");
         let reactions = as_reaction_map(parsed.data);
         let times = produce_fuel_from_ore(requested_fuel, &reactions);
 
@@ -37,7 +37,7 @@ fn single_fuel_production() {
 #[test]
 fn maximum_fuel_production() {
     fn assertion(data: &str, available_ore: u64, expected_fuel: u64) {
-        let parsed = Day::parse(data).expect("Could not parse");
+        let parsed = parse(data).expect("Could not parse");
         let reactions = as_reaction_map(parsed.data);
         let fuel = maximum_fuel_produced_from(available_ore, &reactions);
 

@@ -5,26 +5,26 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example() {
-    let input = Day::parse(EXAMPLE).unwrap();
+    let input = parse(EXAMPLE).unwrap();
     assert_eq!(71, input.error_rate);
 }
 
 #[test]
 fn first_part_main() {
-    let input = Day::parse(MAIN).unwrap();
+    let input = parse(MAIN).unwrap();
     assert_eq!(27870, input.error_rate);
 }
 
 #[test]
 fn second_part_example() {
-    let input = Day::parse(EXAMPLE).unwrap();
+    let input = parse(EXAMPLE).unwrap();
     let headers = input.find_headers().unwrap();
     assert_eq!(&headers, &["row", "class", "seat"]);
 }
 
 #[test]
 fn second_part_main() {
-    let input = Day::parse(MAIN).unwrap();
+    let input = parse(MAIN).unwrap();
     let headers = input.find_headers().unwrap();
 
     assert_eq!(

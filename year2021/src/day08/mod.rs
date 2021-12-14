@@ -1,19 +1,17 @@
 use commons::eyre::{bail, eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 8: Seven Segment Search";
 
-impl Problem for Day {
-    type Input = LineSep<Outputs>;
-    const TITLE: &'static str = "Day 8: Seven Segment Search";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. {} simple digits", first_part(&data.data));
+    println!("2. {} total output", second_part(&data.data)?);
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1. {} simple digits", first_part(&data.data));
-        println!("2. {} total output", second_part(&data.data)?);
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Outputs>> {
+    s.parse()
 }
 
 const DIGITS: usize = 10;
@@ -88,7 +86,7 @@ fn resolve(output: &Outputs) -> Result<[WireBitSet; DIGITS]> {
 
 /// The puzzle input
 #[derive(Debug)]
-pub struct Outputs {
+struct Outputs {
     /// The unknown digits, represented by their wires set
     unknown: [WireBitSet; DIGITS],
     /// The output we need to read, containing some of the elements in `unknown`

@@ -1,48 +1,47 @@
 use std::collections::VecDeque;
 
-use commons::eyre::{eyre, Result};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 use commons::CLEAR_COMMAND;
 
 use super::int_code::{IntCodeInput, Processor};
 
 mod ship;
 
-pub struct Day;
+pub const TITLE: &str = "Day 25: Cryostasis";
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 25: Cryostasis";
-
-    fn solve(data: Self::Input) -> Result<()> {
-        let mut line = String::new();
-        loop {
-            println!("Mode ? (options are manual / script)");
-            line.clear();
-            std::io::stdin().read_line(&mut line)?;
-            line = line.to_ascii_lowercase().trim().into();
-            match line.as_str() {
-                "manual" => {
-                    play_manually(&data.data);
-                    return Ok(());
-                }
-                "script" => {
-                    let timer = std::time::Instant::now();
-                    return if let Some(code) = auto_play(&data.data) {
-                        let elapsed = timer.elapsed();
-                        println!("The key code is '{}'", code);
-                        println!("Finding the key code took {}s", elapsed.as_secs_f64());
-                        Ok(())
-                    } else {
-                        Err(eyre!("Could not find the key code at the end"))
-                    };
-                }
-                _ => println!("Unrecognized : {}", line),
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let mut line = String::new();
+    loop {
+        println!("Mode ? (options are manual / script)");
+        line.clear();
+        std::io::stdin().read_line(&mut line)?;
+        line = line.to_ascii_lowercase().trim().into();
+        match line.as_str() {
+            "manual" => {
+                play_manually(&data.data);
+                return Ok(());
             }
+            "script" => {
+                let timer = std::time::Instant::now();
+                return if let Some(code) = auto_play(&data.data) {
+                    let elapsed = timer.elapsed();
+                    println!("The key code is '{}'", code);
+                    println!("Finding the key code took {}s", elapsed.as_secs_f64());
+                    Ok(())
+                } else {
+                    Err(eyre!("Could not find the key code at the end"))
+                };
+            }
+            _ => println!("Unrecognized : {}", line),
         }
     }
+}
+
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 /// The current state of the game to allow deciding the next action to take

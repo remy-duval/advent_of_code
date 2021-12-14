@@ -1,17 +1,19 @@
 #![allow(unused)]
 
 use commons::eyre::{eyre, Result};
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "";
 
-impl Problem for Day {
-    type Input = String;
-    const TITLE: &'static str = "";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. TODO");
+    println!("2. TODO");
 
-    fn solve(data: Self::Input) -> Result<()> {
-        Err(eyre!("TODO"))
-    }
+    Err(eyre!("TODO"))
+}
+
+fn parse(s: &str) -> Result<String> {
+    Ok(s.parse()?)
 }
 
 #[cfg(test)]

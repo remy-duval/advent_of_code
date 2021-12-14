@@ -3,20 +3,18 @@ use hashbrown::{hash_map::Entry, HashMap};
 use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::grid::Point;
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 5: Hydrothermal Venture";
 
-impl Problem for Day {
-    type Input = LineSep<Segment>;
-    const TITLE: &'static str = "Day 5: Hydrothermal Venture";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. Overlapping (no diagonals) {}", first_part(&data.data));
+    println!("2. Overlapping (diagonals) {}", second_part(&data.data));
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1. Overlapping (no diagonals) {}", first_part(&data.data));
-        println!("1. Overlapping (diagonals) {}", second_part(&data.data));
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Segment>> {
+    s.parse()
 }
 
 fn first_part(segments: &[Segment]) -> usize {
@@ -55,7 +53,7 @@ fn overlapping_points(segments: &[Segment], use_diagonals: bool) -> usize {
 }
 
 /// A segment for the puzzle
-pub struct Segment {
+struct Segment {
     from: Point<i16>,
     to: Point<i16>,
 }
@@ -94,12 +92,12 @@ impl std::str::FromStr for Segment {
         }
 
         let (from, to) = s
-            .split_once(" -> ")
-            .ok_or_else(|| eyre!("Bad line: {}", s))?;
+            .split_once("->")
+            .ok_or_else(|| eyre!("Missing '->' separator: {}", s))?;
 
         Ok(Self {
-            from: point(from.trim()).wrap_err("Bad from point")?,
-            to: point(to.trim()).wrap_err("Bad to point")?,
+            from: point(from.trim()).wrap_err_with(|| from.to_owned())?,
+            to: point(to.trim()).wrap_err_with(|| to.to_owned())?,
         })
     }
 }

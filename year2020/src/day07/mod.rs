@@ -1,39 +1,68 @@
-use commons::eyre::{eyre, Result, WrapErr};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result, WrapErr};
+
+pub const TITLE: &str = "Day 7: Handy Haversacks";
+pub fn run(raw: String) -> Result<()> {
+    let rules = parse(&raw)?;
+    println!(
+        "{bags} contains a {wanted} bag",
+        bags = first_part(&rules),
+        wanted = WANTED_BAG
+    );
+
+    println!(
+        "A {bag} will contain {count} bags",
+        bag = WANTED_BAG,
+        count = second_part(&rules)
+    );
+
+    Ok(())
+}
 
 /// The wanted bag
 const WANTED_BAG: &str = "shiny gold";
-
-pub struct Day;
-
-impl Problem for Day {
-    type Input = String;
-    const TITLE: &'static str = "Day 7: Handy Haversacks";
-
-    fn solve(data: Self::Input) -> Result<()> {
-        let rules = parse_rules(&data)?;
-        println!(
-            "{bags} contains a {wanted} bag",
-            bags = first_part(&rules),
-            wanted = WANTED_BAG
-        );
-
-        println!(
-            "A {bag} will contain {count} bags",
-            bag = WANTED_BAG,
-            count = second_part(&rules)
-        );
-
-        Ok(())
-    }
-}
-
 type Bag<'a> = &'a str;
 type BagRule<'a> = HashMap<Bag<'a>, u32>;
 type Rules<'a> = HashMap<Bag<'a>, BagRule<'a>>;
+
+fn parse(raw: &str) -> Result<Rules<'_>> {
+    raw.lines()
+        .map(|line| {
+            let line = line.trim_end_matches('.');
+            let (bag, rules) = line
+                .split_once("bags contain")
+                .map(|(a, b)| (a.trim(), b.trim()))
+                .ok_or_else(|| eyre!("Missing element in the string for a rule {}", line))?;
+
+            let rules = if rules == "no other bags" {
+                HashMap::new()
+            } else {
+                rules
+                    .split(',')
+                    .map(|rule| {
+                        let rule = rule.trim().trim_end_matches("bag").trim_end_matches("bags");
+                        let (number, bag) = rule
+                            .split_once(' ')
+                            .map(|(a, b)| (a.trim(), b.trim()))
+                            .ok_or_else(|| {
+                                eyre!("Missing element in the string for a rule {}", rule)
+                            })?;
+
+                        let number = number.parse::<u32>().wrap_err_with(|| {
+                            format!("Could not parse a number of bag in the rule {}", rule)
+                        })?;
+
+                        Ok((bag, number))
+                    })
+                    .collect::<Result<_>>()?
+            };
+
+            Ok((bag, rules))
+        })
+        .try_collect()
+}
 
 /// Find the number of bags that can contain the wanted one (recursively)
 fn first_part<'a>(all_rules: &Rules<'a>) -> usize {
@@ -107,43 +136,6 @@ fn count_bags_inside<'a>(
     } else {
         0
     }
-}
-
-fn parse_rules(raw: &str) -> Result<Rules<'_>> {
-    raw.lines()
-        .map(|line| {
-            let line = line.trim_end_matches('.');
-            let (bag, rules) = line
-                .split_once("bags contain")
-                .map(|(a, b)| (a.trim(), b.trim()))
-                .ok_or_else(|| eyre!("Missing element in the string for a rule {}", line))?;
-
-            let rules = if rules == "no other bags" {
-                HashMap::new()
-            } else {
-                rules
-                    .split(',')
-                    .map(|rule| {
-                        let rule = rule.trim().trim_end_matches("bag").trim_end_matches("bags");
-                        let (number, bag) = rule
-                            .split_once(' ')
-                            .map(|(a, b)| (a.trim(), b.trim()))
-                            .ok_or_else(|| {
-                                eyre!("Missing element in the string for a rule {}", rule)
-                            })?;
-
-                        let number = number.parse::<u32>().wrap_err_with(|| {
-                            format!("Could not parse a number of bag in the rule {}", rule)
-                        })?;
-
-                        Ok((bag, number))
-                    })
-                    .collect::<Result<_>>()?
-            };
-
-            Ok((bag, rules))
-        })
-        .try_collect()
 }
 
 #[cfg(test)]

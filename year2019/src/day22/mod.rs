@@ -1,33 +1,30 @@
 use std::str::FromStr;
 
 use commons::eyre::{eyre, Report, Result};
-
 use commons::num::integer::{mod_floor, ExtendedGcd, Integer};
 use commons::parse::LineSep;
-use commons::Problem;
 
+pub const TITLE: &str = "Day 22: Slam Shuffle";
 const DECK: i128 = 119_315_717_514_047;
 const REPEAT: i128 = 101_741_582_076_661;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!(
+        "The final position of the 2019th card is {}",
+        first_part(data.data.clone())
+    );
 
-impl Problem for Day {
-    type Input = LineSep<Shuffle>;
-    const TITLE: &'static str = "Day 22: Slam Shuffle";
+    println!(
+        "The initial position of the 2020th card was {}",
+        second_part(data.data)
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "The final position of the 2019th card is {}",
-            first_part(data.data.clone())
-        );
+    Ok(())
+}
 
-        println!(
-            "The initial position of the 2020th card was {}",
-            second_part(data.data)
-        );
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Shuffle>> {
+    s.parse()
 }
 
 fn first_part(shuffles: Vec<Shuffle>) -> i128 {
@@ -51,7 +48,7 @@ fn modular_inverse(a: i128, n: i128) -> i128 {
 
 /// Represents a Shuffle operations for the problem.
 #[derive(Debug, Copy, Clone)]
-pub enum Shuffle {
+enum Shuffle {
     NewStack,
     Cut(i32),
     Deal(i32),
@@ -118,14 +115,14 @@ impl Default for LinearFunction {
 impl LinearFunction {
     /// Applies this LCF to the given input.
     /// This produces the position of the card after the shuffling.
-    pub fn apply(&self, input: i128, size: i128) -> i128 {
+    fn apply(&self, input: i128, size: i128) -> i128 {
         let &Self(a, b) = self;
         mod_floor(mod_floor(a * input, size) + b, size)
     }
 
     /// Compose this LCF with another one (with the given modulo)
     /// This is equivalent to chaining shuffling operations corresponding to the operands
-    pub fn compose_with(self, rhs: Self, size: i128) -> Self {
+    fn compose_with(self, rhs: Self, size: i128) -> Self {
         let Self(a, b) = self;
         let Self(c, d) = rhs;
         let first = mod_floor(a * c, size);
@@ -137,7 +134,7 @@ impl LinearFunction {
     /// Exponential for this LCF to the power of the given exponent.
     /// As the LCF composition is associative, repeating exponent times a shuffling
     /// Is equivalent to applying one time shuffling.pow(exponent)
-    pub fn pow(self, exponent: i128, size: i128) -> Self {
+    fn pow(self, exponent: i128, size: i128) -> Self {
         if exponent == 0 {
             return Self::default();
         }
@@ -158,7 +155,7 @@ impl LinearFunction {
 
     /// Inverse of this LCF.
     /// This LCF will give the initial position of a card finishing at the input given
-    pub fn inverse(self, size: i128) -> Self {
+    fn inverse(self, size: i128) -> Self {
         let Self(a, b) = self;
         let a_inverse = modular_inverse(a, size);
 
@@ -167,7 +164,7 @@ impl LinearFunction {
 
     /// Fold the given collection of LCF into one single LCF.
     /// This is used to fuse the whole shuffling into one linear function.
-    pub fn fold<I, A>(shuffles: I, size: i128) -> LinearFunction
+    fn fold<I, A>(shuffles: I, size: i128) -> LinearFunction
     where
         A: Into<Self>,
         I: IntoIterator<Item = A>,

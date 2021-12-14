@@ -1,23 +1,21 @@
 use commons::eyre::{bail, Report, Result};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 2: Dive!";
 
-impl Problem for Day {
-    type Input = LineSep<Command>;
-    const TITLE: &'static str = "Day 2: Dive!";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. Horizontal x Depth = {}", first_part(&data.data));
+    println!("2. Horizontal x Depth = {}", second_part(&data.data));
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1. Horizontal x Depth = {}", first_part(&data.data));
-        println!("2. Horizontal x Depth = {}", second_part(&data.data));
-
-        Ok(())
-    }
+fn parse(raw: &str) -> Result<LineSep<Command>> {
+    raw.parse()
 }
 
 #[derive(Copy, Clone)]
-pub enum Command {
+enum Command {
     Forward(u8),
     Up(u8),
     Down(u8),

@@ -68,7 +68,7 @@ fn calibration_test_a() {
 
 #[test]
 fn calibration_test_b() {
-    let memory = Day::parse(CODE).unwrap().data;
+    let memory = parse(CODE).unwrap().data;
     let scaffold = Scaffold::from_camera_program(&memory, false).unwrap();
     let calibration = scaffold.intersections_sum();
 
@@ -88,7 +88,7 @@ fn straight_path_test_a() {
 
 #[test]
 fn straight_path_test_b() {
-    let memory = Day::parse(CODE).unwrap().data;
+    let memory = parse(CODE).unwrap().data;
     let scaffold = Scaffold::from_camera_program(&memory, false).unwrap();
     let path = scaffold.straight_ahead_path().iter().join(",");
 
@@ -114,7 +114,7 @@ fn compression_test_a() {
 
 #[test]
 fn compression_test_b() {
-    let memory = Day::parse(CODE).unwrap().data;
+    let memory = parse(CODE).unwrap().data;
     let scaffold = Scaffold::from_camera_program(&memory, false).unwrap();
     let path = scaffold.straight_ahead_path();
     let (main, a, b, c) = compression(&path, (5, 20)).unwrap();

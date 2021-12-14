@@ -1,39 +1,36 @@
-use commons::eyre::Result;
 use hashbrown::HashMap;
 use itertools::Itertools;
 
-use commons::Problem;
-
-use crate::day04::events::Event;
+use commons::eyre::Result;
 
 mod events;
 
-pub struct Day;
+pub const TITLE: &str = "Day 4: Repose Record";
 
-impl Problem for Day {
-    type Input = events::Events;
-    const TITLE: &'static str = "Day 4: Repose Record";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let schedule = Schedule::new(&data.events);
+    let (guard, sleepiest) = schedule.first_strategy().unwrap();
+    println!(
+        "Strategy 1: The sleepiest guard is {} at 00:{:02} for a result of {}",
+        guard,
+        sleepiest,
+        guard * sleepiest
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let schedule = Schedule::new(&data.events);
-        let (guard, sleepiest) = schedule.first_strategy().unwrap();
-        println!(
-            "Strategy 1: The sleepiest guard is {} at 00:{:02} for a result of {}",
-            guard,
-            sleepiest,
-            guard * sleepiest
-        );
+    let (guard, sleepiest) = schedule.second_strategy().unwrap();
+    println!(
+        "Strategy 2: The sleepiest guard is {} at 00:{:02} for a result of {}",
+        guard,
+        sleepiest,
+        guard * sleepiest
+    );
 
-        let (guard, sleepiest) = schedule.second_strategy().unwrap();
-        println!(
-            "Strategy 2: The sleepiest guard is {} at 00:{:02} for a result of {}",
-            guard,
-            sleepiest,
-            guard * sleepiest
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<events::Events> {
+    s.parse()
 }
 
 #[derive(Debug)]
@@ -43,7 +40,7 @@ struct Schedule {
 
 impl Schedule {
     /// Create the schedule of the guards
-    pub fn new(events: &[events::TimedEvent]) -> Self {
+    fn new(events: &[events::TimedEvent]) -> Self {
         assert!(!events.is_empty());
         let mut guards: HashMap<u16, [u16; 60]> = HashMap::new();
         let mut guard = 0;
@@ -66,9 +63,9 @@ impl Schedule {
                 }
 
                 is_asleep = match event.event {
-                    Event::Sleep => true,
-                    Event::WakeUp => false,
-                    Event::Change(id) => {
+                    events::Event::Sleep => true,
+                    events::Event::WakeUp => false,
+                    events::Event::Change(id) => {
                         next_guard = id;
                         if event.timestamp.hour == 0 {
                             guard = id;

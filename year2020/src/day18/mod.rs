@@ -1,26 +1,21 @@
 use std::str::FromStr;
 
 use commons::eyre::{eyre, Report, Result, WrapErr};
-
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 18: Operation Order";
 
-impl Problem for Day {
-    type Input = LineSep<Operation>;
-    const TITLE: &'static str = "Day 18: Operation Order";
+pub fn run(raw: String) -> Result<()> {
+    let tokens = parse(&raw)?.data;
+    let first = first_part(&tokens)?;
+    println!("No precedence: The sum of each line is {}", first);
+    let second = second_part(&tokens)?;
+    println!("Addition precedence: The sum of each line is {}", second);
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let tokens = data.data;
-        let first = first_part(&tokens)?;
-        println!("No precedence: The sum of each line is {}", first);
-
-        let second = second_part(&tokens)?;
-        println!("Addition precedence: The sum of each line is {}", second);
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Operation>> {
+    s.parse()
 }
 
 fn first_part(tokens: &[Operation]) -> Result<u64> {
@@ -35,12 +30,11 @@ fn second_part(tokens: &[Operation]) -> Result<u64> {
 }
 
 /// An operation to evaluate
-#[derive(Debug, Clone)]
-pub struct Operation(Vec<Token>);
+struct Operation(Vec<Token>);
 
 impl Operation {
     /// Evaluate the operation with no precedence difference between + and *
-    pub fn evaluate_no_precedence(&self) -> Result<u64> {
+    fn evaluate_no_precedence(&self) -> Result<u64> {
         self.shunting_yard(|op| match op {
             Operator::Plus => 2,
             Operator::Mul => 2,
@@ -50,7 +44,7 @@ impl Operation {
     }
 
     /// Evaluate the operation with a higher precedence for + than for *
-    pub fn evaluate_addition_has_precedence(&self) -> Result<u64> {
+    fn evaluate_addition_has_precedence(&self) -> Result<u64> {
         self.shunting_yard(|op| match op {
             Operator::Plus => 3,
             Operator::Mul => 2,
@@ -165,7 +159,7 @@ impl Operator {
 }
 
 /// A raw token parsed from the operation String (any significant element of it)
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 enum Token {
     Operator(Operator),
     Number(u64),

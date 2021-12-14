@@ -1,35 +1,23 @@
 use commons::eyre::Result;
 use commons::parse::CommaSep;
-use commons::Problem;
 
+pub const TITLE: &str = "Day 15: Rambunctious Recitation";
 const FIRST_TURNS: u32 = 2020;
 const SECOND_TURNS: u32 = 30000000;
 
-/// This day is based on the [Van Eck sequence](https://www.numberphile.com/videos/van-eck-sequence)
-///
-/// The definition of the Van Eck sequence is:
-/// * `VanEck(0)` = `0`
-/// * `VanEck(n+1)` =
-///   * if `VanEck(n)` exists in `VanEck(0..n)` `n - prev_occ`
-///   * else `0`
-///
-/// In this our the base case is overridden with the given `prefix`:
-/// Such that `VanEck(0..prefix.len())` = `prefix`
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let first = nth_spoken_number(&data.data, FIRST_TURNS);
+    println!("The {}th spoken is {}", FIRST_TURNS, first);
 
-impl Problem for Day {
-    type Input = CommaSep<u32>;
-    const TITLE: &'static str = "Day 15: Rambunctious Recitation";
+    let second = nth_spoken_number(&data.data, SECOND_TURNS);
+    println!("The {}th spoken is {}", SECOND_TURNS, second);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let first = nth_spoken_number(&data.data, FIRST_TURNS);
-        println!("The {}th spoken is {}", FIRST_TURNS, first);
+    Ok(())
+}
 
-        let second = nth_spoken_number(&data.data, SECOND_TURNS);
-        println!("The {}th spoken is {}", SECOND_TURNS, second);
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<CommaSep<u32>> {
+    Ok(s.parse()?)
 }
 
 /// Compute the nth term using a Vec as the backing memoization:

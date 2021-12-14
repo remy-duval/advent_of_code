@@ -1,33 +1,31 @@
-use commons::eyre::Result;
 use hashbrown::HashMap;
 use itertools::Itertools;
 
+use commons::eyre::Result;
 use commons::grid::{Direction, Point};
-use commons::Problem;
 
 use super::int_code::{IntCodeError, IntCodeInput, Processor, Status};
 
-pub struct Day;
+pub const TITLE: &str = "Day 11: Space Police";
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 11: Space Police";
+pub fn run(raw: String) -> Result<()> {
+    let memory = parse(&raw)?.data;
+    let mut hull: HashMap<Point, u8> = HashMap::new();
+    println!("\n{}\n", paint_hull(&memory, &mut hull)?);
+    println!("The robot painted {} tiles\n\n", hull.len());
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let memory = data.data;
-        let mut hull: HashMap<Point, u8> = HashMap::new();
-        println!("\n{}\n", paint_hull(&memory, &mut hull)?);
-        println!("The robot painted {} tiles\n\n", hull.len());
+    hull.clear();
+    hull.insert(Point::new(0, 0), 1);
+    println!(
+        "The robot painted something:\n{}",
+        paint_hull(&memory, &mut hull)?
+    );
 
-        hull.clear();
-        hull.insert(Point::new(0, 0), 1);
-        println!(
-            "The robot painted something:\n{}",
-            paint_hull(&memory, &mut hull)?
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 /// Run the IntCode processor given to paint the hull

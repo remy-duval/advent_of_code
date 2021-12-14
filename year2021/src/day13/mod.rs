@@ -3,30 +3,60 @@ use std::collections::VecDeque;
 use hashbrown::HashSet;
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Report, Result};
+use commons::eyre::{eyre, Result};
 use commons::grid::Point;
 use commons::parse::sep_by_empty_lines;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 13: Transparent Origami";
 
-impl Problem for Day {
-    type Input = Origami;
-    const TITLE: &'static str = "Day 13: Transparent Origami";
+pub fn run(raw: String) -> Result<()> {
+    let mut origami = parse(&raw)?;
+    origami.fold_once();
+    println!("1. Dots after first fold: {}", origami.count());
+    origami.fold_all();
+    println!("2. Final origami:\n{}", origami);
+    Ok(())
+}
 
-    fn solve(mut origami: Self::Input) -> Result<()> {
-        origami.fold_once();
-        println!("1. Dots after first fold: {}", origami.count());
-        origami.fold_all();
-        println!("2. Final origami:\n{}", origami);
+fn parse(s: &str) -> Result<Origami> {
+    let (dots, folds) = sep_by_empty_lines(s)
+        .collect_tuple::<(_, _)>()
+        .ok_or_else(|| eyre!("Missing empty line between dots and folds"))?;
 
-        Ok(())
-    }
+    let dots = dots
+        .lines()
+        .map(|d| -> Result<Point<i16>> {
+            let (x, y) = d
+                .split_once(',')
+                .ok_or_else(|| eyre!("Missing ',' for a point: {}", d))?;
+            Ok(Point::new(x.parse()?, y.parse()?))
+        })
+        .collect::<Result<HashSet<_>>>()?;
+
+    let folds = folds
+        .lines()
+        .map(|f| -> Result<Fold> {
+            match f
+                .strip_prefix("fold along")
+                .and_then(|f| f.trim().split_once('='))
+            {
+                Some(("x", x)) => Ok(Fold::Left(x.parse()?)),
+                Some(("y", y)) => Ok(Fold::Up(y.parse()?)),
+                _ => Err(eyre!("Can't parse fold instruction: {}", f)),
+            }
+        })
+        .collect::<Result<VecDeque<_>>>()?;
+
+    let buffer = dots.clone();
+    Ok(Origami {
+        dots,
+        folds,
+        buffer,
+    })
 }
 
 /// The origami to process in this puzzle
-#[derive(Debug)]
-pub struct Origami {
+struct Origami {
     /// The dots of the origami
     dots: HashSet<Point<i16>>,
     /// The remaining folds to apply
@@ -36,7 +66,6 @@ pub struct Origami {
 }
 
 /// A fold instruction for the origami
-#[derive(Debug)]
 enum Fold {
     Left(i16),
     Up(i16),
@@ -83,47 +112,6 @@ impl Origami {
         } else {
             false
         }
-    }
-}
-
-impl std::str::FromStr for Origami {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        let (dots, folds) = sep_by_empty_lines(s)
-            .collect_tuple::<(_, _)>()
-            .ok_or_else(|| eyre!("Missing empty line between dots and folds"))?;
-
-        let dots = dots
-            .lines()
-            .map(|d| -> Result<Point<i16>> {
-                let (x, y) = d
-                    .split_once(',')
-                    .ok_or_else(|| eyre!("Missing ',' for a point: {}", d))?;
-                Ok(Point::new(x.parse()?, y.parse()?))
-            })
-            .collect::<Result<HashSet<_>>>()?;
-
-        let folds = folds
-            .lines()
-            .map(|f| -> Result<Fold> {
-                match f
-                    .strip_prefix("fold along")
-                    .and_then(|f| f.trim().split_once('='))
-                {
-                    Some(("x", x)) => Ok(Fold::Left(x.parse()?)),
-                    Some(("y", y)) => Ok(Fold::Up(y.parse()?)),
-                    _ => Err(eyre!("Can't parse fold instruction: {}", f)),
-                }
-            })
-            .collect::<Result<VecDeque<_>>>()?;
-
-        let buffer = dots.clone();
-        Ok(Self {
-            dots,
-            folds,
-            buffer,
-        })
     }
 }
 

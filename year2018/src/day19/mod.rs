@@ -1,24 +1,22 @@
 use commons::eyre::Result;
 
-use commons::Problem;
-
 use super::instructions::{Int, Program};
 
-pub struct Day;
+pub const TITLE: &str = "Day 19: Go With The Flow";
 
-impl Problem for Day {
-    type Input = Program;
-    const TITLE: &'static str = "Day 19: Go With The Flow";
+pub fn run(raw: String) -> Result<()> {
+    let program = parse(&raw)?;
+    let first = run_optimized(program.clone(), 0)?;
+    println!("Run 1: The register 0 contains {} on exit", first);
 
-    fn solve(program: Self::Input) -> Result<()> {
-        let first = run_optimized(program.clone(), 0)?;
-        println!("Run 1: The register 0 contains {} on exit", first);
+    let second = run_optimized(program, 1)?;
+    println!("Run 2: The register 0 contains {} on exit", second);
 
-        let second = run_optimized(program, 1)?;
-        println!("Run 2: The register 0 contains {} on exit", second);
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Program> {
+    s.parse()
 }
 
 /// Run the given input program, optimizing the critical section to make it not run for hours

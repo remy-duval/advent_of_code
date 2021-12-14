@@ -2,32 +2,30 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use commons::eyre::{bail, eyre, Report, Result};
-
 use commons::grid::Grid;
 use commons::num::integer::Integer;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 18: Settlers of The North Pole";
 
-impl Problem for Day {
-    type Input = Area;
-    const TITLE: &'static str = "Day 18: Settlers of The North Pole";
+pub fn run(raw: String) -> Result<()> {
+    let area = parse(&raw)?;
+    let (trees, lumberyard) = first_part(area.clone()).trees_and_lumberyards();
+    println!(
+        "After 10 minutes: {} trees and {} lumberyards: {} resources",
+        trees,
+        lumberyard,
+        trees * lumberyard
+    );
 
-    fn solve(area: Self::Input) -> Result<()> {
-        let (trees, lumberyard) = first_part(area.clone()).trees_and_lumberyards();
-        println!(
-            "After 10 minutes: {} trees and {} lumberyards: {} resources",
-            trees,
-            lumberyard,
-            trees * lumberyard
-        );
+    let second =
+        second_part(area).ok_or_else(|| eyre!("Could not find the period of the system"))?;
+    println!("After one billion minutes: {} resources", second);
 
-        let second =
-            second_part(area).ok_or_else(|| eyre!("Could not find the period of the system"))?;
-        println!("After one billion minutes: {} resources", second);
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Area> {
+    s.parse()
 }
 
 /// Compute the first ten minutes
@@ -97,8 +95,8 @@ fn find_period(diffs: &[isize]) -> Option<(Vec<isize>, usize)> {
 }
 
 /// The representation of an area
-#[derive(Debug, Clone)]
-pub struct Area(Grid<Tile>);
+#[derive(Clone)]
+struct Area(Grid<Tile>);
 
 impl Area {
     /// Compute the total of the resources in the area

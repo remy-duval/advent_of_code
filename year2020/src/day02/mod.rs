@@ -1,27 +1,25 @@
 use std::str::FromStr;
 
 use commons::eyre::{eyre, Report, Result, WrapErr};
-
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 2: Password Philosophy";
 
-impl Problem for Day {
-    type Input = LineSep<Password>;
-    const TITLE: &'static str = "Day 2: Password Philosophy";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!(
+        "{} passwords respect the first policy",
+        first_part(&data.data)
+    );
+    println!(
+        "{} passwords respect the second policy",
+        second_part(&data.data)
+    );
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "{} passwords respect the first policy",
-            first_part(&data.data)
-        );
-        println!(
-            "{} passwords respect the second policy",
-            second_part(&data.data)
-        );
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<Password>> {
+    s.parse()
 }
 
 fn first_part(data: &[Password]) -> usize {
@@ -37,7 +35,7 @@ fn second_part(data: &[Password]) -> usize {
 }
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct Password {
+struct Password {
     parameters: (u8, u8),
     character: char,
     value: String,

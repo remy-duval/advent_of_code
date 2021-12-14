@@ -9,27 +9,27 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example() {
-    let input = Day::parse(ONE).unwrap().data;
+    let input = parse(ONE).unwrap().data;
     assert_eq!(sum(&input), 3);
 }
 
 #[test]
 fn first_part_main() {
-    let input = Day::parse(MAIN).unwrap().data;
+    let input = parse(MAIN).unwrap().data;
     assert_eq!(sum(&input), 513);
 }
 
 #[test]
 fn second_part_example() {
-    assert_eq!(first_repeated(&Day::parse(ONE).unwrap().data), 2);
-    assert_eq!(first_repeated(&Day::parse(TWO).unwrap().data), 0);
-    assert_eq!(first_repeated(&Day::parse(THREE).unwrap().data), 10);
-    assert_eq!(first_repeated(&Day::parse(FOUR).unwrap().data), 5);
-    assert_eq!(first_repeated(&Day::parse(FIVE).unwrap().data), 14);
+    assert_eq!(first_repeated(&parse(ONE).unwrap().data), 2);
+    assert_eq!(first_repeated(&parse(TWO).unwrap().data), 0);
+    assert_eq!(first_repeated(&parse(THREE).unwrap().data), 10);
+    assert_eq!(first_repeated(&parse(FOUR).unwrap().data), 5);
+    assert_eq!(first_repeated(&parse(FIVE).unwrap().data), 14);
 }
 
 #[test]
 fn second_part_main() {
-    let input = Day::parse(MAIN).unwrap().data;
+    let input = parse(MAIN).unwrap().data;
     assert_eq!(first_repeated(&input), 287);
 }

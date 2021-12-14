@@ -4,7 +4,7 @@ const DATA: &str = include_str!("data.txt");
 
 #[test]
 fn solve_test() {
-    let mut memory = Day::parse(DATA).unwrap().data;
+    let mut memory = parse(DATA).unwrap().data;
     memory[0] = 2;
     let mut engine = Processor::new(&memory);
     let mut state = GameState::default();

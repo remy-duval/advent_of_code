@@ -1,51 +1,34 @@
-use std::str::FromStr;
-
-use commons::eyre::{eyre, Report, Result};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
-pub struct Day;
+pub const TITLE: &str = "Day 4: Secure Container";
 
-impl Problem for Day {
-    type Input = Between;
-    const TITLE: &'static str = "Day 4: Secure Container";
+pub fn run(raw: String) -> Result<()> {
+    let (from, to) = parse(&raw)?;
+    println!("Range is {}..{}", from, to);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let Between { from, to } = data;
-        println!("Range is {}..{}", from, to);
+    let (first, second) = solve(from, to);
+    println!("The number of valid possibilities is {}", first);
+    println!(
+        "The number of valid possibilities with increased strictness is {}",
+        second
+    );
 
-        let (first, second) = solve(from, to);
-        println!("The number of valid possibilities is {}", first);
-        println!(
-            "The number of valid possibilities with increased strictness is {}",
-            second
-        );
-
-        Ok(())
-    }
+    Ok(())
 }
 
-pub struct Between {
-    from: i32,
-    to: i32,
-}
-
-impl FromStr for Between {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((a, b)) = s.split('-').collect_tuple() {
-            let from: i32 = a.parse()?;
-            let to: i32 = b.parse()?;
-            if from >= to {
-                Err(eyre!("{} >= {}", from, to))
-            } else {
-                Ok(Between { from, to })
-            }
+fn parse(s: &str) -> Result<(i32, i32)> {
+    if let Some((a, b)) = s.split('-').collect_tuple() {
+        let from: i32 = a.parse()?;
+        let to: i32 = b.parse()?;
+        if from >= to {
+            Err(eyre!("{} >= {}", from, to))
         } else {
-            Err(eyre!("Didn't find the lower and higher bound in {}", s))
+            Ok((from, to))
         }
+    } else {
+        Err(eyre!("Didn't find the lower and higher bound in {}", s))
     }
 }
 

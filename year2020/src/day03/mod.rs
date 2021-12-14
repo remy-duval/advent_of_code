@@ -1,25 +1,27 @@
-use std::str::FromStr;
-
 use commons::eyre::Result;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 3: Toboggan Trajectory";
 
-impl Problem for Day {
-    type Input = Forest;
-    const TITLE: &'static str = "Day 3: Toboggan Trajectory";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!(
+        "Using a slope of (3, 1), you will encounter {} trees",
+        first_part(&data)
+    );
+    println!(
+        "The product trees numbers at slopes (1, 1), (3, 1), (5, 1), (7, 1) and (1, 2) is {}",
+        second_part(&data)
+    );
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "Using a slope of (3, 1), you will encounter {} trees",
-            first_part(&data)
-        );
-        println!(
-            "The product trees numbers at slopes (1, 1), (3, 1), (5, 1), (7, 1) and (1, 2) is {}",
-            second_part(&data)
-        );
-        Ok(())
-    }
+fn parse(s: &str) -> Result<Forest> {
+    let trees: Vec<Vec<bool>> = s
+        .lines()
+        .map(|line| line.chars().map(|char| char == '#').collect())
+        .collect();
+
+    Ok(Forest { trees })
 }
 
 fn first_part(data: &Forest) -> usize {
@@ -56,8 +58,7 @@ fn count_tree_at_slope(forest: &Forest, slope: (usize, usize)) -> usize {
     trees
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Forest {
+struct Forest {
     trees: Vec<Vec<bool>>,
 }
 
@@ -75,19 +76,6 @@ impl Forest {
             .get(position.1)
             .and_then(|tree_line| tree_line.get(position.0 % tree_line.len()))
             .map_or(false, |&b| b)
-    }
-}
-
-impl FromStr for Forest {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let trees: Vec<Vec<bool>> = s
-            .lines()
-            .map(|line| line.chars().map(|char| char == '#').collect())
-            .collect();
-
-        Ok(Forest { trees })
     }
 }
 

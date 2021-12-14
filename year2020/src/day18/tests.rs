@@ -94,14 +94,14 @@ fn addition_precedence_test_f() {
 
 #[test]
 fn first_part_test() {
-    let input = Day::parse(MAIN).unwrap().data;
+    let input = parse(MAIN).unwrap().data;
     let result = first_part(&input).unwrap();
     assert_eq!(result, 202_553_439_706);
 }
 
 #[test]
 fn second_part_test() {
-    let input = Day::parse(MAIN).unwrap().data;
+    let input = parse(MAIN).unwrap().data;
     let result = second_part(&input).unwrap();
     assert_eq!(result, 88_534_268_715_686);
 }

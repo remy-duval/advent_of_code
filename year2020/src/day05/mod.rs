@@ -1,29 +1,23 @@
-use std::str::FromStr;
-
-use commons::eyre::{bail, ensure, Report, Result};
 use itertools::Itertools;
 
+use commons::eyre::{bail, ensure, Report, Result};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 5: Binary Boarding";
 
-impl Problem for Day {
-    type Input = LineSep<BoardingPass>;
-    const TITLE: &'static str = "Day 5: Binary Boarding";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let max = first_part(&data.data).unwrap_or_default();
+    println!("The maximum seat ID on the plane is {}", max);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let max = first_part(&data.data).unwrap_or_default();
-        println!("The maximum seat ID on the plane is {max}", max = max);
+    let missing = second_part(data.data).unwrap_or_default();
+    println!("The missing seat ID on the plane is {}", missing);
 
-        let missing = second_part(data.data).unwrap_or_default();
-        println!(
-            "The missing seat ID on the plane is {missing}",
-            missing = missing
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<LineSep<BoardingPass>> {
+    s.parse()
 }
 
 /// Find the maximum seat id on the plane
@@ -36,7 +30,7 @@ fn second_part(mut passes: Vec<BoardingPass>) -> Option<u16> {
     passes.sort();
     passes
         .into_iter()
-        .tuple_windows::<(BoardingPass, BoardingPass)>()
+        .tuple_windows::<(_, _)>()
         .find_map(|(current, next)| {
             if current.seat + 1 != next.seat {
                 Some(current.seat + 1)
@@ -47,12 +41,12 @@ fn second_part(mut passes: Vec<BoardingPass>) -> Option<u16> {
 }
 
 /// A boarding pass
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
-pub struct BoardingPass {
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
+struct BoardingPass {
     seat: u16,
 }
 
-impl FromStr for BoardingPass {
+impl std::str::FromStr for BoardingPass {
     type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {

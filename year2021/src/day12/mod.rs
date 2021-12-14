@@ -1,18 +1,46 @@
-use commons::eyre::{ensure, eyre, Report, Result};
-use commons::Problem;
+use commons::eyre::{ensure, eyre, Result};
 
-pub struct Day;
+pub const TITLE: &str = "Day 12: Passage Pathing";
 
-impl Problem for Day {
-    type Input = Paths;
-    const TITLE: &'static str = "Day 12: Passage Pathing";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. Paths count is {}", first_part(&data)?);
+    println!("2. Paths count is {}", second_part(&data)?);
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1. Paths count is {}", first_part(&data)?);
-        println!("2. Paths count is {}", second_part(&data)?);
-
-        Ok(())
+fn parse(s: &str) -> Result<Paths> {
+    fn find_or_insert(id: &str, caves: &mut Vec<Cave>) -> usize {
+        match caves.iter().position(|c| c.id == id) {
+            Some(i) => i,
+            None => {
+                let id = id.to_owned();
+                let small = id.chars().all(|x| x.is_ascii_lowercase());
+                let paths = Vec::new();
+                caves.push(Cave { id, small, paths });
+                caves.len() - 1
+            }
+        }
     }
+
+    let mut caves: Vec<Cave> = Vec::with_capacity(32);
+    s.lines().try_for_each(|line| {
+        if let Some((from, to)) = line.split_once('-') {
+            let from_id = find_or_insert(from, &mut caves);
+            let to_id = find_or_insert(to, &mut caves);
+            caves[from_id].paths.push(to_id);
+            caves[to_id].paths.push(from_id);
+            Ok(())
+        } else {
+            Err(eyre!("Missing delimiter '-'"))
+        }
+    })?;
+
+    let start = caves.iter().position(|c| c.id == "start");
+    let start = start.ok_or_else(|| eyre!("Missing start cave"))?;
+    let end = caves.iter().position(|c| c.id == "end");
+    let end = end.ok_or_else(|| eyre!("Missing end cave"))?;
+    Ok(Paths { start, end, caves })
 }
 
 fn first_part(paths: &Paths) -> Result<usize> {
@@ -74,7 +102,7 @@ fn count_paths(paths: &Paths, can_visit_small_twice: bool) -> Result<usize> {
 }
 
 /// The paths for the puzzle
-pub struct Paths {
+struct Paths {
     /// The index of the entry
     start: usize,
     /// The index of the exit
@@ -104,44 +132,6 @@ impl VisitedSet {
     fn with(&self, i: usize) -> Self {
         let mask = 1 << i;
         Self(self.0 | mask)
-    }
-}
-
-impl std::str::FromStr for Paths {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        fn find_or_insert(id: &str, caves: &mut Vec<Cave>) -> usize {
-            match caves.iter().position(|c| c.id == id) {
-                Some(i) => i,
-                None => {
-                    let id = id.to_owned();
-                    let small = id.chars().all(|x| x.is_ascii_lowercase());
-                    let paths = Vec::new();
-                    caves.push(Cave { id, small, paths });
-                    caves.len() - 1
-                }
-            }
-        }
-
-        let mut caves: Vec<Cave> = Vec::with_capacity(32);
-        s.lines().try_for_each(|line| {
-            if let Some((from, to)) = line.split_once('-') {
-                let from_id = find_or_insert(from, &mut caves);
-                let to_id = find_or_insert(to, &mut caves);
-                caves[from_id].paths.push(to_id);
-                caves[to_id].paths.push(from_id);
-                Ok(())
-            } else {
-                Err(eyre!("Missing delimiter '-'"))
-            }
-        })?;
-
-        let start = caves.iter().position(|c| c.id == "start");
-        let start = start.ok_or_else(|| eyre!("Missing start cave"))?;
-        let end = caves.iter().position(|c| c.id == "end");
-        let end = end.ok_or_else(|| eyre!("Missing end cave"))?;
-        Ok(Self { start, end, caves })
     }
 }
 

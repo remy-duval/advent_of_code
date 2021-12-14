@@ -1,39 +1,38 @@
-use commons::eyre::{eyre, Result};
-use itertools::{Itertools, MinMaxResult};
+use itertools::Itertools;
 
+use commons::eyre::{eyre, Result};
 use commons::parse::LineSep;
-use commons::Problem;
+
+pub const TITLE: &str = "Day 9: Encoding Error";
+
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let wanted = first_not_sum(&data.data, PREAMBLE)
+        .ok_or_else(|| eyre!("Did not find the first element that is not a sum"))?;
+
+    println!(
+        "The first element that is not a sum of the previous ones is {first}",
+        first = wanted
+    );
+
+    let (min, max) = second_part(&data.data, wanted)
+        .ok_or_else(|| eyre!("Did not find the slice that can be summed to {}", wanted))?;
+
+    println!(
+        "The slice between {min} and {max} (sum is {sum}) will sum up to it",
+        min = min,
+        max = max,
+        sum = min + max
+    );
+
+    Ok(())
+}
+
+fn parse(s: &str) -> Result<LineSep<u64>> {
+    Ok(s.parse()?)
+}
 
 const PREAMBLE: usize = 25;
-
-pub struct Day;
-
-impl Problem for Day {
-    type Input = LineSep<u64>;
-    const TITLE: &'static str = "Day 9: Encoding Error";
-
-    fn solve(data: Self::Input) -> Result<()> {
-        let wanted = first_not_sum(&data.data, PREAMBLE)
-            .ok_or_else(|| eyre!("Did not find the first element that is not a sum"))?;
-
-        println!(
-            "The first element that is not a sum of the previous ones is {first}",
-            first = wanted
-        );
-
-        let (min, max) = second_part(&data.data, wanted)
-            .ok_or_else(|| eyre!("Did not find the slice that can be summed to {}", wanted))?;
-
-        println!(
-            "The slice between {min} and {max} (sum is {sum}) will sum up to it",
-            min = min,
-            max = max,
-            sum = min + max
-        );
-
-        Ok(())
-    }
-}
 
 /// Find the first element in `data` that is not a sum of the `from_previous` previous elements
 fn first_not_sum(data: &[u64], from_previous: usize) -> Option<u64> {
@@ -50,10 +49,11 @@ fn first_not_sum(data: &[u64], from_previous: usize) -> Option<u64> {
 
 /// Find the first contiguous set that sum up to `wanted` in `data` and get its min and max
 fn second_part(data: &[u64], wanted: u64) -> Option<(u64, u64)> {
-    match contiguous_set(data, wanted)?.iter().minmax() {
-        MinMaxResult::MinMax(min, max) => Some((*min, *max)),
-        _ => None,
-    }
+    contiguous_set(data, wanted)?
+        .iter()
+        .copied()
+        .minmax()
+        .into_option()
 }
 
 /// Find the first contiguous set of at least 2 elements in `data` that sum up to `wanted`

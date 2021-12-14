@@ -1,19 +1,17 @@
 use commons::eyre::Result;
 use commons::parse::CommaSep;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 7: The Treachery of Whales";
 
-impl Problem for Day {
-    type Input = CommaSep<i32>;
-    const TITLE: &'static str = "Day 7: The Treachery of Whales";
+pub fn run(raw: String) -> Result<()> {
+    let mut data = parse(&raw)?;
+    println!("1. Linear fuel cost {}", first_part(&mut data.data));
+    println!("2. Quadratic fuel cost {}", second_part(&data.data));
+    Ok(())
+}
 
-    fn solve(mut data: Self::Input) -> Result<()> {
-        println!("1. Linear fuel cost {}", first_part(&mut data.data));
-        println!("1. Quadratic fuel cost {}", second_part(&data.data));
-
-        Ok(())
-    }
+fn parse(s: &str) -> Result<CommaSep<i32>> {
+    Ok(s.parse()?)
 }
 
 /// Find the minimum sum of distances to a central point where the distance is linear

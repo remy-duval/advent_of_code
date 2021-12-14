@@ -5,7 +5,7 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example() {
-    let steps = Day::parse(EXAMPLE).unwrap().data;
+    let steps = parse(EXAMPLE).unwrap().data;
     let requirements = build_requirements(&steps);
     let steps = process_steps(requirements);
     assert_eq!(steps, "CABDFE");
@@ -13,7 +13,7 @@ fn first_part_example() {
 
 #[test]
 fn first_part_main() {
-    let steps = Day::parse(MAIN).unwrap().data;
+    let steps = parse(MAIN).unwrap().data;
     let requirements = build_requirements(&steps);
     let steps = process_steps(requirements);
     assert_eq!(steps, "HPDTNXYLOCGEQSIMABZKRUWVFJ");
@@ -21,7 +21,7 @@ fn first_part_main() {
 
 #[test]
 fn second_part_example() {
-    let steps = Day::parse(EXAMPLE).unwrap().data;
+    let steps = parse(EXAMPLE).unwrap().data;
     let requirements = build_requirements(&steps);
     let time = count_time(requirements, 2, 0);
     assert_eq!(time, 15);
@@ -29,7 +29,7 @@ fn second_part_example() {
 
 #[test]
 fn second_part_main() {
-    let steps = Day::parse(MAIN).unwrap().data;
+    let steps = parse(MAIN).unwrap().data;
     let requirements = build_requirements(&steps);
     let time = count_time(requirements, 5, 60);
     assert_eq!(time, 908);

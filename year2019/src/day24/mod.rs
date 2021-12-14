@@ -1,30 +1,35 @@
 use std::{
     collections::HashSet,
     fmt::{Display, Formatter},
-    str::FromStr,
 };
 
-use commons::eyre::Result;
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::Result;
 
-pub struct Day;
+pub const TITLE: &str = "Day 24: Planet of Discord";
 
-impl Problem for Day {
-    type Input = Bugs;
-    const TITLE: &'static str = "Day 24: Planet of Discord";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw);
+    let result = first_repeat(data);
+    println!("{}", result);
+    println!("Biodiversity rating is {}", result.biodiversity_rating());
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let result = first_repeat(data);
-        println!("{}", result);
-        println!("Biodiversity rating is {}", result.biodiversity_rating());
+    let result = recursive_expansion(data, 200);
+    println!("The number of bugs after 200 minutes is {} (Yikes)", result);
 
-        let result = recursive_expansion(data, 200);
-        println!("The number of bugs after 200 minutes is {} (Yikes)", result);
+    Ok(())
+}
 
-        Ok(())
+fn parse(s: &str) -> Bugs {
+    let mut bugs = [[false; 5]; 5];
+    for (y, line) in s.lines().take(5).enumerate() {
+        for (x, c) in line.chars().take(5).enumerate() {
+            bugs[y][x] = c == '#';
+        }
     }
+
+    Bugs { bugs }
 }
 
 /// Computes next states of the Bugs with no recursion until we get one we saw before.
@@ -85,23 +90,8 @@ fn recursive_expansion(start: Bugs, n: usize) -> usize {
 
 /// Represent a Bugs state for one minute
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
-pub struct Bugs {
+struct Bugs {
     bugs: [[bool; 5]; 5],
-}
-
-impl FromStr for Bugs {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut bugs = [[false; 5]; 5];
-        for (y, line) in s.lines().take(5).enumerate() {
-            for (x, c) in line.chars().take(5).enumerate() {
-                bugs[y][x] = c == '#';
-            }
-        }
-
-        Ok(Self { bugs })
-    }
 }
 
 impl Display for Bugs {
@@ -121,7 +111,7 @@ impl Display for Bugs {
 
 impl Bugs {
     /// Compute the biodiversity rating of this state
-    pub fn biodiversity_rating(&self) -> u64 {
+    fn biodiversity_rating(&self) -> u64 {
         let mut current_power = 1;
         let mut total = 0;
         for line in self.bugs.iter() {
@@ -137,7 +127,7 @@ impl Bugs {
     }
 
     /// The number of insects in this.
-    pub fn insects_number(&self) -> usize {
+    fn insects_number(&self) -> usize {
         self.bugs
             .iter()
             .map(|line| line.iter().filter(|x| **x).count())
@@ -145,12 +135,12 @@ impl Bugs {
     }
 
     /// Computes the next state of this (after 1 minute), without recursion
-    pub fn next_state(&self) -> Self {
+    fn next_state(&self) -> Self {
         self.lifecycle(self.count_neighbors(), false)
     }
 
     /// Computes the next state using the recursive configuration of the second part
-    pub fn recursive_next_state(&self, enclosing: Option<&Self>, middle: Option<&Self>) -> Self {
+    fn recursive_next_state(&self, enclosing: Option<&Self>, middle: Option<&Self>) -> Self {
         let mut count = self.count_neighbors();
 
         // Add the count for the enclosing bugs

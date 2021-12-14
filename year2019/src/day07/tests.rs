@@ -39,7 +39,7 @@ fn second_part() {
 
 #[test]
 fn solve_test() {
-    let memory = Day::parse(DATA).unwrap().data;
+    let memory = parse(DATA).unwrap().data;
     assert_eq!(11828, single_loop(&memory));
     assert_eq!(1_714_298, feedback_loop(&memory));
 }

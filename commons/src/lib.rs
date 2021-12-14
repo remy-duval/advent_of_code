@@ -26,10 +26,6 @@ pub use eyre;
 /// Re-export of num library
 pub use num;
 
-pub use arguments::Day;
-pub use problem::Problem;
-pub use problem::{load, solve};
-
 /// String to print in the console to return to the top
 pub const TO_TOP: &str = "\u{001b}[H";
 /// String to print in the console to clear the screen

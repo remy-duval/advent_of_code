@@ -1,41 +1,60 @@
 use std::collections::VecDeque;
 use std::hash::{BuildHasher, Hash, Hasher};
-use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Result, WrapErr};
 use commons::parse::sep_by_empty_lines;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 22: Crab Combat";
 
-impl Problem for Day {
-    type Input = Game;
-    const TITLE: &'static str = "Day 22: Crab Combat";
-
-    fn solve(mut game: Self::Input) -> Result<()> {
-        println!("Normal winner score is {}", game.clone().normal_play());
-        println!("Recursive winner score: {}", game.advanced_play());
-
-        Ok(())
-    }
+pub fn run(raw: String) -> Result<()> {
+    let mut game = parse(&raw)?;
+    println!("Normal winner score is {}", game.clone().normal_play());
+    println!("Recursive winner score: {}", game.advanced_play());
+    Ok(())
 }
 
 /// The number type used to represents the game cards (u8 should be enough, cards are < 50
 type Card = u8;
 
 /// The state of the decks of a game
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct Game {
+#[derive(Clone, Eq, PartialEq, Hash)]
+struct Game {
     first_player: VecDeque<Card>,
     second_player: VecDeque<Card>,
 }
 
+fn parse(s: &str) -> Result<Game> {
+    let (first_player, second_player) = sep_by_empty_lines(s)
+        .flat_map(|blk| blk.split_terminator("\n\n"))
+        .map(|block| {
+            block
+                .lines()
+                .skip(1)
+                .map(|line| {
+                    line.trim()
+                        .parse::<Card>()
+                        .wrap_err_with(|| format!("Could not parse a card as an integer {}", line))
+                })
+                .collect::<Result<VecDeque<Card>, _>>()
+        })
+        .collect_tuple::<(_, _)>()
+        .ok_or_else(|| eyre!("Missing a player section in {}", s))?;
+
+    let first_player = first_player?;
+    let second_player: VecDeque<Card> = second_player?;
+
+    Ok(Game {
+        first_player,
+        second_player,
+    })
+}
+
 impl Game {
     /// Play a normal game (no recursion)
-    pub fn normal_play(&mut self) -> usize {
+    fn normal_play(&mut self) -> usize {
         while !self.is_done() {
             if let Some((first, second)) = self.draw() {
                 if first > second {
@@ -50,7 +69,7 @@ impl Game {
     }
 
     /// Play an advanced game (recursion enabled)
-    pub fn advanced_play(&mut self) -> usize {
+    fn advanced_play(&mut self) -> usize {
         self.play_recursively(&mut HashMap::with_capacity(100));
         self.score()
     }
@@ -152,36 +171,6 @@ impl Game {
             .rev()
             .enumerate()
             .fold(0, |acc, (idx, card)| acc + (idx + 1) * card)
-    }
-}
-
-impl FromStr for Game {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (first_player, second_player) = sep_by_empty_lines(s)
-            .flat_map(|blk| blk.split_terminator("\n\n"))
-            .map(|block| {
-                block
-                    .lines()
-                    .skip(1)
-                    .map(|line| {
-                        line.trim().parse::<Card>().wrap_err_with(|| {
-                            format!("Could not parse a card as an integer {}", line)
-                        })
-                    })
-                    .collect::<Result<VecDeque<Card>, _>>()
-            })
-            .collect_tuple::<(_, _)>()
-            .ok_or_else(|| eyre!("Missing a player section in {}", s))?;
-
-        let first_player = first_player?;
-        let second_player: VecDeque<Card> = second_player?;
-
-        Ok(Self {
-            first_player,
-            second_player,
-        })
     }
 }
 

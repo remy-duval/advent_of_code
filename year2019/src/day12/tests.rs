@@ -6,8 +6,8 @@ const DATA: &str = include_str!("data.txt");
 
 #[test]
 fn parse_test() {
-    let first: Moons = TEST_ONE.parse().unwrap();
-    let second: Moons = TEST_TWO.parse().unwrap();
+    let first = parse(TEST_ONE).unwrap();
+    let second = parse(TEST_TWO).unwrap();
 
     assert_eq!(
         Moons::new([[-1, 0, 2], [2, -10, -7], [4, -8, 8], [3, 5, -1]]),
@@ -21,8 +21,8 @@ fn parse_test() {
 
 #[test]
 fn energy_test() {
-    let mut first: Moons = TEST_ONE.parse().unwrap();
-    let mut second: Moons = TEST_TWO.parse().unwrap();
+    let mut first = parse(TEST_ONE).unwrap();
+    let mut second = parse(TEST_TWO).unwrap();
 
     (0..10).for_each(|_| first.next());
     assert_eq!(179, first.energy());
@@ -33,8 +33,8 @@ fn energy_test() {
 
 #[test]
 fn periodicity_test() {
-    let first: Moons = TEST_ONE.parse().unwrap();
-    let second: Moons = TEST_TWO.parse().unwrap();
+    let first = parse(TEST_ONE).unwrap();
+    let second = parse(TEST_TWO).unwrap();
 
     assert_eq!(2772, find_periodicity(first));
     assert_eq!(4_686_774_924, find_periodicity(second));
@@ -42,7 +42,7 @@ fn periodicity_test() {
 
 #[test]
 fn solve_test() {
-    let mut moons: Moons = Day::parse(DATA).unwrap();
+    let mut moons = parse(DATA).unwrap();
     (0..STEPS).for_each(|_| moons.next());
     let total_energy = moons.energy();
     assert_eq!(9493, total_energy);

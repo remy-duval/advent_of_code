@@ -9,9 +9,7 @@ const DATA: &str = include_str!("data.txt");
 #[test]
 fn check_surveillance_point() {
     fn assertion(data: &str, expected_station: Point, expected_count: usize) {
-        let (station, view) = data
-            .parse::<AsteroidField>()
-            .expect("Parse error !")
+        let (station, view) = parse(data)
             .find_surveillance_point()
             .expect("Not found any surveillance point");
 
@@ -38,7 +36,7 @@ fn check_surveillance_point() {
 
 #[test]
 fn destroy_order() {
-    let asteroids: AsteroidField = TEST_FOUR.parse().expect("Parse error !");
+    let asteroids = parse(TEST_FOUR);
     let (station, view) = asteroids
         .find_surveillance_point()
         .expect("Not found any surveillance point");
@@ -68,7 +66,7 @@ fn destroy_order() {
 
 #[test]
 fn solve_test() {
-    let mut asteroids: AsteroidField = DATA.parse().unwrap();
+    let mut asteroids = parse(DATA);
     let (station, station_view) = asteroids
         .find_surveillance_point()
         .expect("Not found any surveillance point");

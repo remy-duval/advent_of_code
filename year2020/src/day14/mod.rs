@@ -1,30 +1,28 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use hashbrown::HashMap;
 
+use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
-use commons::Problem;
 
-pub type Value = u64;
+pub const TITLE: &str = "Day 14: Docking Data";
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let instructions = parse(&raw)?.data;
+    let first = first_part(&instructions);
+    println!("Decoder V1: The memory sum after completion is {}", first);
 
-impl Problem for Day {
-    type Input = LineSep<Instruction>;
-    const TITLE: &'static str = "Day 14: Docking Data";
+    let second = second_part(instructions);
+    println!("Decoder V2: The memory sum after completion is {}", second);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let instructions = data.data;
-        let first = first_part(&instructions);
-        println!("Decoder V1: The memory sum after completion is {}", first);
-
-        let second = second_part(instructions);
-        println!("Decoder V2: The memory sum after completion is {}", second);
-
-        Ok(())
-    }
+    Ok(())
 }
+
+fn parse(s: &str) -> Result<LineSep<Instruction>> {
+    s.parse()
+}
+
+type Value = u64;
 
 /// Use the first mode of the decoder to compute the sum of values in memory at the end
 fn first_part(instructions: &[Instruction]) -> Value {
@@ -58,8 +56,7 @@ fn second_part(instructions: Vec<Instruction>) -> Value {
 }
 
 /// An instruction for the decoder
-#[derive(Debug, Clone)]
-pub enum Instruction {
+enum Instruction {
     /// Set the current bit mask to this value
     SetMask(Mask),
     /// Set value(s) in memory (according to the mode)
@@ -67,8 +64,8 @@ pub enum Instruction {
 }
 
 /// A bit mask that will overwrite some zeros and ones in a 36-bits (at least) integer
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct Mask {
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct Mask {
     /// A bit mask to overwrite some positions to 1 with |, should be 0s except for 1 positions
     ones: Value,
     /// A bit mask to overwrite some positions to 0 with &, should be 1s except for 0 positions
@@ -76,19 +73,18 @@ pub struct Mask {
 }
 
 impl Mask {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Mask { ones: 0, zeros: 0 }
     }
 
     /// Apply the bit mask to the current value
     /// This is done with a bitwise or for setting the ones and a bitwise and for setting the zeros
-    pub fn apply(&self, value: Value) -> Value {
+    fn apply(&self, value: Value) -> Value {
         (value | self.ones) & self.zeros
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct FloatingMasks {
+struct FloatingMasks {
     possibilities: Vec<Mask>,
     buffer: Vec<Mask>,
 }
@@ -96,7 +92,7 @@ pub struct FloatingMasks {
 impl FloatingMasks {
     const BIT_RANGE: u8 = 36;
 
-    pub fn new() -> Self {
+    fn new() -> Self {
         FloatingMasks {
             possibilities: Vec::new(),
             buffer: Vec::new(),
@@ -104,13 +100,13 @@ impl FloatingMasks {
     }
 
     /// Apply the floating bit mask to the current value to get all the possible values
-    pub fn apply(&self, value: Value) -> impl Iterator<Item = Value> + '_ {
+    fn apply(&self, value: Value) -> impl Iterator<Item = Value> + '_ {
         self.possibilities.iter().map(move |mask| mask.apply(value))
     }
 
     /// Compute the new floating masks from the given mask
     /// Re-uses the internal buffer instead of allocating new one
-    pub fn compute(&mut self, mask: Mask) {
+    fn compute(&mut self, mask: Mask) {
         self.possibilities.clear(); // Re-use an already allocated vec
         self.possibilities.push(Mask { ones: 0, zeros: 0 });
         (0..Self::BIT_RANGE).rev().for_each(|bit| {

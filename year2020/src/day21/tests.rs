@@ -5,7 +5,7 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example() {
-    let recipes = Day::parse(EXAMPLE).unwrap().data;
+    let recipes = parse(EXAMPLE);
     let containers = find_containers(&recipes);
     let result = first_part(&recipes, &containers);
     assert_eq!(result, 5);
@@ -13,7 +13,7 @@ fn first_part_example() {
 
 #[test]
 fn first_part_main() {
-    let recipes = Day::parse(MAIN).unwrap().data;
+    let recipes = parse(MAIN);
     let containers = find_containers(&recipes);
     let result = first_part(&recipes, &containers);
     assert_eq!(result, 2170);
@@ -21,7 +21,7 @@ fn first_part_main() {
 
 #[test]
 fn second_part_example() {
-    let recipes = Day::parse(EXAMPLE).unwrap().data;
+    let recipes = parse(EXAMPLE);
     let containers = find_containers(&recipes);
     let result = second_part(containers);
     assert_eq!(result, "mxmxvkd,sqjhc,fvjkl");
@@ -29,7 +29,7 @@ fn second_part_example() {
 
 #[test]
 fn second_part_main() {
-    let recipes = Day::parse(MAIN).unwrap().data;
+    let recipes = parse(MAIN);
     let containers = find_containers(&recipes);
     let result = second_part(containers);
     assert_eq!(result, "nfnfk,nbgklf,clvr,fttbhdr,qjxxpr,hdsm,sjhds,xchzh");

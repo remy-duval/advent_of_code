@@ -5,14 +5,14 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn example() {
-    let program = Day::parse(EXAMPLE).unwrap();
+    let program = parse(EXAMPLE).unwrap();
     let (first, _) = find_possible(&program.samples);
     assert_eq!(first, 1);
 }
 
 #[test]
 fn main() {
-    let program = Day::parse(MAIN).unwrap();
+    let program = parse(MAIN).unwrap();
     let (first, possible) = find_possible(&program.samples);
     assert_eq!(first, 677);
 

@@ -1,18 +1,11 @@
 use commons::eyre::Result;
 
-use commons::Problem;
+pub const TITLE: &str = "Day 5: Alchemical Reduction";
 
-pub struct Day;
-
-impl Problem for Day {
-    type Input = String;
-    const TITLE: &'static str = "Day 5: Alchemical Reduction";
-
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("After the basic reaction, {} units remain", first(&data));
-        println!("After the best reaction, {} units remain", second(&data));
-        Ok(())
-    }
+pub fn run(raw: String) -> Result<()> {
+    println!("After the basic reaction, {} units remain", first(&raw));
+    println!("After the best reaction, {} units remain", second(&raw));
+    Ok(())
 }
 
 fn first(polymer: &str) -> usize {

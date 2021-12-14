@@ -1,10 +1,27 @@
-use std::fmt::{Display, Formatter, Result as FmtResult, Write};
-use std::str::FromStr;
-
 use itertools::Itertools;
 
+use commons::eyre::Result;
 use commons::grid::Grid;
-use commons::Problem;
+
+pub const TITLE: &str = "Day 11: Seating System";
+
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw);
+    let first = first_part(data.clone());
+
+    println!(
+        "When seeing only adjacent seats the number of occupied seats at the end is {}",
+        first.occupied_seats()
+    );
+
+    let second = second_part(data);
+    println!(
+        "When seeing further seats the number of occupied seats at the end is {}",
+        second.occupied_seats()
+    );
+
+    Ok(())
+}
 
 const DIRECTIONS: [(isize, isize); 8] = [
     (-1, -1),
@@ -17,27 +34,26 @@ const DIRECTIONS: [(isize, isize); 8] = [
     (1, 1),
 ];
 
-pub struct Day;
+fn parse(s: &str) -> Ferry {
+    let mut lines = s.lines().map(|line| {
+        line.trim().chars().map(|char| match char {
+            'L' => Tile::EmptySeat,
+            '#' => Tile::FullSeat,
+            _ => Tile::Nothing,
+        })
+    });
 
-impl Problem for Day {
-    type Input = Ferry;
-    const TITLE: &'static str = "Day 11: Seating System";
+    if let Some(first) = lines.next() {
+        let first = first.collect_vec();
+        let width = first.len();
+        let mut grid = Grid::from_vec(width, first);
+        lines.for_each(|mut line| {
+            grid.insert_filled_line(|_| line.next().unwrap_or(Tile::Nothing));
+        });
 
-    fn solve(data: Self::Input) -> commons::eyre::Result<()> {
-        let first = first_part(data.clone());
-
-        println!(
-            "When seeing only adjacent seats the number of occupied seats at the end is {}",
-            first.occupied_seats()
-        );
-
-        let second = second_part(data);
-        println!(
-            "When seeing further seats the number of occupied seats at the end is {}",
-            second.occupied_seats()
-        );
-
-        Ok(())
+        Ferry(grid)
+    } else {
+        Ferry(Grid::new(0, 0))
     }
 }
 
@@ -85,31 +101,31 @@ fn second_part(mut floor: Ferry) -> Ferry {
     floor
 }
 
+/// The floor plan of the ferry
+#[derive(Clone)]
+struct Ferry(Grid<Tile>);
+
 /// A tile in the ferry
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum Tile {
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum Tile {
     FullSeat,
     EmptySeat,
     Nothing,
 }
 
 impl Tile {
-    pub fn is_occupied(self) -> bool {
+    fn is_occupied(self) -> bool {
         matches!(self, Tile::FullSeat)
     }
 
-    pub fn is_nothing(self) -> bool {
+    fn is_nothing(self) -> bool {
         matches!(self, Tile::Nothing)
     }
 }
 
-/// The floor plan of the ferry
-#[derive(Debug, Clone)]
-pub struct Ferry(Grid<Tile>);
-
 impl Ferry {
     /// The number of occupied seats in the ferry
-    pub fn occupied_seats(&self) -> usize {
+    fn occupied_seats(&self) -> usize {
         self.0.iter().filter(|t| t.is_occupied()).count()
     }
 
@@ -123,7 +139,7 @@ impl Ferry {
     /// ### Returns
     /// The number of modified tiles in the update process (0 if current == previous)
     /// Also modifies the `destination` in place
-    pub fn compute_next_state(
+    fn compute_next_state(
         &self,
         max_around: usize,
         destination: &mut Grid<Tile>,
@@ -152,51 +168,6 @@ impl Ferry {
         }
 
         changes
-    }
-}
-
-impl FromStr for Ferry {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut lines = s.lines().map(|line| {
-            line.trim().chars().map(|char| match char {
-                'L' => Tile::EmptySeat,
-                '#' => Tile::FullSeat,
-                _ => Tile::Nothing,
-            })
-        });
-
-        if let Some(first) = lines.next() {
-            let first = first.collect_vec();
-            let width = first.len();
-            let mut grid = Grid::from_vec(width, first);
-            lines.for_each(|mut line| {
-                grid.insert_filled_line(|_| line.next().unwrap_or(Tile::Nothing));
-            });
-
-            Ok(Ferry(grid))
-        } else {
-            Ok(Ferry(Grid::new(0, 0)))
-        }
-    }
-}
-
-impl Display for Tile {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let char = match self {
-            Tile::FullSeat => '#',
-            Tile::EmptySeat => 'L',
-            Tile::Nothing => '.',
-        };
-
-        f.write_char(char)
-    }
-}
-
-impl Display for Ferry {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "{}", self.0)
     }
 }
 

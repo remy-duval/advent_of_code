@@ -14,21 +14,21 @@ fn paths_test() {
 
 #[test]
 fn first_part_example() {
-    let paths = Day::parse(EXAMPLE).unwrap().data;
+    let paths = parse(EXAMPLE).unwrap().data;
     let result = initial_state(paths).len();
     assert_eq!(result, 10);
 }
 
 #[test]
 fn first_part_main() {
-    let paths = Day::parse(MAIN).unwrap().data;
+    let paths = parse(MAIN).unwrap().data;
     let result = initial_state(paths).len();
     assert_eq!(result, 332);
 }
 
 #[test]
 fn second_part_example() {
-    let state = initial_state(Day::parse(EXAMPLE).unwrap().data);
+    let state = initial_state(parse(EXAMPLE).unwrap().data);
     assert_eq!(compute_next_state(state.clone(), 1).len(), 15);
     assert_eq!(compute_next_state(state.clone(), 2).len(), 12);
     assert_eq!(compute_next_state(state.clone(), 3).len(), 25);
@@ -44,7 +44,7 @@ fn second_part_example() {
 
 #[test]
 fn second_part_main() {
-    let state = initial_state(Day::parse(MAIN).unwrap().data);
+    let state = initial_state(parse(MAIN).unwrap().data);
     let state = compute_next_state(state, 100);
     assert_eq!(state.len(), 3900);
 }

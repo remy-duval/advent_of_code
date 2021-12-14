@@ -1,29 +1,63 @@
 use std::collections::VecDeque;
-use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result};
 use hashbrown::HashSet;
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result};
 
+pub const TITLE: &str = "Day 12: Subterranean Sustainability";
 const FIFTY_BILLION: usize = 50_000_000_000;
 
-pub struct Day;
+pub fn run(raw: String) -> Result<()> {
+    let rules = parse(&raw)?;
+    let first = first_part(&rules);
+    println!("After 20 generations the sum is {}", first);
 
-impl Problem for Day {
-    type Input = Rules;
-    const TITLE: &'static str = "Day 12: Subterranean Sustainability";
+    let second = second_part(&rules);
+    println!("After fifty billion generations the sum is {}", second);
 
-    fn solve(rules: Self::Input) -> Result<()> {
-        let first = first_part(&rules);
-        println!("After 20 generations the sum is {}", first);
+    Ok(())
+}
 
-        let second = second_part(&rules);
-        println!("After fifty billion generations the sum is {}", second);
+/// The rules of the plant generation
+struct Rules {
+    /// The initial generation, true means a plant is there
+    initial_state: Vec<bool>,
+    /// The rules for the next generation, compute the pattern of the state and index it
+    rules: Vec<bool>,
+}
 
-        Ok(())
+fn parse(s: &str) -> Result<Rules> {
+    fn state(state: &str) -> Vec<bool> {
+        state.chars().map(|c| c == '#').collect()
     }
+
+    let mut lines = s.lines();
+    let initial_state = lines
+        .next()
+        .ok_or_else(|| eyre!("Missing either the initial state or the rules {}", s))?
+        .strip_prefix("initial state:")
+        .ok_or_else(|| eyre!("Bad format for the initial state {}", s))?
+        .trim();
+
+    let mut rules = vec![false; 32];
+    lines.dropping(1).try_for_each(|line| -> Result<()> {
+        let (pattern, after) = line
+            .splitn(2, "=>")
+            .map(str::trim)
+            .collect_tuple::<(_, _)>()
+            .ok_or_else(|| eyre!("Bad format for a rule {}", line))?;
+
+        let index = Rules::pattern(&state(pattern));
+        let active = after.chars().next().map_or(false, |c| c == '#');
+        rules[index] = active;
+        Ok(())
+    })?;
+
+    Ok(Rules {
+        initial_state: state(initial_state),
+        rules,
+    })
 }
 
 fn first_part(rules: &Rules) -> isize {
@@ -102,18 +136,9 @@ fn next_generation(rules: &Rules, from: &mut HashSet<isize>, into: &mut HashSet<
     });
 }
 
-/// The rules of the plant generation
-#[derive(Debug, Clone)]
-pub struct Rules {
-    /// The initial generation, true means a plant is there
-    initial_state: Vec<bool>,
-    /// The rules for the next generation, compute the pattern of the state and index it
-    rules: Vec<bool>,
-}
-
 impl Rules {
     /// The initial generation per the rules
-    pub fn initial_generation(&self) -> HashSet<isize> {
+    fn initial_generation(&self) -> HashSet<isize> {
         let mut set = HashSet::with_capacity(self.initial_state.len());
         self.initial_state
             .iter()
@@ -128,7 +153,7 @@ impl Rules {
     }
 
     /// Check if a state will be active on next generation according to the rules
-    pub fn will_be_active(&self, state: &[bool]) -> bool {
+    fn will_be_active(&self, state: &[bool]) -> bool {
         self.rules[Self::pattern(state)]
     }
 
@@ -137,43 +162,6 @@ impl Rules {
         state
             .iter()
             .fold(0, |acc, &next| (acc << 1) + if next { 1 } else { 0 })
-    }
-}
-
-impl FromStr for Rules {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        fn state(state: &str) -> Vec<bool> {
-            state.chars().map(|c| c == '#').collect()
-        }
-
-        let mut lines = s.lines();
-        let initial_state = lines
-            .next()
-            .ok_or_else(|| eyre!("Missing either the initial state or the rules {}", s))?
-            .strip_prefix("initial state:")
-            .ok_or_else(|| eyre!("Bad format for the initial state {}", s))?
-            .trim();
-
-        let mut rules = vec![false; 32];
-        lines.dropping(1).try_for_each(|line| -> Result<()> {
-            let (pattern, after) = line
-                .splitn(2, "=>")
-                .map(str::trim)
-                .collect_tuple::<(_, _)>()
-                .ok_or_else(|| eyre!("Bad format for a rule {}", line))?;
-
-            let index = Self::pattern(&state(pattern));
-            let active = after.chars().next().map_or(false, |c| c == '#');
-            rules[index] = active;
-            Ok(())
-        })?;
-
-        Ok(Self {
-            initial_state: state(initial_state),
-            rules,
-        })
     }
 }
 

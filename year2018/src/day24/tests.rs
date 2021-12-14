@@ -5,24 +5,24 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example() {
-    let battle = Day::parse(EXAMPLE).unwrap();
+    let battle = parse(EXAMPLE).unwrap();
     assert_eq!(first_part(battle), 5_216);
 }
 
 #[test]
 fn first_part_main() {
-    let battle = Day::parse(MAIN).unwrap();
+    let battle = parse(MAIN).unwrap();
     assert_eq!(first_part(battle), 19_295);
 }
 
 #[test]
 fn second_part_example() {
-    let battle = Day::parse(EXAMPLE).unwrap();
+    let battle = parse(EXAMPLE).unwrap();
     assert_eq!(second_part(battle), 51);
 }
 
 #[test]
 fn second_part_main() {
-    let battle = Day::parse(MAIN).unwrap();
+    let battle = parse(MAIN).unwrap();
     assert_eq!(second_part(battle), 12_084);
 }

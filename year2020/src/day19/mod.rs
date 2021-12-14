@@ -1,36 +1,47 @@
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::rc::Rc;
-use std::str::FromStr;
 
-use commons::eyre::{eyre, Result};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
-use commons::parse::sep_by_empty_lines;
-use commons::Problem;
+use commons::eyre::{eyre, Result};
+
+pub const TITLE: &str = "Day 19: Monster Messages";
+
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw);
+    println!(
+        "There are {} valid words in the input",
+        first_part(&data).ok_or_else(|| eyre!("Failed to create the parser for P1"))?
+    );
+
+    println!(
+        "There are {} valid words in the input after modifying the rules",
+        second_part(data).ok_or_else(|| eyre!("Failed to create the parser for P2"))?
+    );
+
+    Ok(())
+}
 
 type BoxedParser = Rc<dyn Parser<()>>;
 
-pub struct Day;
+fn parse(s: &str) -> RulesAndWords {
+    let mut blocks = commons::parse::sep_by_empty_lines(s);
 
-impl Problem for Day {
-    type Input = RulesAndWords;
-    const TITLE: &'static str = "Day 19: Monster Messages";
+    let rules = blocks.next().map_or_else(HashMap::new, |block| {
+        block
+            .lines()
+            .filter_map(|line| line.split_once(':'))
+            .map(|(key, value)| (key.trim().to_owned(), value.trim().to_owned()))
+            .collect::<HashMap<_, _>>()
+    });
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!(
-            "There are {} valid words in the input",
-            first_part(&data).ok_or_else(|| eyre!("Failed to create the parser for P1"))?
-        );
+    let words = blocks.next().map_or_else(Vec::new, |block| {
+        block.lines().map(|line| line.to_owned()).collect()
+    });
 
-        println!(
-            "There are {} valid words in the input after modifying the rules",
-            second_part(data).ok_or_else(|| eyre!("Failed to create the parser for P2"))?
-        );
-
-        Ok(())
-    }
+    RulesAndWords { rules, words }
 }
 
 fn first_part(data: &RulesAndWords) -> Option<usize> {
@@ -114,34 +125,11 @@ fn build_parser(
 }
 
 /// The input of the days problem
-#[derive(Debug)]
-pub struct RulesAndWords {
+struct RulesAndWords {
     /// Rules by name
     rules: HashMap<String, String>,
     /// The words to check
     words: Vec<String>,
-}
-
-impl FromStr for RulesAndWords {
-    type Err = std::convert::Infallible;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut blocks = sep_by_empty_lines(s);
-
-        let rules = blocks.next().map_or_else(HashMap::new, |block| {
-            block
-                .lines()
-                .filter_map(|line| line.split_once(':'))
-                .map(|(key, value)| (key.trim().to_owned(), value.trim().to_owned()))
-                .collect::<HashMap<_, _>>()
-        });
-
-        let words = blocks.next().map_or_else(Vec::new, |block| {
-            block.lines().map(|line| line.to_owned()).collect()
-        });
-
-        Ok(Self { rules, words })
-    }
 }
 
 /// A trait for formalizing parsing

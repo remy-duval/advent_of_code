@@ -6,8 +6,7 @@ const DATA: &str = include_str!("data.txt");
 
 #[test]
 fn checked_sum() {
-    let data = Day::parse(A).unwrap();
-    let orbits = parse_map(&data.data);
+    let orbits = parse(A);
     let from_origin = depth_first_search(COM, orbits).unwrap();
     let result = check_sum(&from_origin);
 
@@ -16,8 +15,7 @@ fn checked_sum() {
 
 #[test]
 fn shortest_paths() {
-    let data = Day::parse(B).unwrap();
-    let orbits = parse_map(&data.data);
+    let orbits = parse(B);
     let from_origin = depth_first_search(COM, orbits).unwrap();
     let result = shortest_path(&from_origin, "YOU", "SAN").unwrap();
 
@@ -26,8 +24,7 @@ fn shortest_paths() {
 
 #[test]
 fn solve_test() {
-    let data = Day::parse(DATA).unwrap();
-    let orbits = parse_map(&data.data);
+    let orbits = parse(DATA);
     let from_origin = depth_first_search(COM, orbits).unwrap();
     let first = check_sum(&from_origin);
     let second = shortest_path(&from_origin, "YOU", "SAN").unwrap();

@@ -1,20 +1,33 @@
-use commons::eyre::{eyre, Report, Result};
-use commons::grid::{Direction, Grid, Point};
-use commons::Problem;
 use hashbrown::HashSet;
 
-pub struct Day;
+use commons::eyre::{eyre, Result};
+use commons::grid::{Direction, Grid, Point};
 
-impl Problem for Day {
-    type Input = HeightMap;
-    const TITLE: &'static str = "Day 9: Smoke Basin";
+pub const TITLE: &str = "Day 9: Smoke Basin";
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1. Low point risk: {}", first_part(&data));
-        println!("1. Basin size product: {}", second_part(&data));
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. Low point risk: {}", first_part(&data));
+    println!("2. Basin size product: {}", second_part(&data));
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<HeightMap> {
+    let mut lines = s.lines();
+    let first = lines.next().ok_or_else(|| eyre!("Missing first line"))?;
+    let width = first.chars().count();
+    let mut storage = Vec::with_capacity(width * width);
+    first
+        .chars()
+        .chain(lines.flat_map(move |f| f.chars()))
+        .try_for_each(|c| -> Result<()> {
+            let i = c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c))?;
+            storage.push(i as u8);
+            Ok(())
+        })?;
+
+    let grid = Grid::from_vec(width, storage);
+    Ok(HeightMap { grid })
 }
 
 fn first_part(map: &HeightMap) -> usize {
@@ -39,7 +52,7 @@ fn second_part(map: &HeightMap) -> usize {
     a * b * c
 }
 
-pub struct HeightMap {
+struct HeightMap {
     grid: Grid<u8>,
 }
 
@@ -90,28 +103,6 @@ impl HeightMap {
 
             set.len()
         })
-    }
-}
-
-impl std::str::FromStr for HeightMap {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        let mut lines = s.lines();
-        let first = lines.next().ok_or_else(|| eyre!("Missing first line"))?;
-        let width = first.chars().count();
-        let mut storage = Vec::with_capacity(width * width);
-        first
-            .chars()
-            .chain(lines.flat_map(move |f| f.chars()))
-            .try_for_each(|c| -> Result<()> {
-                let i = c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c))?;
-                storage.push(i as u8);
-                Ok(())
-            })?;
-
-        let grid = Grid::from_vec(width, storage);
-        Ok(Self { grid })
     }
 }
 

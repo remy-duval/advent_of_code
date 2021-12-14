@@ -1,7 +1,6 @@
-use commons::eyre::Result;
 use hashbrown::{hash_map::Entry, HashMap, HashSet};
 
-use commons::Problem;
+use commons::eyre::Result;
 use instructions::{Int, OpCode};
 use parse::Sample;
 
@@ -9,22 +8,22 @@ pub use super::instructions;
 
 mod parse;
 
-pub struct Day;
+pub const TITLE: &str = "Day 16: Chronal Classification";
 
-impl Problem for Day {
-    type Input = parse::Program;
-    const TITLE: &'static str = "Day 16: Chronal Classification";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let (first, possible) = find_possible(&data.samples);
+    println!("{} samples behave like 3+ op codes", first);
+    println!(
+        "The register 0 contains {} after executing the program",
+        data.execute(&sieve(possible)).0[0]
+    );
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let (first, possible) = find_possible(&data.samples);
-        println!("{} samples behave like 3+ op codes", first);
-        println!(
-            "The register 0 contains {} after executing the program",
-            data.execute(&sieve(possible)).0[0]
-        );
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<parse::Program> {
+    s.parse()
 }
 
 /// Find the possible corresponding OpCode for each instruction code

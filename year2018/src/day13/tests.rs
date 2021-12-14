@@ -7,36 +7,36 @@ const MAIN: &str = include_str!("data.txt");
 
 #[test]
 fn first_part_example_a() {
-    let mut network = Day::parse(EXAMPLE_ONE).unwrap();
+    let mut network = parse(EXAMPLE_ONE);
     assert_eq!(first_part(&mut network), Point::new(7, 3));
 }
 
 #[test]
 fn first_part_example_b() {
-    let mut network = Day::parse(EXAMPLE_THREE).unwrap();
+    let mut network = parse(EXAMPLE_THREE);
     assert_eq!(first_part(&mut network), Point::new(83, 49));
 }
 
 #[test]
 fn first_part_main() {
-    let mut network = Day::parse(MAIN).unwrap();
+    let mut network = parse(MAIN);
     assert_eq!(first_part(&mut network), Point::new(53, 133));
 }
 
 #[test]
 fn second_part_example_a() {
-    let mut network = Day::parse(EXAMPLE_TWO).unwrap();
+    let mut network = parse(EXAMPLE_TWO);
     assert_eq!(second_part(&mut network), Point::new(6, 4));
 }
 
 #[test]
 fn second_part_example_b() {
-    let mut network = Day::parse(EXAMPLE_THREE).unwrap();
+    let mut network = parse(EXAMPLE_THREE);
     assert_eq!(second_part(&mut network), Point::new(73, 36));
 }
 
 #[test]
 fn second_part_main() {
-    let mut network = Day::parse(MAIN).unwrap();
+    let mut network = parse(MAIN);
     assert_eq!(second_part(&mut network), Point::new(111, 68));
 }

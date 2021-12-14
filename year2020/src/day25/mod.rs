@@ -1,21 +1,8 @@
-use std::str::FromStr;
-
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
 
-use commons::Problem;
+use commons::eyre::{eyre, Result, WrapErr};
 
-pub struct Day;
-
-impl Problem for Day {
-    type Input = Keys;
-    const TITLE: &'static str = "Day 25: Combo Breaker";
-
-    fn solve(keys: Self::Input) -> Result<()> {
-        println!("The encryption key is {}", solve(keys));
-        Ok(())
-    }
-}
+pub const TITLE: &str = "Day 25: Combo Breaker";
 
 /// The type of integer we use for this problem
 type Key = u64;
@@ -26,11 +13,32 @@ const N: Key = 20201227;
 /// The subject for calculating the public key
 const SUBJECT: Key = 7;
 
+pub fn run(raw: String) -> Result<()> {
+    let keys = parse(&raw)?;
+    println!("The encryption key is {}", solve(keys));
+    Ok(())
+}
+
 /// The two public keys of the card and door
-#[derive(Debug, Copy, Clone)]
-pub struct Keys {
+#[derive(Copy, Clone)]
+struct Keys {
     card: Key,
     door: Key,
+}
+
+fn parse(s: &str) -> Result<Keys> {
+    if let Some((card, door)) = itertools::process_results(
+        s.lines().map(|line| {
+            line.trim()
+                .parse::<Key>()
+                .wrap_err_with(|| format!("Could not parse the key '{}'", line))
+        }),
+        |result| result.collect_tuple::<(_, _)>(),
+    )? {
+        Ok(Keys { card, door })
+    } else {
+        Err(eyre!("Wanted exactly two keys, one each line"))
+    }
 }
 
 /// Brute-forcing either card or door secret loop size (whichever comes first) to compute key
@@ -64,25 +72,6 @@ fn modular_exponentiation(mut a: Key, mut n: Key, modulo: Key) -> Key {
         }
 
         (a * rest) % modulo
-    }
-}
-
-impl FromStr for Keys {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        if let Some((card, door)) = itertools::process_results(
-            s.lines().map(|line| {
-                line.trim()
-                    .parse::<Key>()
-                    .wrap_err_with(|| format!("Could not parse the key '{}'", line))
-            }),
-            |result| result.collect_tuple::<(_, _)>(),
-        )? {
-            Ok(Self { card, door })
-        } else {
-            Err(eyre!("Wanted exactly two keys, one each line"))
-        }
     }
 }
 

@@ -1,25 +1,53 @@
-use commons::eyre::{eyre, Report, Result, WrapErr};
-use commons::Problem;
+use commons::eyre::{eyre, Result, WrapErr};
 
-pub struct Day;
+pub const TITLE: &str = "Day 4: Giant Squid";
 
-impl Problem for Day {
-    type Input = Bingo;
-    const TITLE: &'static str = "Day 4: Giant Squid";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1. First win score is {}", data.first_win_score()?);
+    println!("2. Last win score is {}", data.last_win_score()?);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1. First win score is {}", data.first_win_score()?);
-        println!("1. Last win score is {}", data.last_win_score()?);
+    Ok(())
+}
 
-        Ok(())
+fn parse(s: &str) -> Result<Bingo> {
+    let mut blocks = commons::parse::sep_by_empty_lines(s);
+
+    if let Some(draws) = blocks.next() {
+        let draws: Vec<u8> = draws
+            .split(',')
+            .map(|n| n.trim().parse())
+            .collect::<core::result::Result<_, _>>()
+            .wrap_err_with(|| format!("Bad draws: {}", draws))?;
+        let boards: Vec<Board> = blocks
+            .map(|b| -> Result<_> {
+                let mut board = [[0u8; Board::COLUMNS]; Board::ROWS];
+                for (y, line) in b.lines().take(Board::ROWS).enumerate() {
+                    for (x, num) in line.split_whitespace().take(Board::COLUMNS).enumerate() {
+                        board[y][x] = num.parse().wrap_err_with(|| format!("Bad board:{}", b))?;
+                    }
+                }
+                Ok(Board(board))
+            })
+            .collect::<Result<_>>()?;
+        Ok(Bingo { draws, boards })
+    } else {
+        Err(eyre!("Missing draws"))
     }
 }
 
 /// All the bingo boards and the draw order for the puzzle
-pub struct Bingo {
+struct Bingo {
     draws: Vec<u8>,
     boards: Vec<Board>,
 }
+
+/// A bingo board for the puzzle
+struct Board([[u8; Board::COLUMNS]; Board::COLUMNS]);
+
+/// A completion sheet for a bingo board, implemented as a bitset
+#[derive(Clone, Debug, Default)]
+struct BoardCompletion(u32);
 
 impl Bingo {
     /// Find the score of the first board to win in the draw
@@ -69,9 +97,6 @@ impl Bingo {
     }
 }
 
-/// A bingo board for the puzzle
-struct Board([[u8; Board::COLUMNS]; Board::COLUMNS]);
-
 impl Board {
     /// The number of rows of the board
     const ROWS: usize = 5;
@@ -107,10 +132,6 @@ impl Board {
     }
 }
 
-/// A completion sheet for a bingo board, implemented as a bitset
-#[derive(Clone, Debug, Default)]
-struct BoardCompletion(u32);
-
 impl BoardCompletion {
     /// Fill the given position on the board
     fn fill(&mut self, x: usize, y: usize) {
@@ -129,42 +150,6 @@ impl BoardCompletion {
     fn is_complete(&self) -> bool {
         (0..Board::ROWS).any(|y| (0..Board::COLUMNS).all(|x| self.is_filled(x, y)))
             || (0..Board::COLUMNS).any(|x| (0..Board::ROWS).all(|y| self.is_filled(x, y)))
-    }
-}
-
-impl std::str::FromStr for Bingo {
-    type Err = Report;
-
-    fn from_str(s: &str) -> Result<Self> {
-        let mut blocks = commons::parse::sep_by_empty_lines(s);
-
-        if let Some(draws) = blocks.next() {
-            let draws: Vec<u8> = draws
-                .split(',')
-                .map(|n| n.trim().parse())
-                .collect::<core::result::Result<_, _>>()
-                .wrap_err_with(|| format!("Bad draws: {}", draws))?;
-            let boards: Vec<Board> = blocks
-                .map(|b| b.parse().wrap_err_with(|| format!("Bad bingo: {}", b)))
-                .collect::<Result<_>>()?;
-            Ok(Bingo { draws, boards })
-        } else {
-            Err(eyre!("Missing draws"))
-        }
-    }
-}
-
-impl std::str::FromStr for Board {
-    type Err = core::num::ParseIntError;
-
-    fn from_str(s: &str) -> core::result::Result<Self, Self::Err> {
-        let mut board = [[0u8; Board::COLUMNS]; Board::ROWS];
-        for (y, line) in s.lines().take(Board::ROWS).enumerate() {
-            for (x, num) in line.split_whitespace().take(Board::COLUMNS).enumerate() {
-                board[y][x] = num.parse()?;
-            }
-        }
-        Ok(Board(board))
     }
 }
 

@@ -4,7 +4,7 @@ const DATA: &str = include_str!("data.txt");
 
 #[test]
 fn solve_test() {
-    let memory = Day::parse(DATA).unwrap().data;
+    let memory = parse(DATA).unwrap().data;
     let map = explore_map(&memory, false);
     let (oxygen, path_length) = first_part(&map).unwrap();
 

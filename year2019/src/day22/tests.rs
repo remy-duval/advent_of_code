@@ -10,7 +10,7 @@ const DATA: &str = include_str!("data.txt");
 fn small_deck_test() {
     // Test that the shuffling with LCF produces the expected order (as per the examples)
     fn assertion(data: &str, expected: [i128; 10]) {
-        let shuffles = Day::parse(data).unwrap().data;
+        let shuffles = parse(data).unwrap().data;
         let lcf = LinearFunction::fold(shuffles, 10);
         let mut result = [0; 10];
         for card in 0..10 {
@@ -36,7 +36,7 @@ fn inverse_test() {
     // Test that the inverse function produced gives back [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     // When applied to the last positions of the shuffling (as per the examples)
     fn assertion(data: &str, last_position: [i128; 10]) {
-        let shuffles = Day::parse(data).unwrap().data;
+        let shuffles = parse(data).unwrap().data;
         let lcf = LinearFunction::fold(shuffles, 10).inverse(10);
         let mut result = [0; 10];
         for (card, &last) in last_position.iter().enumerate() {
@@ -61,12 +61,12 @@ fn inverse_test() {
 
 #[test]
 fn first_part_test() {
-    let shuffles = Day::parse(DATA).unwrap().data;
+    let shuffles = parse(DATA).unwrap().data;
     assert_eq!(1_879, first_part(shuffles))
 }
 
 #[test]
 fn second_part_test() {
-    let shuffles = Day::parse(DATA).unwrap().data;
+    let shuffles = parse(DATA).unwrap().data;
     assert_eq!(73_729_306_030_290, second_part(shuffles))
 }

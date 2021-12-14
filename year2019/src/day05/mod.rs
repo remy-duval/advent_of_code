@@ -1,31 +1,29 @@
 use commons::eyre::{eyre, Result};
 
-use commons::Problem;
-
 use super::int_code::{IntCodeInput, Processor, Status};
 
-pub struct Day;
+pub const TITLE: &str = "Day 5: Sunny with a Chance of Asteroids";
 
-impl Problem for Day {
-    type Input = IntCodeInput;
-    const TITLE: &'static str = "Day 5: Sunny with a Chance of Asteroids";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    let (first, second) =
+        solve(&data.data[..]).ok_or_else(|| eyre!("Program should not have crashed !"))?;
+    println!("Input 1 produced : {}", first);
+    println!("Input 5 produced : {}", second);
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let (first, second) =
-            solve(&data.data[..]).ok_or_else(|| eyre!("Program should not have crashed !"))?;
-        println!("Input 1 produced : {}", first);
-        println!("Input 5 produced : {}", second);
+    Ok(())
+}
 
-        Ok(())
-    }
+fn parse(s: &str) -> Result<IntCodeInput> {
+    Ok(s.parse()?)
 }
 
 fn solve(memory: &[i64]) -> Option<(i64, i64)> {
-    Some((run(memory, 1)?, run(memory, 5)?))
+    Some((run_program(memory, 1)?, run_program(memory, 5)?))
 }
 
 /// Runs the IntCode program with the given input and return its last output if it halted.
-fn run(program: &[i64], input: i64) -> Option<i64> {
+fn run_program(program: &[i64], input: i64) -> Option<i64> {
     let mut program: Processor = program.into();
     program.write_int(input);
     let mut output_count: usize = 0;

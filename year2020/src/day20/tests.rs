@@ -40,7 +40,7 @@ fn border_test() {
 
 #[test]
 fn first_part_example() {
-    let tiles = Day::parse(EXAMPLE).unwrap().tiles;
+    let tiles = parse(EXAMPLE).unwrap();
     let image = match_tiles(tiles, 3).unwrap();
     let corners = first_part(&image, 3).unwrap();
     assert_eq!(corners, 20_899_048_083_289);
@@ -48,7 +48,7 @@ fn first_part_example() {
 
 #[test]
 fn first_part_main() {
-    let tiles = Day::parse(MAIN).unwrap().tiles;
+    let tiles = parse(MAIN).unwrap();
     let image = match_tiles(tiles, IMAGE_WIDTH).unwrap();
     let corners = first_part(&image, IMAGE_WIDTH).unwrap();
     assert_eq!(corners, 140_656_720_229_539);
@@ -56,7 +56,7 @@ fn first_part_main() {
 
 #[test]
 fn assemble_image_example() {
-    let tiles = Day::parse(EXAMPLE).unwrap().tiles;
+    let tiles = parse(EXAMPLE).unwrap();
     let image = match_tiles(tiles, 3).unwrap();
     let mut image = FullImage::assemble(image, 3);
     let wanted = FullImage {
@@ -85,7 +85,7 @@ fn assemble_image_example() {
 
 #[test]
 fn second_part_example() {
-    let tiles = Day::parse(EXAMPLE).unwrap().tiles;
+    let tiles = parse(EXAMPLE).unwrap();
     let image = match_tiles(tiles, 3).unwrap();
     let image = FullImage::assemble(image, 3);
     let roughness = second_part(image);
@@ -94,7 +94,7 @@ fn second_part_example() {
 
 #[test]
 fn second_part_main() {
-    let tiles = Day::parse(MAIN).unwrap().tiles;
+    let tiles = parse(MAIN).unwrap();
     let image = match_tiles(tiles, IMAGE_WIDTH).unwrap();
     let image = FullImage::assemble(image, IMAGE_WIDTH);
     let roughness = second_part(image);

@@ -1,25 +1,19 @@
-use commons::eyre::Result;
 use itertools::Itertools;
 
+use commons::eyre::Result;
 use commons::parse::sep_by_empty_lines;
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 4: Passport Processing";
 
-impl Problem for Day {
-    type Input = String;
-    const TITLE: &'static str = "Day 4: Passport Processing";
+pub fn run(data: String) -> Result<()> {
+    let batch = PassportBuilder::parse_many(&data);
+    println!(
+        "{count} passports have all required fields",
+        count = first_part(&batch)
+    );
+    println!("{count} passports are valid", count = second_part(&batch));
 
-    fn solve(data: Self::Input) -> Result<()> {
-        let batch = PassportBuilder::parse_many(&data);
-        println!(
-            "{count} passports have all required fields",
-            count = first_part(&batch)
-        );
-        println!("{count} passports are valid", count = second_part(&batch));
-
-        Ok(())
-    }
+    Ok(())
 }
 
 fn first_part(passports: &[Passport<'_>]) -> usize {
@@ -34,26 +28,26 @@ fn second_part(passports: &[Passport<'_>]) -> usize {
 }
 
 /// A passport for the problem
-pub struct Passport<'a> {
+struct Passport<'a> {
     /// pid (Passport ID)
-    pub passport_id: &'a str,
+    passport_id: &'a str,
     /// byr (Birth Year)
-    pub birth: &'a str,
+    birth: &'a str,
     /// iyr (Issue Year)
-    pub issued: &'a str,
+    issued: &'a str,
     /// eyr (Expiration Year)
-    pub expiration: &'a str,
+    expiration: &'a str,
     /// hgt (Height)
-    pub height: &'a str,
+    height: &'a str,
     /// hcl (Hair Color)
-    pub hair_color: &'a str,
+    hair_color: &'a str,
     /// ecl (Eye Color)
-    pub eye_color: &'a str,
+    eye_color: &'a str,
 }
 
 impl<'a> Passport<'a> {
     /// Check if all the passport data is valid
-    pub fn is_valid(&self) -> bool {
+    fn is_valid(&self) -> bool {
         self.passport_id_valid()
             && self.birth_valid()
             && self.issued_valid()
@@ -141,7 +135,7 @@ impl<'a> PassportBuilder<'a> {
     ///
     /// ### Returns
     /// A Vector of passports, each containing string slices of the original slice
-    pub fn parse_many(string: &'a str) -> Vec<Passport> {
+    fn parse_many(string: &'a str) -> Vec<Passport> {
         // Each passport is separated from the others by an empty new line
         // Since Windows exists, splitting on "\n\n" isn't enough
         sep_by_empty_lines(string)
@@ -155,7 +149,7 @@ impl<'a> PassportBuilder<'a> {
     ///
     /// ### Returns
     /// A single passport, containg string slices of the original slice
-    pub fn parse_one(string: &'a str) -> Option<Passport<'a>> {
+    fn parse_one(string: &'a str) -> Option<Passport<'a>> {
         let mut builder = Self::default();
         string
             .split_whitespace()

@@ -1,12 +1,12 @@
 //! Factorize the logic for traversing a tree into a trait
 
 /// Fold a tree using the given [Folder](Folder) implementation
-pub fn fold<T: Folder>(mut folder: T, tree: &super::Tree) -> Option<T::Output> {
+pub(super) fn fold<T: Folder>(mut folder: T, tree: &super::Tree) -> Option<T::Output> {
     folder.fold_impl(&tree.0).map(|(out, _)| out)
 }
 
 /// A trait for folding a [Tree](super::Tree) into an output value
-pub trait Folder {
+pub(super) trait Folder {
     /// The type of the output that is folded from a tree
     type Output;
 
@@ -41,7 +41,7 @@ pub trait Folder {
 }
 
 /// A folder for summing the metadata values
-pub struct MetadataSum;
+pub(super) struct MetadataSum;
 
 impl Folder for MetadataSum {
     type Output = u32;
@@ -56,7 +56,7 @@ impl Folder for MetadataSum {
 }
 
 /// A folder for computing the value of a node
-pub struct NodeValues;
+pub(super) struct NodeValues;
 
 impl Folder for NodeValues {
     type Output = u32;

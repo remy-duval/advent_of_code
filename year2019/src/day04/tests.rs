@@ -25,7 +25,7 @@ fn pairs() {
 
 #[test]
 fn solve_test() {
-    let Between { from, to } = DATA.parse().unwrap();
+    let (from, to) = parse(DATA).unwrap();
     let (first, second) = solve(from, to);
 
     assert_eq!(1_653, first);

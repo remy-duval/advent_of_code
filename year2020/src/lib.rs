@@ -21,7 +21,10 @@
     unused_qualifications
 )]
 
+use std::path::PathBuf;
+
 use commons::eyre::{eyre, Result};
+use commons::problem::solve_verbose;
 
 mod day01;
 mod day02;
@@ -50,35 +53,33 @@ mod day24;
 mod day25;
 
 /// Dispatch to the correct problem and solve it
-pub fn solve_problem(day: u8, input: &str) -> Result<()> {
-    use commons::solve;
-
+pub fn solve_problem(day: u8, input: PathBuf) -> Result<()> {
     match day {
-        1 => solve::<day01::Day>(input),
-        2 => solve::<day02::Day>(input),
-        3 => solve::<day03::Day>(input),
-        4 => solve::<day04::Day>(input),
-        5 => solve::<day05::Day>(input),
-        6 => solve::<day06::Day>(input),
-        7 => solve::<day07::Day>(input),
-        8 => solve::<day08::Day>(input),
-        9 => solve::<day09::Day>(input),
-        10 => solve::<day10::Day>(input),
-        11 => solve::<day11::Day>(input),
-        12 => solve::<day12::Day>(input),
-        13 => solve::<day13::Day>(input),
-        14 => solve::<day14::Day>(input),
-        15 => solve::<day15::Day>(input),
-        16 => solve::<day16::Day>(input),
-        17 => solve::<day17::Day>(input),
-        18 => solve::<day18::Day>(input),
-        19 => solve::<day19::Day>(input),
-        20 => solve::<day20::Day>(input),
-        21 => solve::<day21::Day>(input),
-        22 => solve::<day22::Day>(input),
-        23 => solve::<day23::Day>(input),
-        24 => solve::<day24::Day>(input),
-        25 => solve::<day25::Day>(input),
+        1 => solve_verbose(day01::TITLE, input, day01::run),
+        2 => solve_verbose(day02::TITLE, input, day02::run),
+        3 => solve_verbose(day03::TITLE, input, day03::run),
+        4 => solve_verbose(day04::TITLE, input, day04::run),
+        5 => solve_verbose(day05::TITLE, input, day05::run),
+        6 => solve_verbose(day06::TITLE, input, day06::run),
+        7 => solve_verbose(day07::TITLE, input, day07::run),
+        8 => solve_verbose(day08::TITLE, input, day08::run),
+        9 => solve_verbose(day09::TITLE, input, day09::run),
+        10 => solve_verbose(day10::TITLE, input, day10::run),
+        11 => solve_verbose(day11::TITLE, input, day11::run),
+        12 => solve_verbose(day12::TITLE, input, day12::run),
+        13 => solve_verbose(day13::TITLE, input, day13::run),
+        14 => solve_verbose(day14::TITLE, input, day14::run),
+        15 => solve_verbose(day15::TITLE, input, day15::run),
+        16 => solve_verbose(day16::TITLE, input, day16::run),
+        17 => solve_verbose(day17::TITLE, input, day17::run),
+        18 => solve_verbose(day18::TITLE, input, day18::run),
+        19 => solve_verbose(day19::TITLE, input, day19::run),
+        20 => solve_verbose(day20::TITLE, input, day20::run),
+        21 => solve_verbose(day21::TITLE, input, day21::run),
+        22 => solve_verbose(day22::TITLE, input, day22::run),
+        23 => solve_verbose(day23::TITLE, input, day23::run),
+        24 => solve_verbose(day24::TITLE, input, day24::run),
+        25 => solve_verbose(day25::TITLE, input, day25::run),
         _ => Err(eyre!("{} is not implemented for year 2020", day)),
     }
 }

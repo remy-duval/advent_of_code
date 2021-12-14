@@ -1,22 +1,25 @@
 use commons::eyre::{eyre, Result};
-use commons::Problem;
 
-pub struct Day;
+pub const TITLE: &str = "Day 3: Binary Diagnostic";
 
-impl Problem for Day {
-    type Input = Binaries;
-    const TITLE: &'static str = "Day 3: Binary Diagnostic";
+pub fn run(raw: String) -> Result<()> {
+    let data = parse(&raw)?;
+    println!("1: Power consumption is {}", first_part(&data));
+    println!("2: Life support is {}", second_part(&data)?);
+    Ok(())
+}
 
-    fn solve(data: Self::Input) -> Result<()> {
-        println!("1: Power consumption is {}", first_part(&data));
-        println!("2: Life support is {}", second_part(&data)?);
-
-        Ok(())
-    }
+fn parse(raw: &str) -> Result<Binaries> {
+    let mut lines = raw.lines().peekable();
+    let bits = lines.peek().map_or(0, |line| line.chars().count());
+    let data = lines
+        .map(|l| u16::from_str_radix(l, 2).map(Binary))
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(Binaries { data, bits })
 }
 
 /// Parsed values from the input
-pub struct Binaries {
+struct Binaries {
     /// All the binary ratings that were parsed from the input
     data: Vec<Binary>,
     /// The number of bits for each of the binaries we have
@@ -31,19 +34,6 @@ impl Binary {
     /// Check if the given bit is zero
     pub fn is_zero_bit(&self, bit: usize) -> bool {
         self.0 & (1 << bit) == 0
-    }
-}
-
-impl std::str::FromStr for Binaries {
-    type Err = core::num::ParseIntError;
-
-    fn from_str(s: &str) -> core::result::Result<Self, Self::Err> {
-        let mut lines = s.lines().peekable();
-        let bits = lines.peek().map_or(0, |line| line.chars().count());
-        let data = lines
-            .map(|l| u16::from_str_radix(l, 2).map(Binary))
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok(Binaries { data, bits })
     }
 }
 
