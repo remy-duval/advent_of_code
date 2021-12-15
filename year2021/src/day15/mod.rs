@@ -35,7 +35,7 @@ fn parse(s: &str) -> Result<CostSquare> {
 }
 
 fn first_part(s: &CostSquare) -> u16 {
-    s.lowest_cost().map_or(0, |p| p.cost)
+    s.lowest_cost().unwrap_or_default()
 }
 
 fn second_part(s: &CostSquare) -> u16 {
@@ -66,46 +66,40 @@ struct CostSquare {
     storage: Vec<u8>,
 }
 
-/// A path, ordered by decreasing cost and path length
-/// The Ord implementation is required, since [BinaryHeap::pop] uses it
-#[derive(Eq, PartialEq)]
-struct Path {
-    from: usize,
-    cost: u16,
-}
-
-impl PartialOrd<Self> for Path {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Path {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Reversed, since BinaryHeap returns the highest element and we want the lowest cost
-        other.cost.cmp(&self.cost)
-    }
-}
-
 impl CostSquare {
     /// Find the lowest cost path from the first index to the last
-    fn lowest_cost(&self) -> Option<Path> {
+    /// Uses Djikstra algorithm (A* with manhattan distance doesn't seem to be faster in this case)
+    fn lowest_cost(&self) -> Option<u16> {
+        #[derive(Eq, PartialEq)]
+        struct Path(usize, u16);
+
+        impl PartialOrd<Self> for Path {
+            fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+                Some(self.cmp(other))
+            }
+        }
+
+        impl Ord for Path {
+            fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+                // Reversed, since BinaryHeap returns the highest element and we want the lowest cost
+                other.1.cmp(&self.1)
+            }
+        }
+
         let mut queue = BinaryHeap::with_capacity(self.width);
         let mut costs = vec![u16::MAX; self.storage.len()];
-        queue.push(Path { from: 0, cost: 0 });
+        queue.push(Path(0, 0));
 
-        while let Some(Path { from, cost }) = queue.pop() {
+        while let Some(Path(from, cost)) = queue.pop() {
             if from == self.storage.len() - 1 {
-                return Some(Path { from, cost });
+                return Some(cost);
             }
 
             self.for_each_adjacent(from, |p, c| {
                 let cost = cost + c as u16;
-                if let Some(best) = costs.get_mut(p) {
-                    if cost < *best {
-                        *best = cost;
-                        queue.push(Path { from: p, cost });
-                    }
+                if cost < costs[p] {
+                    costs[p] = cost;
+                    queue.push(Path(p, cost));
                 }
             });
         }
@@ -114,9 +108,10 @@ impl CostSquare {
     }
 
     /// Apply a callback on all elements around an index
+    #[inline(always)]
     fn for_each_adjacent<ForEach: FnMut(usize, u8)>(&self, index: usize, mut f: ForEach) {
         let x = index % self.width;
-        let mut execute = |opt: Option<usize>| {
+        let mut execute = move |opt: Option<usize>| {
             if let Some(i) = opt {
                 if let Some(content) = self.storage.get(i) {
                     f(i, *content)
