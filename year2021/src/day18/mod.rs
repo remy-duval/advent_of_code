@@ -1,177 +1,170 @@
-use commons::eyre::{eyre, Result, WrapErr};
+use commons::eyre::{eyre, Result};
 
 pub const TITLE: &str = "Day 18: Snailfish";
 
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
-    println!("1. Magnitude of the sum: {}", first_part(data.clone()));
-    println!("2. Highest magnitude sum: {}", second_part(data));
+    println!("1. Magnitude of the sum: {}", first_part(&data));
+    println!("2. Highest magnitude sum: {}", second_part(&data));
 
     Ok(())
 }
 
-fn parse(s: &str) -> Result<Vec<Number>> {
-    s.lines()
-        .map(|line| Number::parse(line).map(|(n, _)| n))
-        .collect()
+/// Represent a number in the binary tree by storing its depth and value
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+struct Part {
+    /// Always between 1 and 5
+    depth: u8,
+    value: u8,
 }
 
-fn first_part(numbers: Vec<Number>) -> u64 {
-    numbers
-        .into_iter()
-        .reduce(|a, b| a.add(b))
-        .map_or(0, |n| n.magnitude())
+fn parse(s: &str) -> Result<Vec<Vec<Part>>> {
+    s.lines().map(parse_one).collect()
 }
 
-fn second_part(numbers: Vec<Number>) -> u64 {
+/// Add up all the numbers together and compute the final magnitude
+fn first_part(numbers: &[Vec<Part>]) -> u64 {
+    add_all(numbers).map_or(0, |result| magnitude(&result))
+}
+
+/// Find the highest magnitude of the numbers two-sums
+fn second_part(numbers: &[Vec<Part>]) -> u64 {
     let mut max = 0;
+    let mut current = Vec::with_capacity(2 * numbers.first().map_or(0, Vec::capacity));
     for i in 0..numbers.len() {
-        for j in (0..numbers.len()).filter(|&j| j != i) {
-            let first = numbers[i].clone().add(numbers[j].clone()).magnitude();
-            let second = numbers[j].clone().add(numbers[i].clone()).magnitude();
-            max = max.max(first).max(second)
+        for j in 0..numbers.len() {
+            if i != j {
+                add(&numbers[i], &numbers[j], &mut current);
+                let first = magnitude(&current);
+                add(&numbers[j], &numbers[i], &mut current);
+                max = max.max(magnitude(&current)).max(first)
+            }
         }
     }
+
     max
 }
 
-/// A number formed of pairs of numbers stored as a binary tree
-/// This could probably be made more efficient by being flattened as a vec ?
-#[derive(Debug, Clone, Eq, PartialEq)]
-enum Number {
-    Pair(Box<(Number, Number)>),
-    Regular(u64),
+/// Parse a number from a line
+fn parse_one(s: &str) -> Result<Vec<Part>> {
+    let mut depth = 0;
+    let mut result = Vec::new();
+    for c in s.trim().chars() {
+        match c {
+            '[' => depth += 1,
+            ']' => depth -= 1,
+            ',' => (),
+            d => match d.to_digit(10).map(|d| d as u8) {
+                Some(value) => result.push(Part { depth, value }),
+                None => return Err(eyre!("Expected '[', ']', ',' or digit, got {}", d)),
+            },
+        }
+    }
+
+    Ok(result)
 }
 
-impl Number {
-    /// Recursively compute the number's magnitude
-    fn magnitude(&self) -> u64 {
-        match self {
-            Number::Pair(pair) => {
-                let (a, b) = pair.as_ref();
-                3 * a.magnitude() + 2 * b.magnitude()
-            }
-            Number::Regular(n) => *n,
-        }
-    }
+/// Compute the magnitude of this number
+///
+/// This is the trickiest part with this data structure, since we don't have the actual tree
+fn magnitude(number: &[Part]) -> u64 {
+    // To be able to compute the magnitude without rebuilding the full tree:
+    // Remember whether we are on the first or second value for this depth level, and for:
+    // false -> first, 3x factor, switch to true
+    // true -> second, 2x factor, switch to false, bubble up this process to previous depths
+    //
+    // The full factor to apply to each value is the product of all the factors until its depth
+    //
+    // E.g.: [[a, [b, c]], d]
+    // The factors should be:
+    // - a: [3, 3]        (array is [false, false, false, false] using depth 0 - 1)
+    // - b: [3, 2, 3]     (array is [false, true, false, false] using depth 0 - 2)
+    // - c: [3, 2, 2],    (array is [false, true, true, false]  using depth 0 - 2)
+    // - d: [2]           (array is [true, false, false, false] using depth 0)
+    //
+    // This way of doing breaks for depths of more than five
+    let mut second_value = [false; 4];
+    number
+        .iter()
+        .copied()
+        .fold(0, |acc, Part { depth, value }| {
+            assert!(depth < 5 && depth > 0);
+            let depth = (depth - 1) as usize;
+            let mut second_value_seen = false;
+            // Add the value x the factors to the total
+            acc + second_value
+                .iter_mut()
+                .take(depth + 1)
+                .enumerate()
+                .rev()
+                .fold(value as u64, |acc, (i, v)| {
+                    let factor = if *v { 2 } else { 3 };
+                    // Set whether the next value will be the second value for this depth level
+                    if i == depth || second_value_seen {
+                        second_value_seen = *v; // Bubble up if this was the second value
+                        *v = !*v;
+                    }
+                    acc * factor
+                })
+        })
+}
 
-    /// Add two numbers together
-    /// - Concatenate the two in a tree
-    /// - Apply reduction (explode or split in this order) repeatedly until stable
-    fn add(self, other: Self) -> Self {
-        let mut current = Self::Pair(Box::new((self, other)));
-        while current.explode_once(0).is_some() || current.split_once() {}
-        current
-    }
+/// Add all numbers together in order
+fn add_all(numbers: &[Vec<Part>]) -> Option<Vec<Part>> {
+    let mut numbers = numbers.iter();
+    let mut acc = numbers.next()?.clone();
+    let mut swap = Vec::with_capacity(acc.capacity());
+    numbers.for_each(|number| {
+        add(&acc, number, &mut swap);
+        std::mem::swap(&mut acc, &mut swap);
+    });
+    Some(acc)
+}
 
-    /// Split the first 10+ number in this sub-tree into a pair and stop
-    /// Returns whether such a split was made
-    fn split_once(&mut self) -> bool {
-        match self {
-            Self::Regular(n) => {
-                // Split numbers >= 10 in pairs of its halves
-                if *n >= 10 {
-                    let left = *n / 2;
-                    let right = left + *n % 2;
-                    *self = Self::Pair(Box::new((Self::Regular(left), Self::Regular(right))));
-                    true
-                } else {
-                    false
-                }
-            }
-            Self::Pair(pair) => {
-                let (a, b) = pair.as_mut();
-                a.split_once() || b.split_once()
-            }
-        }
-    }
+/// Add two numbers into the given buffer
+fn add(first: &[Part], second: &[Part], into: &mut Vec<Part>) {
+    into.clear();
+    into.reserve(first.len() + second.len());
+    first.iter().chain(second.iter()).for_each(|p| {
+        into.push(Part {
+            depth: p.depth + 1,
+            value: p.value,
+        });
+    });
+    while explode(into) || split(into) {}
+}
 
-    /// Explode the leftmost 4+ deep pair and stop
-    ///
-    /// - Returns `None` if it did nothing
-    /// - Returns `Some((left, right))` if it exploded something, with values to add to its:
-    ///   - leftmost neighbour number
-    ///   - rightmost neighbour number
-    fn explode_once(&mut self, depth: usize) -> Option<(u64, u64)> {
-        if let Self::Pair(pair) = self {
-            let (a, b) = pair.as_mut();
-            if depth >= 4 {
-                let left = match a {
-                    Number::Regular(n) => *n,
-                    Number::Pair(_) => 0,
-                };
-                let right = match b {
-                    Number::Regular(n) => *n,
-                    Number::Pair(_) => 0,
-                };
-                *self = Self::Regular(0);
-                // When going up, we will need to dispatch those values to the left and right
-                Some((left, right))
-            } else if let Some((left, mut right)) = a.explode_once(depth + 1) {
-                if right != 0 {
-                    // Add the right explosion value to the left-most of the right element
-                    b.increase(right, false);
-                    right = 0;
-                }
-                Some((left, right))
-            } else if let Some((mut left, right)) = b.explode_once(depth + 1) {
-                if left != 0 {
-                    // Add the left explosion value to the right-most of the left element
-                    a.increase(left, true);
-                    left = 0;
-                }
-                Some((left, right))
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    }
+/// Split the first number >= 10 into a pair. Returns true if changed something.
+fn split(number: &mut Vec<Part>) -> bool {
+    number
+        .iter()
+        .position(|p| p.value >= 10)
+        .map_or(false, |i| {
+            let current = &mut number[i];
+            let depth = current.depth + 1;
+            let l = current.value / 2;
+            let r = l + current.value % 2;
+            *current = Part { depth, value: l };
+            number.insert(i + 1, Part { depth, value: r });
+            true
+        })
+}
 
-    /// Propagate a value increase to either the left most or right most element in this
-    fn increase(&mut self, value: u64, right_most: bool) {
-        match self {
-            Number::Regular(n) => *n += value,
-            Number::Pair(pair) => {
-                let (a, b) = pair.as_mut();
-                if right_most {
-                    b.increase(value, right_most)
-                } else {
-                    a.increase(value, right_most)
-                }
-            }
+/// Explode the first pair at depth 5 into the nearest elements. Returns true if changed something.
+fn explode(number: &mut Vec<Part>) -> bool {
+    if let Some(i) = number.iter().position(|p| p.depth > 4) {
+        let right = number.remove(i + 1);
+        let left = std::mem::replace(&mut number[i], Part { depth: 4, value: 0 });
+        if let Some(before) = i.checked_sub(1).and_then(|b| number.get_mut(b)) {
+            before.value += left.value;
         }
-    }
+        if let Some(after) = number.get_mut(i + 1) {
+            after.value += right.value;
+        }
 
-    /// Parse a number tree from a string, returning the parsed number and the rest of the string
-    fn parse(s: &str) -> Result<(Self, &str)> {
-        match s.strip_prefix('[') {
-            None => s
-                .char_indices()
-                .take_while(|(_, c)| c.is_digit(10))
-                .map(|(i, _)| i)
-                .last()
-                .map(|last| s.split_at(last + 1))
-                .ok_or_else(|| eyre!("Expecting number in {}", s))
-                .and_then(|(num, rest)| {
-                    let num = num
-                        .parse()
-                        .wrap_err_with(|| format!("Expecting number in {}", num))?;
-                    Ok((Self::Regular(num), rest))
-                }),
-            Some(pair) => {
-                let (a, rest) = Self::parse(pair)?;
-                let rest = rest
-                    .strip_prefix(',')
-                    .ok_or_else(|| eyre!("Expecting ',' in the middle of pair {}", s))?;
-                let (b, rest) = Self::parse(rest)?;
-                let rest = rest
-                    .strip_prefix(']')
-                    .ok_or_else(|| eyre!("Expecting ']' at the end of pair {}", s))?;
-                Ok((Self::Pair(Box::new((a, b))), rest))
-            }
-        }
+        true
+    } else {
+        false
     }
 }
 
