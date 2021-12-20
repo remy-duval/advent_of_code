@@ -83,29 +83,23 @@ fn magnitude(number: &[Part]) -> u64 {
     // - d: [2]           (array is [true, false, false, false] using depth 0)
     //
     // This way of doing breaks for depths of more than five
-    let mut second_value = [false; 4];
+    let mut second_value = [false; 5];
     number
         .iter()
         .copied()
         .fold(0, |acc, Part { depth, value }| {
-            assert!(depth < 5 && depth > 0);
-            let depth = (depth - 1) as usize;
-            let mut second_value_seen = false;
+            let mut carry_over = true;
+            let mut current = value as u64;
             // Add the value x the factors to the total
-            acc + second_value
-                .iter_mut()
-                .take(depth + 1)
-                .enumerate()
-                .rev()
-                .fold(value as u64, |acc, (i, v)| {
-                    let factor = if *v { 2 } else { 3 };
-                    // Set whether the next value will be the second value for this depth level
-                    if i == depth || second_value_seen {
-                        second_value_seen = *v; // Bubble up if this was the second value
-                        *v = !*v;
-                    }
-                    acc * factor
-                })
+            for v in second_value.iter_mut().take(depth as usize).rev() {
+                current *= if *v { 2 } else { 3 };
+                if carry_over {
+                    carry_over = *v; // Bubble up if this was the second value
+                    *v = !*v;
+                }
+            }
+
+            acc + current
         })
 }
 
