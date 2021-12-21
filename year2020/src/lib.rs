@@ -24,7 +24,7 @@
 use std::path::PathBuf;
 
 use commons::eyre::{eyre, Result};
-use commons::problem::solve_verbose;
+use commons::problem::{solve_quiet, solve_verbose};
 
 mod day01;
 mod day02;
@@ -82,4 +82,43 @@ pub fn solve_problem(day: u8, input: PathBuf) -> Result<()> {
         25 => solve_verbose(day25::TITLE, input, day25::run),
         _ => Err(eyre!("{} is not implemented for year 2020", day)),
     }
+}
+
+/// Solve all the problems for this year in a row, timing them all
+pub fn solve_all(dir: PathBuf) -> Result<()> {
+    fn all(dir: PathBuf) -> Result<()> {
+        solve_quiet(1, dir.join("01.txt"), day01::run)?;
+        solve_quiet(2, dir.join("02.txt"), day02::run)?;
+        solve_quiet(3, dir.join("03.txt"), day03::run)?;
+        solve_quiet(4, dir.join("04.txt"), day04::run)?;
+        solve_quiet(5, dir.join("05.txt"), day05::run)?;
+        solve_quiet(6, dir.join("06.txt"), day06::run)?;
+        solve_quiet(7, dir.join("07.txt"), day07::run)?;
+        solve_quiet(8, dir.join("08.txt"), day08::run)?;
+        solve_quiet(9, dir.join("09.txt"), day09::run)?;
+        solve_quiet(10, dir.join("10.txt"), day10::run)?;
+        solve_quiet(11, dir.join("11.txt"), day11::run)?;
+        solve_quiet(12, dir.join("12.txt"), day12::run)?;
+        solve_quiet(13, dir.join("13.txt"), day13::run)?;
+        solve_quiet(14, dir.join("14.txt"), day14::run)?;
+        solve_quiet(15, dir.join("15.txt"), day15::run)?;
+        solve_quiet(16, dir.join("16.txt"), day16::run)?;
+        solve_quiet(17, dir.join("17.txt"), day17::run)?;
+        solve_quiet(18, dir.join("18.txt"), day18::run)?;
+        solve_quiet(19, dir.join("19.txt"), day19::run)?;
+        solve_quiet(20, dir.join("20.txt"), day20::run)?;
+        solve_quiet(21, dir.join("21.txt"), day21::run)?;
+        solve_quiet(22, dir.join("22.txt"), day22::run)?;
+        solve_quiet(23, dir.join("23.txt"), day23::run)?;
+        solve_quiet(24, dir.join("24.txt"), day24::run)?;
+        solve_quiet(25, dir.join("25.txt"), day25::run)?;
+        Ok(())
+    }
+
+    let start = std::time::Instant::now();
+    let result = all(dir);
+    let elapsed = start.elapsed();
+    println!("\n\nSolve time: {:}ms", elapsed.as_millis());
+
+    result
 }

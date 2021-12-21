@@ -2,35 +2,35 @@ use std::fmt::{Debug, Display};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use clap::{value_t, App, Arg};
-use eyre::{eyre, Report, Result};
+use clap::{crate_authors, crate_version, value_t, App, Arg};
+use eyre::{eyre, Report, Result, WrapErr};
 
 /// Parse the advent of code arguments
-pub fn setup(name: &str) -> Arguments {
+pub fn parse_arguments(name: &str) -> Arguments {
     let matches = App::new(name)
-        .version(clap::crate_version!())
-        .author(clap::crate_authors!())
+        .version(crate_version!())
+        .author(crate_authors!())
         .about("Solutions for the advent of code problems")
         .arg(
             Arg::with_name("day")
                 .short("d")
                 .long("day")
                 .value_name("DAY")
-                .help("The specific day of the problem")
+                .help("The specific day of the problem or 'all'")
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("input")
                 .long("input")
                 .value_name("FILE")
-                .help("The input for that day problem")
+                .help("The problem's input. If day is 'all', a directory from 01.txt to 25.txt")
                 .takes_value(true),
         )
         .get_matches();
 
     Arguments {
-        day: clap::value_t!(matches, "day", Day).unwrap_or_else(|e| e.exit()),
-        input: clap::value_t!(matches, "input", PathBuf).unwrap_or_else(|e| e.exit()),
+        day: value_t!(matches, "day", Day).unwrap_or_else(|e| e.exit()),
+        input: value_t!(matches, "input", PathBuf).unwrap_or_else(|e| e.exit()),
     }
 }
 
@@ -43,13 +43,19 @@ pub struct Arguments {
     pub input: PathBuf,
 }
 
-/// The Day of the Advent of Code problem to solve (between 01 and 25)
+/// The Day of the Advent of Code problem to solve (between 01 and 25 or all)
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub struct Day(pub u8);
+pub enum Day {
+    All,
+    Number(u8),
+}
 
 impl Display for Day {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Day {}", self.0)
+        match self {
+            Self::All => write!(f, "All days"),
+            Self::Number(n) => write!(f, "Day {}", n),
+        }
     }
 }
 
@@ -57,9 +63,19 @@ impl FromStr for Day {
     type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.parse::<u8>()? {
-            day if day > 0 && day <= 25 => Ok(Day(day)),
-            _ => Err(eyre!("Day must be between 1 and 25")),
+        if s == "all" {
+            Ok(Self::All)
+        } else {
+            s.parse::<u8>()
+                .wrap_err_with(|| format!("For number: {}", s))
+                .and_then(|day| {
+                    if day > 0 && day <= 25 {
+                        Ok(Self::Number(day))
+                    } else {
+                        Err(eyre!("Day must be between 1 and 25"))
+                    }
+                })
+                .wrap_err("Should be 'all' or a number between 1 and 25")
         }
     }
 }
