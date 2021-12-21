@@ -1,5 +1,4 @@
-use hashbrown::HashMap;
-use itertools::{iproduct, Itertools};
+use itertools::Itertools;
 
 use commons::eyre::{eyre, Result};
 
@@ -58,43 +57,79 @@ fn first_part([a, b]: [u8; 2]) -> usize {
     }
 }
 
-/// Play all the possible games with a dice of 1 to 3
-fn second_part([a, b]: [u8; 2]) -> usize {
-    // The universes created by summing three dice rolls (from 3 to 9)
-    // The index is the dice sum - 3
-    let rolls: [usize; 7] = {
-        let mut result = [0; 7];
-        for (i, j, k) in iproduct!(0..3, 0..3, 0..3) {
-            result[i + j + k] += 1;
-        }
-        result
-    };
-
-    let mut universes = HashMap::with_capacity(4096);
-    let mut swap = universes.clone();
-    let mut wins = [0; 2];
-    let mut turn = 0;
-    universes.insert([(a, 0u8), (b, 0u8)], 1usize);
-
-    while !universes.is_empty() {
-        for (state, count) in universes.drain() {
-            for (roll, &created) in rolls.iter().enumerate() {
-                let mut state = state;
-                let (pos, score) = &mut state[turn];
-                *pos = (*pos + (roll + 3) as u8) % 10;
-                *score += *pos + 1;
-                if *score >= 21 {
-                    wins[turn] += count * created;
-                } else {
-                    *swap.entry(state).or_default() += count * created;
-                }
+/// The universes created by summing three dice rolls (from 3 to 9)
+/// The index is the dice sum - 3
+const ROLLS: [usize; 7] = {
+    let mut result = [0; 7];
+    let mut i = 0;
+    while i < 3 {
+        let mut j = 0;
+        while j < 3 {
+            let mut k = 0;
+            while k < 3 {
+                result[i + j + k] += 1;
+                k += 1;
             }
+            j += 1;
         }
-        std::mem::swap(&mut universes, &mut swap);
-        turn = if turn == 1 { 0 } else { 1 };
+        i += 1;
+    }
+    result
+};
+
+/// Find the maximum count of possible universes in which one of the player wins
+fn second_part([a, b]: [u8; 2]) -> u64 {
+    // Iterates the possible next states (and their occurrence count) from the given one
+    fn next_states((pos, score): (u8, u8)) -> impl Iterator<Item = (u64, (u8, u8))> {
+        ROLLS.into_iter().enumerate().map(move |(roll, n)| {
+            let pos = (pos + (roll + 3) as u8) % 10;
+            let score = score + pos + 1;
+            (n as u64, (pos, score))
+        })
     }
 
-    wins[0].max(wins[1])
+    // Count the number of possible wins from the given state, cached
+    fn wins_from(state: [(u8, u8); 2], cache: &mut [Option<[u64; 2]>]) -> [u64; 2] {
+        // Convert the state to an index in the cache
+        let key = {
+            let first = state[0].1 as usize * 10 + state[0].0 as usize;
+            let second = state[1].1 as usize * 10 + state[1].0 as usize;
+            first * 210 + second
+        };
+
+        if let Some(result) = cache[key] {
+            result
+        } else {
+            let mut wins = [0, 0];
+            next_states(state[0]).for_each(|(count, one)| {
+                if one.1 >= 21 {
+                    wins[0] += count;
+                    return;
+                }
+
+                next_states(state[1]).for_each(|(n, two)| {
+                    let count = count * n;
+                    if two.1 >= 21 {
+                        wins[1] += count;
+                        return;
+                    }
+
+                    wins_from([one, two], cache)
+                        .into_iter()
+                        .zip(&mut wins)
+                        .for_each(|(wins, total)| *total += count * wins);
+                });
+            });
+
+            cache[key] = Some(wins);
+            wins
+        }
+    }
+
+    // The cache is a huge pre-allocated Vec, which is weirdly enough a lot faster than a HashMap
+    let mut cache = vec![None; 10 * 10 * 21 * 21];
+    let result = wins_from([(a, 0), (b, 0)], &mut cache);
+    result[0].max(result[1])
 }
 
 #[cfg(test)]
