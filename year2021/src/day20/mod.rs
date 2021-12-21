@@ -14,9 +14,9 @@ pub fn run(raw: String) -> Result<()> {
 }
 
 fn parse(s: &str) -> Result<(Enhancer, Image)> {
-    let (enhancer, image) = commons::parse::sep_by_empty_lines(s).collect_tuple().ok_or_else(|| {
-        eyre!("Missing sections in {}", s)
-    })?;
+    let (enhancer, image) = commons::parse::sep_by_empty_lines(s)
+        .collect_tuple()
+        .ok_or_else(|| eyre!("Missing sections in {}", s))?;
 
     Ok((Enhancer::parse(enhancer), Image::parse(image)))
 }
@@ -49,7 +49,8 @@ impl Image {
         into.width = self.width + 2;
         into.background = alg.get([self.background; 9]);
         into.center.clear();
-        into.center.reserve((into.width as usize) * (height as usize + 2));
+        into.center
+            .reserve((into.width as usize) * (height as usize + 2));
         (-1..(height + 1)).for_each(|y| {
             (-1..(self.width + 1)).for_each(|x| {
                 into.center.push(alg.get(self.square(x, y)));
@@ -99,7 +100,8 @@ impl Image {
         s.lines().for_each(|line| {
             line.chars()
                 .chain(std::iter::repeat('.'))
-                .take(width).for_each(|c| center.push(c == '#'));
+                .take(width)
+                .for_each(|c| center.push(c == '#'));
         });
 
         Self {
@@ -128,7 +130,10 @@ impl Enhancer {
         let mut result = [0u8; 64];
         let mut chars = s.chars();
         result.iter_mut().for_each(|set| {
-            (0..8).zip(&mut chars).filter(|(_, c)| *c == '#').for_each(|(pos, _)| *set |= 1 << pos);
+            (0..8)
+                .zip(&mut chars)
+                .filter(|(_, c)| *c == '#')
+                .for_each(|(pos, _)| *set |= 1 << pos);
         });
 
         Self(result)

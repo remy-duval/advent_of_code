@@ -46,8 +46,8 @@ mod day17;
 mod day18;
 mod day19;
 mod day20;
-/* mod day21;
-mod day22;
+mod day21;
+/* mod day22;
 mod day23;
 mod day24;
 mod day25;
@@ -76,8 +76,8 @@ pub fn solve_problem(day: u8, input: PathBuf) -> Result<()> {
         18 => solve_verbose(day18::TITLE, input, day18::run),
         19 => solve_verbose(day19::TITLE, input, day19::run),
         20 => solve_verbose(day20::TITLE, input, day20::run),
-        /* 21 => solve_verbose(day21::TITLE, input, day21::run),
-        22 => solve_verbose(day22::TITLE, input, day22::run),
+        21 => solve_verbose(day21::TITLE, input, day21::run),
+        /* 22 => solve_verbose(day22::TITLE, input, day22::run),
         23 => solve_verbose(day23::TITLE, input, day23::run),
         24 => solve_verbose(day24::TITLE, input, day24::run),
         25 => solve_verbose(day25::TITLE, input, day25::run), */
