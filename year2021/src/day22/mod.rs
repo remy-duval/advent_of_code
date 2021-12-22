@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use std::ops::Range;
 use std::str::FromStr;
 
@@ -43,27 +41,55 @@ fn first_part(instructions: &[Boot]) -> i64 {
 
 /// Count the points active after the instructions
 fn all_points(instructions: impl IntoIterator<Item = Boot>) -> i64 {
-    let mut on: Vec<Cuboid> = Vec::new();
-    let mut off: Vec<Cuboid> = Vec::new();
-    instructions.into_iter().for_each(|Boot { active, zone }| {
-        let before = off.len();
-        off.extend(on.iter().filter_map(|c| zone.overlap(c)));
-        on.extend(off[..before].iter().filter_map(|c| zone.overlap(c)));
-        if active {
-            on.push(zone);
+    // Split a main range to not overlap with the second range
+    // Update the main range to only keep the part that remains to be split on other axis
+    fn split_axis(main: &mut Range<i32>, by: &Range<i32>, mut produce: impl FnMut(Range<i32>)) {
+        if main.start < by.start {
+            produce(main.start..by.start);
+            main.start = by.start;
         }
-    });
-
-    let mut sum = 0;
-    while !on.is_empty() || !off.is_empty() {
-        if let Some(c) = on.pop() {
-            sum += c.size();
-        }
-        if let Some(c) = off.pop() {
-            sum -= c.size();
+        if main.end > by.end {
+            produce(by.end..main.end);
+            main.end = by.end;
         }
     }
-    sum
+
+    // Store the non-overlapping active cuboids
+    let mut current: Vec<Cuboid> = Vec::with_capacity(4800);
+    let mut to_add: Vec<Cuboid> = Vec::with_capacity(100);
+    instructions.into_iter().for_each(|Boot { active, zone }| {
+        // For each new cuboid, split the existing cubes to not overlap with it
+        current.retain(|cuboid| {
+            if cuboid.is_disjoint(&zone) {
+                true
+            } else {
+                // Split each axis, each split occurring on the remaining space
+                let mut x = cuboid.0[0].clone();
+                let mut y = cuboid.0[1].clone();
+                let mut z = cuboid.0[2].clone();
+                split_axis(&mut x, &zone.0[0], |x| {
+                    to_add.push(Cuboid([x, y.clone(), z.clone()]));
+                });
+                split_axis(&mut y, &zone.0[1], |y| {
+                    to_add.push(Cuboid([x.clone(), y, z.clone()]));
+                });
+                split_axis(&mut z, &zone.0[2], |z| {
+                    to_add.push(Cuboid([x.clone(), y.clone(), z]));
+                });
+                false
+            }
+        });
+
+        // Then if the new cuboid is active, add it to the queue
+        if active {
+            current.push(zone);
+        }
+
+        current.append(&mut to_add);
+    });
+
+    // As no cuboid is overlapping, computing the number of active point is just a sum
+    current.into_iter().map(|c| c.size()).sum()
 }
 
 /// The boot instructions
@@ -86,21 +112,15 @@ impl Cuboid {
             .product()
     }
 
-    /// Compute the overlap of two cuboids
-    fn overlap(&self, other: &Self) -> Option<Self> {
-        fn range(a: &Range<i32>, b: &Range<i32>) -> Option<Range<i32>> {
-            let r = a.start.max(b.start)..(a.end.min(b.end));
-            if r.is_empty() {
-                None
-            } else {
-                Some(r)
-            }
+    /// True if the two cuboids don't overlap
+    fn is_disjoint(&self, other: &Self) -> bool {
+        fn axis(first: &Range<i32>, second: &Range<i32>) -> bool {
+            first.end <= second.start || second.end <= first.start
         }
 
-        let x = range(&self.0[0], &other.0[0])?;
-        let y = range(&self.0[1], &other.0[1])?;
-        let z = range(&self.0[2], &other.0[2])?;
-        Some(Self([x, y, z]))
+        axis(&self.0[0], &other.0[0])
+            || axis(&self.0[1], &other.0[1])
+            || axis(&self.0[2], &other.0[2])
     }
 }
 
