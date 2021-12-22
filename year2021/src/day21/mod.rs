@@ -59,7 +59,7 @@ fn first_part([a, b]: [u8; 2]) -> usize {
 
 /// The universes created by summing three dice rolls (from 3 to 9)
 /// The index is the dice sum - 3
-const ROLLS: [usize; 7] = {
+const ROLLS: [i64; 7] = {
     let mut result = [0; 7];
     let mut i = 0;
     while i < 3 {
@@ -78,18 +78,18 @@ const ROLLS: [usize; 7] = {
 };
 
 /// Find the maximum count of possible universes in which one of the player wins
-fn second_part([a, b]: [u8; 2]) -> u64 {
+fn second_part([a, b]: [u8; 2]) -> i64 {
     // Iterates the possible next states (and their occurrence count) from the given one
-    fn next_states((pos, score): (u8, u8)) -> impl Iterator<Item = (u64, (u8, u8))> {
+    fn next_states((pos, score): (u8, u8)) -> impl Iterator<Item = (i64, (u8, u8))> {
         ROLLS.into_iter().enumerate().map(move |(roll, n)| {
             let pos = (pos + (roll + 3) as u8) % 10;
             let score = score + pos + 1;
-            (n as u64, (pos, score))
+            (n, (pos, score))
         })
     }
 
     // Count the number of possible wins from the given state, cached
-    fn wins_from(state: [(u8, u8); 2], cache: &mut [Option<[u64; 2]>]) -> [u64; 2] {
+    fn wins_from(state: [(u8, u8); 2], cache: &mut [[i64; 2]]) -> [i64; 2] {
         // Convert the state to an index in the cache
         let key = {
             let first = state[0].1 as usize * 10 + state[0].0 as usize;
@@ -97,37 +97,39 @@ fn second_part([a, b]: [u8; 2]) -> u64 {
             first * 210 + second
         };
 
-        if let Some(result) = cache[key] {
-            result
-        } else {
-            let mut wins = [0, 0];
-            next_states(state[0]).for_each(|(count, one)| {
-                if one.1 >= 21 {
-                    wins[0] += count;
+        let mut wins = cache[key];
+        if wins[0] >= 0 && wins[1] >= 0 {
+            return wins;
+        }
+
+        wins[0] = 0;
+        wins[1] = 0;
+        next_states(state[0]).for_each(|(count, one)| {
+            if one.1 >= 21 {
+                wins[0] += count;
+                return;
+            }
+
+            next_states(state[1]).for_each(|(n, two)| {
+                let count = count * n;
+                if two.1 >= 21 {
+                    wins[1] += count;
                     return;
                 }
 
-                next_states(state[1]).for_each(|(n, two)| {
-                    let count = count * n;
-                    if two.1 >= 21 {
-                        wins[1] += count;
-                        return;
-                    }
-
-                    wins_from([one, two], cache)
-                        .into_iter()
-                        .zip(&mut wins)
-                        .for_each(|(wins, total)| *total += count * wins);
-                });
+                wins_from([one, two], cache)
+                    .into_iter()
+                    .zip(&mut wins)
+                    .for_each(|(wins, total)| *total += count * wins);
             });
+        });
 
-            cache[key] = Some(wins);
-            wins
-        }
+        cache[key] = wins;
+        wins
     }
 
     // The cache is a huge pre-allocated Vec, which is weirdly enough a lot faster than a HashMap
-    let mut cache = vec![None; 10 * 10 * 21 * 21];
+    let mut cache = vec![[-1, -1]; 10 * 10 * 21 * 21];
     let result = wins_from([(a, 0), (b, 0)], &mut cache);
     result[0].max(result[1])
 }
