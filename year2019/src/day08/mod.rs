@@ -63,7 +63,7 @@ impl Debug for Image {
             .iter()
             .map(|l| Self::layer_representation(*l))
             .join("\n\n");
-        write!(f, "Layers:\n{}", repr)
+        write!(f, "Layers:\n{repr}")
     }
 }
 

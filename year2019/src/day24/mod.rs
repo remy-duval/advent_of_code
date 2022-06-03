@@ -105,7 +105,7 @@ impl Display for Bugs {
                     .join("")
             })
             .join("\n");
-        write!(f, "{}", display)
+        display.fmt(f)
     }
 }
 

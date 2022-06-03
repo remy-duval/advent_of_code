@@ -3,7 +3,6 @@
 //! Note that the indexing operations on the grid are based on isize instead of usize
 //! to allow easier increment/decrement operation on them
 
-use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::ops::{Index, IndexMut};
 
 pub use point::Direction;
@@ -529,11 +528,11 @@ impl<T> From<(usize, Vec<T>)> for Grid<T> {
     }
 }
 
-impl<T: Display> Display for Grid<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+impl<T: std::fmt::Display> std::fmt::Display for Grid<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for line in self.lines() {
             for elt in line {
-                write!(f, "{}", elt)?;
+                elt.fmt(f)?;
             }
             writeln!(f)?;
         }

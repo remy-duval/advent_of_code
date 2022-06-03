@@ -38,7 +38,7 @@ fn feedback_loop(memory: &[i64]) -> i64 {
 fn maximum_output(memory: &[i64], base: &[u8]) -> i64 {
     let mut max = 0;
     let mut best: Vec<u8> = vec![];
-    for phases in base.to_vec().into_iter().permutations(base.len()) {
+    for phases in base.iter().copied().permutations(base.len()) {
         let result = amplifier(memory, &phases).unwrap_or(0);
         if result > max {
             max = result;

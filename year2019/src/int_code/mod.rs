@@ -88,7 +88,7 @@ impl Display for IntCodeError {
             IntCodeError::InvalidInstruction => "Current instruction is invalid",
             IntCodeError::Other(msg) => &*msg,
         };
-        write!(f, "{}", error)
+        error.fmt(f)
     }
 }
 

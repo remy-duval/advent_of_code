@@ -288,16 +288,13 @@ impl Direction {
 
 impl Display for Direction {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(
-            f,
-            "{}",
-            match self {
-                Direction::North => "north",
-                Direction::South => "south",
-                Direction::East => "east",
-                Direction::West => "west",
-            }
-        )
+        let message = match self {
+            Direction::North => "north",
+            Direction::South => "south",
+            Direction::East => "east",
+            Direction::West => "west",
+        };
+        message.fmt(f)
     }
 }
 
@@ -346,6 +343,6 @@ impl Item {
 
 impl Display for Item {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "{}", self.0)
+        self.0.fmt(f)
     }
 }

@@ -41,10 +41,14 @@ pub fn run(raw: String) -> Result<()> {
     };
 
     let mut stdout = BufWriter::new(stdout());
-    robot.run_with_ascii_callbacks(
+    let _ = robot.run_with_ascii_callbacks(
         [&main, &a, &b, &c, "n"].iter(),
         |iterator| Some(format!("{}\n", iterator.next()?)),
-        |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
+        |_, line| {
+            stdout
+                .write_all(line.as_bytes())
+                .map_err(|_| Status::Halted)
+        },
     );
     stdout.flush()?;
 
@@ -283,9 +287,9 @@ enum Path {
 impl Display for Path {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match *self {
-            Path::Ahead(number) => write!(f, "{}", number),
-            Path::Right => write!(f, "R"),
-            Path::Left => write!(f, "L"),
+            Path::Ahead(number) => number.fmt(f),
+            Path::Right => 'R'.fmt(f),
+            Path::Left => 'L'.fmt(f),
         }
     }
 }

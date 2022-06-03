@@ -55,13 +55,17 @@ fn parse(s: &str) -> Result<IntCodeInput> {
 fn first_part(memory: &[i64]) -> std::io::Result<()> {
     let mut stdout = BufWriter::new(stdout());
     let mut robot: Processor = memory.into();
-    robot.run_with_ascii_callbacks(
+    let _ = robot.run_with_ascii_callbacks(
         [
             "NOT A T", "NOT B J", "OR J T", "NOT C J", "OR T J", "AND D J", "WALK",
         ]
         .iter(),
         |iterator| Some(format!("{}\n", iterator.next()?)),
-        |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
+        |_, line| {
+            stdout
+                .write_all(line.as_bytes())
+                .map_err(|_| Status::Halted)
+        },
     );
     stdout.flush()
 }
@@ -69,14 +73,18 @@ fn first_part(memory: &[i64]) -> std::io::Result<()> {
 fn second_part(memory: &[i64]) -> std::io::Result<()> {
     let mut stdout = BufWriter::new(stdout());
     let mut robot: Processor = memory[..].into();
-    robot.run_with_ascii_callbacks(
+    let _ = robot.run_with_ascii_callbacks(
         [
             "NOT A T", "NOT B J", "OR J T", "NOT C J", "OR T J", "OR E T", "OR H T", "AND D T",
             "AND T J", "RUN",
         ]
         .iter(),
         |iterator| Some(format!("{}\n", iterator.next()?)),
-        |_, line| write!(stdout, "{}", line).map_err(|_| Status::Halted),
+        |_, line| {
+            stdout
+                .write_all(line.as_bytes())
+                .map_err(|_| Status::Halted)
+        },
     );
 
     stdout.flush()

@@ -91,10 +91,11 @@ fn visualize<T: IntoIterator<Item = Point>>(
     destroyed: T,
 ) -> std::io::Result<()> {
     let mut f = BufWriter::new(stdout());
-    write!(f, "{}", CLEAR_COMMAND)?;
+    f.write_all(CLEAR_COMMAND.as_bytes())?;
     for point in destroyed {
         asteroids.field.remove(&point);
-        write!(f, "{}{}", TO_TOP, asteroids)?;
+        f.write_all(TO_TOP.as_bytes())?;
+        write!(f, "{asteroids}")?;
         f.flush()?;
         std::thread::sleep(Duration::from_millis(10));
     }

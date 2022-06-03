@@ -2,25 +2,25 @@ use std::fmt::{Debug, Display};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use clap::{crate_authors, crate_version, value_t, App, Arg};
+use clap::{Arg, Command, crate_version, crate_authors};
 use eyre::{eyre, Report, Result, WrapErr};
 
 /// Parse the advent of code arguments
 pub fn parse_arguments(name: &str) -> Arguments {
-    let matches = App::new(name)
+    let matches = Command::new(name)
         .version(crate_version!())
         .author(crate_authors!())
         .about("Solutions for the advent of code problems")
         .arg(
-            Arg::with_name("day")
-                .short("d")
+            Arg::new("day")
+                .short('d')
                 .long("day")
                 .value_name("DAY")
                 .help("The specific day of the problem or 'all'")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("input")
+            Arg::new("input")
                 .long("input")
                 .value_name("FILE")
                 .help("The problem's input. If day is 'all', a directory from 01.txt to 25.txt")
@@ -29,8 +29,8 @@ pub fn parse_arguments(name: &str) -> Arguments {
         .get_matches();
 
     Arguments {
-        day: value_t!(matches, "day", Day).unwrap_or_else(|e| e.exit()),
-        input: value_t!(matches, "input", PathBuf).unwrap_or_else(|e| e.exit()),
+        day: matches.value_of_t_or_exit::<Day>("day"),
+        input: matches.value_of_t_or_exit::<PathBuf>("input"),
     }
 }
 

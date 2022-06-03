@@ -238,7 +238,7 @@ impl Display for Maze {
             })
             .join("\n");
 
-        write!(f, "{}", display)
+        display.fmt(f)
     }
 }
 

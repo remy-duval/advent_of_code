@@ -143,7 +143,7 @@ impl Display for CupRing {
         (0..8).try_for_each(|_| {
             current = self.storage[current];
             // +1 since we store the cup indexed from 0 where the problem indexes from 1
-            write!(f, "{}", current + 1)
+            (current + 1).fmt(f)
         })
     }
 }

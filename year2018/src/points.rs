@@ -42,7 +42,7 @@ impl PartialOrd for Point {
 
 impl Display for Point {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "{}", self.0)
+        self.0.fmt(f)
     }
 }
 
