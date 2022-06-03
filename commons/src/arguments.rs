@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use clap::{Arg, Command, crate_version, crate_authors};
+use clap::{crate_authors, crate_version, Arg, Command};
 use eyre::{eyre, Report, Result, WrapErr};
 
 /// Parse the advent of code arguments
