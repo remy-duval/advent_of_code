@@ -186,9 +186,9 @@ fn parse(s: &str) -> Result<Vec<Scanner>> {
                         .filter(|&j| j != i)
                         .map(|j| {
                             let [x, y, z] = sub(beacons[j], beacons[i]);
-                            let x = x.abs() as u32;
-                            let y = y.abs() as u32;
-                            let z = z.abs() as u32;
+                            let x = x.unsigned_abs() as u32;
+                            let y = y.unsigned_abs() as u32;
+                            let z = z.unsigned_abs() as u32;
                             x * x + y * y + z * z
                         })
                         .collect()

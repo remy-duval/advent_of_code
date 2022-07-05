@@ -3,16 +3,17 @@
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 
-use commons::eyre::{eyre, Report, Result};
 use hashbrown::HashMap;
 use itertools::Itertools;
 
+use commons::eyre::{eyre, Report, Result};
 use commons::grid::{Direction, Point};
 
 use super::{HallWay, Keys};
 
 /// Splits the maze in four at the middle point given.
 pub fn split_maze_in_four(data: &str, middle: Point, add_starts: bool) -> [String; 4] {
+    use std::fmt::Write;
     let mut split = [
         String::with_capacity(data.len() / 4),
         String::with_capacity(data.len() / 4),
@@ -24,20 +25,20 @@ pub fn split_maze_in_four(data: &str, middle: Point, add_starts: bool) -> [Strin
     for (y, line) in data.lines().enumerate() {
         match y {
             less if less < half_y => {
-                split[0].push_str(&format!("{}#\n", &line[..half_x]));
-                split[1].push_str(&format!("#{}\n", &line[(half_x + 1)..]));
+                writeln!(split[0], "{}#", &line[..half_x]).expect("written to string");
+                writeln!(split[1], "#{}", &line[(half_x + 1)..]).expect("written to string");
             }
             equals if equals == half_y => {
                 if add_starts {
-                    split[0].push_str(&format!("{}@#\n", &line[..(half_x - 1)]));
-                    split[1].push_str(&format!("#@{}\n", &line[(half_x + 2)..]));
-                    split[2].push_str(&format!("{}@#\n", &line[..(half_x - 1)]));
-                    split[3].push_str(&format!("#@{}\n", &line[(half_x + 2)..]));
+                    writeln!(split[0], "{}@#", &line[..(half_x - 1)]).expect("written to string");
+                    writeln!(split[1], "#@{}", &line[(half_x + 2)..]).expect("written to string");
+                    writeln!(split[2], "{}@#", &line[..(half_x - 1)]).expect("written to string");
+                    writeln!(split[3], "#@{}", &line[(half_x + 2)..]).expect("written to string");
                 }
             }
             _ => {
-                split[2].push_str(&format!("{}#\n", &line[..half_x]));
-                split[3].push_str(&format!("#{}\n", &line[(half_x + 1)..]));
+                writeln!(split[2], "{}#", &line[..half_x]).expect("written to string");
+                writeln!(split[3], "#{}", &line[(half_x + 1)..]).expect("written to string");
             }
         }
     }

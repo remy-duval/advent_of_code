@@ -99,7 +99,6 @@ impl FromStr for Instruction {
 
     fn from_str(s: &str) -> Result<Self> {
         let (first, second, third, fourth) = s
-            .trim()
             .split_whitespace()
             .map(parse_element)
             .collect_tuple::<(_, _, _, _)>()

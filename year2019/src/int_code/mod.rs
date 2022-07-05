@@ -227,7 +227,8 @@ impl Processor {
                             return (acc, None);
                         }
                     } else {
-                        acc.push_str(&format!("\n{}\n", out));
+                        use std::fmt::Write;
+                        writeln!(acc, "\n{}", out).expect("written to string");
                         return (acc, None);
                     }
                 }

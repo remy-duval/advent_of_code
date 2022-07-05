@@ -168,12 +168,12 @@ impl Moons {
         let mut kinetic = [0u32; MOONS];
         let mut potent = [0u32; MOONS];
         for i in 0..MOONS {
-            potent[i] += self.x[i].abs() as u32;
-            potent[i] += self.y[i].abs() as u32;
-            potent[i] += self.z[i].abs() as u32;
-            kinetic[i] += self.v_x[i].abs() as u32;
-            kinetic[i] += self.v_y[i].abs() as u32;
-            kinetic[i] += self.v_z[i].abs() as u32;
+            potent[i] += self.x[i].unsigned_abs();
+            potent[i] += self.y[i].unsigned_abs();
+            potent[i] += self.z[i].unsigned_abs();
+            kinetic[i] += self.v_x[i].unsigned_abs();
+            kinetic[i] += self.v_y[i].unsigned_abs();
+            kinetic[i] += self.v_z[i].unsigned_abs();
         }
 
         kinetic

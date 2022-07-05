@@ -67,8 +67,8 @@ impl Segment {
     /// An iterator over all the points of this segment
     fn points(&self) -> impl Iterator<Item = Point<i16>> {
         let (step, count) = match self.to - self.from {
-            Point { x: 0, y } => (Point::new(0, y.signum()), y.abs() as usize),
-            Point { x, y: 0 } => (Point::new(x.signum(), 0), x.abs() as usize),
+            Point { x: 0, y } => (Point::new(0, y.signum()), y.unsigned_abs() as usize),
+            Point { x, y: 0 } => (Point::new(x.signum(), 0), x.unsigned_abs() as usize),
             Point { x, y } => {
                 // Always positive
                 let steps = commons::num::integer::gcd(x, y);
