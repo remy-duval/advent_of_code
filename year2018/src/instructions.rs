@@ -154,20 +154,12 @@ impl OpCode {
 
 /// 1 if `a` is strictly greater than `b`
 fn greater(a: Int, b: Int) -> Int {
-    if a > b {
-        1
-    } else {
-        0
-    }
+    Int::from(a > b)
 }
 
 /// 1 if `a` and `b` are equal
 fn equal(a: Int, b: Int) -> Int {
-    if a == b {
-        1
-    } else {
-        0
-    }
+    Int::from(a == b)
 }
 
 /// Try to convert an [Int](Int) into a [usize](usize) for indexing purpose

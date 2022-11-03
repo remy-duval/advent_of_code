@@ -161,7 +161,7 @@ impl Rules {
     fn pattern(state: &[bool]) -> usize {
         state
             .iter()
-            .fold(0, |acc, &next| (acc << 1) + if next { 1 } else { 0 })
+            .fold(0, |acc, &next| (acc << 1) + usize::from(next))
     }
 }
 

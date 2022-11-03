@@ -67,7 +67,7 @@ fn produce_fuel_from_ore(number: u64, reactions: &HashMap<String, Reaction>) -> 
                 // If we don't, we produce what we are missing (and update remaining)
                 let rest = times - *already_created;
                 let reaction = reactions.get(ingredient).unwrap();
-                let times = rest / reaction.times + if rest % reaction.times == 0 { 0 } else { 1 };
+                let times = rest / reaction.times + u64::from(rest % reaction.times != 0);
                 *already_created = reaction.times * times - rest; // The produced surplus
 
                 Some(

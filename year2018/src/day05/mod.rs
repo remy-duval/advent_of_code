@@ -13,7 +13,7 @@ fn first(polymer: &str) -> usize {
 }
 
 fn second(polymer: &str) -> usize {
-    ('a'..'z')
+    ('a'..='z')
         .map(|lower| {
             let higher = lower.to_ascii_uppercase();
             reaction(polymer, move |c: &char| *c != lower && *c != higher).len()

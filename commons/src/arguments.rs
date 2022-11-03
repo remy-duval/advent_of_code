@@ -2,14 +2,12 @@ use std::fmt::{Debug, Display};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use clap::{crate_authors, crate_version, Arg, Command};
+use clap::{value_parser, Arg, ArgAction, Command};
 use eyre::{eyre, Report, Result, WrapErr};
 
 /// Parse the advent of code arguments
-pub fn parse_arguments(name: &str) -> Arguments {
-    let matches = Command::new(name)
-        .version(crate_version!())
-        .author(crate_authors!())
+pub fn parse_arguments(name: &'static str) -> Arguments {
+    let mut matches = Command::new(name)
         .about("Solutions for the advent of code problems")
         .arg(
             Arg::new("day")
@@ -17,20 +15,24 @@ pub fn parse_arguments(name: &str) -> Arguments {
                 .long("day")
                 .value_name("DAY")
                 .help("The specific day of the problem or 'all'")
-                .takes_value(true),
+                .action(ArgAction::Set)
+                .required(true)
+                .value_parser(value_parser!(Day)),
         )
         .arg(
             Arg::new("input")
                 .long("input")
                 .value_name("FILE")
                 .help("The problem's input. If day is 'all', a directory from 01.txt to 25.txt")
-                .takes_value(true),
+                .action(ArgAction::Set)
+                .required(true)
+                .value_parser(value_parser!(PathBuf)),
         )
         .get_matches();
 
     Arguments {
-        day: matches.value_of_t_or_exit::<Day>("day"),
-        input: matches.value_of_t_or_exit::<PathBuf>("input"),
+        day: matches.remove_one("day").expect("valid day is required"),
+        input: matches.remove_one("input").expect("'input' is required"),
     }
 }
 

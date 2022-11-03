@@ -31,8 +31,8 @@ fn check_sum(boxes: &str) -> u32 {
                 });
 
             (
-                exactly_two + if has_two { 1 } else { 0 },
-                exactly_three + if has_three { 1 } else { 0 },
+                exactly_two + u32::from(has_two),
+                exactly_three + u32::from(has_three),
             )
         });
 

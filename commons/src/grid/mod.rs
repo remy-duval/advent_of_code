@@ -375,12 +375,12 @@ impl<T> Grid<T> {
     /// ```
     pub fn insert_filled_line(&mut self, mut produce: impl FnMut(usize) -> T) -> &mut [T] {
         let start = self.storage.len();
-        self.storage.reserve(self.width as usize);
+        self.storage.reserve(self.width);
         for i in 0..self.width {
             self.storage.push(produce(i));
         }
 
-        &mut self.storage[start..(start + self.width as usize)]
+        &mut self.storage[start..(start + self.width)]
     }
 
     /// Add a new line to the Grid (if it is exactly `width` in length

@@ -124,7 +124,7 @@ impl Cavern {
                 (0, y) => y as u64 * 48271,
                 (x, y) => self.compute_erosion((x - 1, y)) * self.compute_erosion((x, y - 1)),
             };
-            let erosion = (geologic_index + self.depth as u64) % 20_183;
+            let erosion = (geologic_index + self.depth) % 20_183;
             self.grid.insert(point, erosion);
             erosion
         }

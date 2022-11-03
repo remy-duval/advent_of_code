@@ -3,13 +3,14 @@ name = "commons"
 version = "0.1.0"
 authors = ["Remy Duval <remy_duval@laposte.net>"]
 edition = "2021"
+rust-version = "1.65.0"
 
 [dependencies]
-itertools = "0.10.3"
+itertools = "0.10.5"
 eyre = "0.6.8"
 num= "0.4.0"
 
 [dependencies.clap]
-version = "3.2.8"
+version = "4.0.18"
 default-features = false
-features = [ "suggestions", "std", "cargo" ]
+features = [ "std", "help", "usage", "error-context", "suggestions" ]

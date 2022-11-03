@@ -127,7 +127,7 @@ fn count_bags_inside<'a>(
                 if let Some(count) = already_counted.get(*inner).copied() {
                     count * times
                 } else {
-                    let count = count_bags_inside(all_rules, *inner, already_counted) + 1;
+                    let count = count_bags_inside(all_rules, inner, already_counted) + 1;
                     already_counted.insert(inner, count);
                     count * times
                 }

@@ -37,7 +37,7 @@ fn count_pulled(drone: &[i64], top: Point, bottom: Point) -> usize {
             display.push('\n');
             (top.x..bottom.x)
                 .filter(|x| {
-                    let point = Point::new(*x as i64, y as i64);
+                    let point = Point::new(*x, y);
                     if check_position(drone, point) {
                         display.push('#');
                         true

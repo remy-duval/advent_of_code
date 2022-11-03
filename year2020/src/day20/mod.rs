@@ -200,7 +200,7 @@ fn match_sea_monster(array: [&str; 3]) -> impl Fn([&[char]; 3]) -> bool {
         to_match
             .iter()
             .zip(&all)
-            .all(|(str, wanted)| check(*str, wanted))
+            .all(|(str, wanted)| check(str, wanted))
     }
 }
 

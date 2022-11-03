@@ -141,7 +141,7 @@ impl Battle {
                         })
                 })
                 .and_then(|(i, unit)| {
-                    if attacker.actual_damage_to(*unit) > 0 {
+                    if attacker.actual_damage_to(unit) > 0 {
                         Some(*i)
                     } else {
                         None

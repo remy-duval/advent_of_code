@@ -117,8 +117,8 @@ impl FloatingMasks {
             let is_one = mask.ones & i != 0;
             let is_float = mask.zeros & i != 0 && !is_one;
             self.possibilities.iter_mut().for_each(|current| {
-                current.ones = current.ones * 2 + if is_one { 1 } else { 0 };
-                current.zeros = current.zeros * 2 + if !is_float { 1 } else { 0 };
+                current.ones = current.ones * 2 + Value::from(is_one);
+                current.zeros = current.zeros * 2 + Value::from(!is_float);
             });
             // If bitmask X, duplicate each bitmask to account for the 2 possibilities
             // The duplicated mask will have its values at the given bit the reverse of the original

@@ -146,18 +146,18 @@ impl Bugs {
         // Add the count for the enclosing bugs
         if let Some(enc) = enclosing {
             for n in 0..5 {
-                count[0][n] += if enc.bugs[1][2] { 1 } else { 0 };
-                count[4][n] += if enc.bugs[3][2] { 1 } else { 0 };
-                count[n][0] += if enc.bugs[2][1] { 1 } else { 0 };
-                count[n][4] += if enc.bugs[2][3] { 1 } else { 0 };
+                count[0][n] += u8::from(enc.bugs[1][2]);
+                count[4][n] += u8::from(enc.bugs[3][2]);
+                count[n][0] += u8::from(enc.bugs[2][1]);
+                count[n][4] += u8::from(enc.bugs[2][3]);
             }
         }
         // Add the count for the bugs in the middle part.
         if let Some(mid) = middle {
-            let up: u8 = mid.bugs[0].iter().map(|&l| if l { 1 } else { 0 }).sum();
-            let right: u8 = mid.bugs.iter().map(|l| if l[4] { 1 } else { 0 }).sum();
-            let down: u8 = mid.bugs[4].iter().map(|&l| if l { 1 } else { 0 }).sum();
-            let left: u8 = mid.bugs.iter().map(|l| if l[0] { 1 } else { 0 }).sum();
+            let up: u8 = mid.bugs[0].iter().map(|&l| u8::from(l)).sum();
+            let right: u8 = mid.bugs.iter().map(|l| u8::from(l[4])).sum();
+            let down: u8 = mid.bugs[4].iter().map(|&l| u8::from(l)).sum();
+            let left: u8 = mid.bugs.iter().map(|l| u8::from(l[0])).sum();
             count[1][2] += up;
             count[2][3] += right;
             count[3][2] += down;

@@ -50,7 +50,7 @@ fn first_part([a, b]: [u8; 2]) -> usize {
         let (pos, score) = &mut state[turn];
         *pos = (*pos + roll()) % 10;
         *score += *pos + 1;
-        turn = if turn == 0 { 1 } else { 0 };
+        turn = usize::from(turn == 0);
         if *score >= 1000 {
             return rolls * state[turn].1 as usize;
         }

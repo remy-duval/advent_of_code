@@ -40,7 +40,7 @@ use std::{
 pub type IntCodeInput = commons::parse::CommaSep<i64>;
 
 /// The status of an int_code program after it returns from execution
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Status {
     /// The processor is blocked due to last instruction requiring input and having none left.
     RequireInput,
@@ -51,7 +51,7 @@ pub enum Status {
 }
 
 /// Represents the state of an int_code processor commonly used in many problems of AOC2019
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Processor {
     /// The underlying memory of the processor
     memory: Vec<i64>,
@@ -64,7 +64,7 @@ pub struct Processor {
 }
 
 /// An error for the whole IntCode processor.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IntCodeError {
     InvalidIndexRead,
     InvalidIndexWrite,
@@ -82,11 +82,11 @@ impl Error for IntCodeError {}
 
 impl Display for IntCodeError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let error: &str = match self {
+        let error = match self {
             IntCodeError::InvalidIndexRead => "Cannot read from an invalid index",
             IntCodeError::InvalidIndexWrite => "Cannot write to an invalid index",
             IntCodeError::InvalidInstruction => "Current instruction is invalid",
-            IntCodeError::Other(msg) => &*msg,
+            IntCodeError::Other(msg) => msg.as_str(),
         };
         error.fmt(f)
     }
@@ -129,20 +129,8 @@ impl Processor {
                     let result = match instruction.code {
                         OpCode::Add => first + second,
                         OpCode::Mul => first * second,
-                        OpCode::Less => {
-                            if first < second {
-                                1
-                            } else {
-                                0
-                            }
-                        }
-                        OpCode::Equals => {
-                            if first == second {
-                                1
-                            } else {
-                                0
-                            }
-                        }
+                        OpCode::Less => i64::from(first < second),
+                        OpCode::Equals => i64::from(first == second),
                         _ => unreachable!(),
                     };
                     self.set(3, result, c)?;
