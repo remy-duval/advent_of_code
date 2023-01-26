@@ -4,8 +4,8 @@ pub const TITLE: &str = "Day 24: Arithmetic Logic Unit";
 
 pub fn run(raw: String) -> Result<()> {
     let (min, max) = search(&raw)?;
-    println!("1. Highest valid input: {}", max);
-    println!("2. Minimum valid input: {}", min);
+    println!("1. Highest valid input: {max}");
+    println!("2. Minimum valid input: {min}");
 
     Ok(())
 }
@@ -90,9 +90,9 @@ impl std::str::FromStr for Block {
             *into = line
                 .trim()
                 .strip_prefix(prefix)
-                .ok_or_else(|| eyre!("Missing '{}' prefix", prefix))
+                .ok_or_else(|| eyre!("Missing '{prefix}' prefix"))
                 .and_then(|s| Ok(s.trim().parse::<i32>()?))
-                .wrap_err_with(|| format!("Expected '{} <NUMBER>', got '{}'", prefix, line))?;
+                .wrap_err_with(|| format!("Expected '{prefix} <NUMBER>', got '{line}'"))?;
 
             Ok(())
         }
@@ -123,7 +123,7 @@ impl std::str::FromStr for Block {
                 16 => check(line, "add z y"),
                 _ => Ok(()),
             })
-            .wrap_err_with(|| format!("For block '{}'", s))?;
+            .wrap_err_with(|| format!("For block '{s}'"))?;
 
         Ok(Self {
             comparison_offset,

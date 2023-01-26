@@ -8,8 +8,8 @@ pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let (first, second) =
         solve(&data.data[..]).ok_or_else(|| eyre!("Program should not have crashed !"))?;
-    println!("Input 1 produced : {}", first);
-    println!("Input 5 produced : {}", second);
+    println!("Input 1 produced : {first}");
+    println!("Input 5 produced : {second}");
 
     Ok(())
 }
@@ -45,7 +45,7 @@ fn run_program(program: &[i64], input: i64) -> Option<i64> {
             Some(current)
         }
     } else {
-        println!("Input {} produced unexpected status: {:?}", input, status);
+        println!("Input {input} produced unexpected status: {status:?}");
         None
     }
 }

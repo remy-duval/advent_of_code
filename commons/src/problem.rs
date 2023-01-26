@@ -38,7 +38,7 @@ pub fn solve_quiet<Solver>(day: u8, path: PathBuf, solve: Solver) -> Result<()>
 where
     Solver: FnOnce(String) -> Result<()>,
 {
-    println!("Day {}:", day);
+    println!("Day {day}:");
     solve(load(path)?)
 }
 
@@ -46,5 +46,5 @@ where
 /// ### Arguments
 /// * `input_path` - The path to the input file for this problem
 pub fn load(path: PathBuf) -> Result<String> {
-    std::fs::read_to_string(&path).wrap_err_with(|| format!("Can't load input from '{:?}'", path))
+    std::fs::read_to_string(&path).wrap_err_with(|| format!("Can't load input from '{path:?}'"))
 }

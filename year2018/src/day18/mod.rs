@@ -10,16 +10,12 @@ pub const TITLE: &str = "Day 18: Settlers of The North Pole";
 pub fn run(raw: String) -> Result<()> {
     let area = parse(&raw)?;
     let (trees, lumberyard) = first_part(area.clone()).trees_and_lumberyards();
-    println!(
-        "After 10 minutes: {} trees and {} lumberyards: {} resources",
-        trees,
-        lumberyard,
-        trees * lumberyard
-    );
+    let first = trees * lumberyard;
+    println!("After 10 minutes: {trees} trees and {lumberyard} lumberyards: {first} resources");
 
     let second =
         second_part(area).ok_or_else(|| eyre!("Could not find the period of the system"))?;
-    println!("After one billion minutes: {} resources", second);
+    println!("After one billion minutes: {second} resources");
 
     Ok(())
 }
@@ -182,7 +178,7 @@ impl FromStr for Area {
             line.chars()
                 .enumerate()
                 .try_for_each(|(x, c)| match Tile::from_char(c) {
-                    None => Err(eyre!("Tile {} in line n°{} is not '.', '|' or '#'", c, y)),
+                    None => Err(eyre!("Tile {c} in line n°{y} is not '.', '|' or '#'")),
                     Some(tile) => {
                         grid[(x as isize, y as isize)] = tile;
                         Ok(())

@@ -18,17 +18,11 @@ pub fn run(raw: String) -> Result<()> {
 
     // First part
     let (oxygen, path_length) = first_part(&map)?;
-    println!(
-        "The shortest path to the oxygen {} takes {} steps",
-        oxygen, path_length
-    );
+    println!("The shortest path to the oxygen {oxygen} takes {path_length} steps");
 
     // Second part
     let path_length = second_part(&map, oxygen)?;
-    println!(
-        "The longest path from the oxygen is {length} steps long, so it would take {length} minutes to fill the area",
-        length = path_length
-    );
+    println!("The longest path from the oxygen is {path_length} steps long");
 
     Ok(())
 }
@@ -186,7 +180,7 @@ fn print_map(current: Point, map: &HashMap<Point, Tile>, min: (i64, i64), max: (
         })
         .join("\n");
 
-    println!("{}{}", TO_TOP, display);
+    println!("{TO_TOP}{display}");
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

@@ -15,16 +15,10 @@ pub fn run(raw: String) -> Result<()> {
     let reactions = as_reaction_map(parse(&raw)?.data);
     // Part one
     let cost_for_one_fuel = produce_fuel_from_ore(1, &reactions);
-    println!(
-        "To produce 1 {} we need {} {}",
-        FUEL, cost_for_one_fuel, ORE
-    );
+    println!("To produce 1 {FUEL} we need {cost_for_one_fuel} {ORE}");
 
     let maximum_amount = maximum_fuel_produced_from(TRILLION, &reactions);
-    println!(
-        "With {} {} we can produce {} {}",
-        TRILLION, ORE, maximum_amount, FUEL
-    );
+    println!("With {TRILLION} {ORE} we can produce {maximum_amount} {FUEL}");
 
     Ok(())
 }

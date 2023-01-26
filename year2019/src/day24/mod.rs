@@ -12,11 +12,12 @@ pub const TITLE: &str = "Day 24: Planet of Discord";
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw);
     let result = first_repeat(data);
-    println!("{}", result);
-    println!("Biodiversity rating is {}", result.biodiversity_rating());
+    println!("{result}");
+    let rating = result.biodiversity_rating();
+    println!("Biodiversity rating is {rating}");
 
     let result = recursive_expansion(data, 200);
-    println!("The number of bugs after 200 minutes is {} (Yikes)", result);
+    println!("The number of bugs after 200 minutes is {result} (Yikes)");
 
     Ok(())
 }

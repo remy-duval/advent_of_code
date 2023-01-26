@@ -7,8 +7,8 @@ pub const TITLE: &str = "Day 20: Trench Map";
 pub fn run(raw: String) -> Result<()> {
     let (enhancer, mut image) = parse(&raw)?;
     let (first, second) = enhance(&mut image, &enhancer);
-    println!("1. After two steps: {}", first);
-    println!("2. After fifty steps: {}", second);
+    println!("1. After two steps: {first}");
+    println!("2. After fifty steps: {second}");
 
     Ok(())
 }

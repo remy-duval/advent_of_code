@@ -10,13 +10,10 @@ pub fn run(raw: String) -> Result<()> {
     let wanted = first_not_sum(&data.data, PREAMBLE)
         .ok_or_else(|| eyre!("Did not find the first element that is not a sum"))?;
 
-    println!(
-        "The first element that is not a sum of the previous ones is {first}",
-        first = wanted
-    );
+    println!("The first element that is not a sum of the previous ones is {wanted}");
 
     let (min, max) = second_part(&data.data, wanted)
-        .ok_or_else(|| eyre!("Did not find the slice that can be summed to {}", wanted))?;
+        .ok_or_else(|| eyre!("Did not find the slice that can be summed to {wanted}"))?;
 
     println!(
         "The slice between {min} and {max} (sum is {sum}) will sum up to it",

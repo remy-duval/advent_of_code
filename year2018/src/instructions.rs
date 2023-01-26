@@ -193,7 +193,7 @@ impl FromStr for Program {
                             ip_index = ip;
                             None
                         }
-                        Err(_) => Some(Err(eyre!("Could not parse Instruction pointer {}", ip))),
+                        Err(_) => Some(Err(eyre!("Could not parse Instruction pointer {ip}"))),
                     }
                 } else {
                     Some(line.parse())
@@ -217,19 +217,14 @@ impl FromStr for Instruction {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         fn parse_int(s: &str) -> Result<Int> {
             s.parse()
-                .wrap_err_with(|| format!("Could not parse an input Int {}", s))
+                .wrap_err_with(|| format!("Could not parse an input Int {s}"))
         }
 
         let (code, a, b, c) = s
             .split_whitespace()
             .filter(|s| !s.is_empty())
             .collect_tuple::<(_, _, _, _)>()
-            .ok_or_else(|| {
-                eyre!(
-                    "Bad format for a instruction: {} (expected 'CODE A B C')",
-                    s
-                )
-            })?;
+            .ok_or_else(|| eyre!("Bad format for a instruction: {s} (expected 'CODE A B C')"))?;
 
         Ok(Self {
             code: code.parse()?,
@@ -261,7 +256,7 @@ impl FromStr for OpCode {
             "eqir" => Ok(Self::EqIR),
             "eqri" => Ok(Self::EqRI),
             "eqrr" => Ok(Self::EqRR),
-            other => Err(eyre!("Unknown op code {}", other)),
+            other => Err(eyre!("Unknown op code {other}")),
         }
     }
 }

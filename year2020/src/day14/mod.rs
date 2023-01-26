@@ -10,10 +10,10 @@ pub const TITLE: &str = "Day 14: Docking Data";
 pub fn run(raw: String) -> Result<()> {
     let instructions = parse(&raw)?.data;
     let first = first_part(&instructions);
-    println!("Decoder V1: The memory sum after completion is {}", first);
+    println!("Decoder V1: The memory sum after completion is {first}");
 
     let second = second_part(instructions);
-    println!("Decoder V2: The memory sum after completion is {}", second);
+    println!("Decoder V2: The memory sum after completion is {second}");
 
     Ok(())
 }
@@ -163,17 +163,17 @@ impl FromStr for Instruction {
             Some("mem[") => {
                 let index = instruction
                     .get(4..(instruction.len() - 1)) // Take everything until the ']'
-                    .ok_or_else(|| eyre!("Unknown line {} (expected 'instruction = value')", s))?
+                    .ok_or_else(|| eyre!("Unknown line {s} (expected 'instruction = value')"))?
                     .parse::<Value>()
-                    .wrap_err_with(|| format!("Could not parse a memory index or value {}", s))?;
+                    .wrap_err_with(|| format!("Could not parse a memory index or value {s}"))?;
 
                 let value = value
                     .parse::<Value>()
-                    .wrap_err_with(|| format!("Could not parse a memory index or value {}", s))?;
+                    .wrap_err_with(|| format!("Could not parse a memory index or value {s}"))?;
 
                 Ok(Instruction::SetValue { index, value })
             }
-            _ => Err(eyre!("Unknown line {} (expected 'instruction = value')", s)),
+            _ => Err(eyre!("Unknown line {s} (expected 'instruction = value')")),
         }
     }
 }

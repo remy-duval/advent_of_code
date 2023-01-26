@@ -8,10 +8,10 @@ pub const TITLE: &str = "Day 5: Binary Boarding";
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let max = first_part(&data.data).unwrap_or_default();
-    println!("The maximum seat ID on the plane is {}", max);
+    println!("The maximum seat ID on the plane is {max}");
 
     let missing = second_part(data.data).unwrap_or_default();
-    println!("The missing seat ID on the plane is {}", missing);
+    println!("The missing seat ID on the plane is {missing}");
 
     Ok(())
 }

@@ -79,7 +79,7 @@ impl FromStr for Timestamp {
     fn from_str(s: &str) -> Result<Self> {
         fn parse_u8(s: &str) -> Result<u8> {
             s.parse()
-                .wrap_err_with(|| format!("Could not parse number {}", s))
+                .wrap_err_with(|| format!("Could not parse number {s}"))
         }
 
         fn split_two(s: &str, sep: char) -> Result<(&str, &str)> {
@@ -88,8 +88,7 @@ impl FromStr for Timestamp {
                 .collect_tuple::<(_, _)>()
                 .ok_or_else(|| {
                     eyre!(
-                        "Bad format for a timestamp <YEAR>-<MONTH>-<DAY> <HOUR>:<MINUTES>, got {}",
-                        s
+                        "Bad format for a timestamp <YEAR>-<MONTH>-<DAY> <HOUR>:<MINUTES>, got {s}"
                     )
                 })
         }
@@ -116,7 +115,7 @@ impl FromStr for Event {
                 .strip_prefix("Guard #")?
                 .strip_suffix(" begins shift")?
                 .parse()
-                .wrap_err_with(|| format!("Could not parse guard ID {}", guard));
+                .wrap_err_with(|| format!("Could not parse guard ID {guard}"));
 
             Some(id)
         }
@@ -125,7 +124,7 @@ impl FromStr for Event {
             "falls asleep" => Ok(Event::Sleep),
             "wakes up" => Ok(Event::WakeUp),
             other => parse_guard(other).map_or_else(
-                || Err(eyre!("Unknown event {}", other)),
+                || Err(eyre!("Unknown event {other}")),
                 |result| result.map(Event::Change),
             ),
         }

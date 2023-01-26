@@ -20,12 +20,9 @@ pub fn run(raw: String) -> Result<()> {
         .find_surveillance_point()
         .ok_or_else(|| eyre!("Not found any surveillance point"))?;
     asteroids.set_station(station);
-    println!("{}", asteroids);
-    println!(
-        "The best view point is {} which has a view on {} asteroids\n",
-        station,
-        station_view.len()
-    );
+    println!("{asteroids}");
+    let asteroids_count = station_view.len();
+    println!("The best view point is {station} which has a view on {asteroids_count} asteroids\n");
 
     // Wait for user input before destroying asteroids
     println!("Press enter to continue");
@@ -35,7 +32,7 @@ pub fn run(raw: String) -> Result<()> {
     let two_hundredth = ordered[199];
     asteroids.set_marked(two_hundredth);
     visualize(&mut asteroids, ordered).wrap_err("IO error during visualization")?;
-    println!("200th destroyed asteroid is {}", two_hundredth);
+    println!("200th destroyed asteroid is {two_hundredth}");
 
     Ok(())
 }

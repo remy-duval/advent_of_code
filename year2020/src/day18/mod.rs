@@ -8,9 +8,9 @@ pub const TITLE: &str = "Day 18: Operation Order";
 pub fn run(raw: String) -> Result<()> {
     let tokens = parse(&raw)?.data;
     let first = first_part(&tokens)?;
-    println!("No precedence: The sum of each line is {}", first);
+    println!("No precedence: The sum of each line is {first}");
     let second = second_part(&tokens)?;
-    println!("Addition precedence: The sum of each line is {}", second);
+    println!("Addition precedence: The sum of each line is {second}");
     Ok(())
 }
 
@@ -179,7 +179,7 @@ impl Token {
             number
                 .parse::<u64>()
                 .map(|number| (Token::Number(number), rest))
-                .wrap_err_with(|| format!("Number token parse error {}", number))
+                .wrap_err_with(|| format!("Number token parse error {number}"))
         } else {
             match current.chars().next() {
                 Some('+') => Ok((Token::Operator(Operator::Plus), &current[1..])),

@@ -158,7 +158,7 @@ impl FromStr for Scan {
             let mut numbers = str.splitn(2, "..").map(|num| {
                 num.trim()
                     .parse::<i64>()
-                    .wrap_err_with(|| format!("Could not parse number {}", num))
+                    .wrap_err_with(|| format!("Could not parse number {num}"))
             });
 
             let first = numbers.next().unwrap()?; // The iterator has at least one element
@@ -176,17 +176,11 @@ impl FromStr for Scan {
             let (x, y) = {
                 if line.starts_with('x') {
                     split_coordinates(line, "x=", "y=").ok_or_else(|| {
-                        eyre!(
-                            "Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {}",
-                            line
-                        )
+                        eyre!("Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {line}")
                     })?
                 } else {
                     let (y, x) = split_coordinates(line, "y=", "x=").ok_or_else(|| {
-                        eyre!(
-                            "Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {}",
-                            line
-                        )
+                        eyre!("Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {line}")
                     })?;
                     (x, y)
                 }

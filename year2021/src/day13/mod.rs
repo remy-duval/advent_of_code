@@ -14,7 +14,7 @@ pub fn run(raw: String) -> Result<()> {
     origami.fold_once();
     println!("1. Dots after first fold: {}", origami.count());
     origami.fold_all();
-    println!("2. Final origami:\n{}", origami);
+    println!("2. Final origami:\n{origami}");
     Ok(())
 }
 

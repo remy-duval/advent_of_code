@@ -174,11 +174,11 @@ fn parse(s: &str) -> Result<Vec<Scanner>> {
                     process_results(p.splitn(3, ',').map(|n| n.parse::<i16>()), |mut r| {
                         Some([r.next()?, r.next()?, r.next()?])
                     })
-                    .wrap_err_with(|| format!("Failed to parse coordinate in '{}'", p))
-                    .and_then(|r| r.ok_or_else(|| eyre!("Not enough coordinates in '{}'", p)))
+                    .wrap_err_with(|| format!("Failed to parse coordinate in '{p}'"))
+                    .and_then(|r| r.ok_or_else(|| eyre!("Not enough coordinates in '{p}'")))
                 })
                 .collect::<Result<_>>()
-                .wrap_err_with(|| format!("For {}", s))?;
+                .wrap_err_with(|| format!("For {s}"))?;
 
             let distances = (0..beacons.len())
                 .map(|i| {

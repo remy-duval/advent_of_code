@@ -213,8 +213,8 @@ impl Maze {
         // If y difference is 1 we need to reverse the order of the name (it is upside down)
         let orientation = door - Point::new(x as i64, y as i64);
         let name = match (orientation.x, orientation.y) {
-            (-1, 0) | (0, -1) => format!("{}{}", second, first),
-            _ => format!("{}{}", first, second),
+            (-1, 0) | (0, -1) => format!("{second}{first}"),
+            _ => format!("{first}{second}"),
         };
 
         Some((name, door))

@@ -42,7 +42,7 @@ fn second_part(shuffles: Vec<Shuffle>) -> i128 {
 /// See https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
 fn modular_inverse(a: i128, n: i128) -> i128 {
     let ExtendedGcd { gcd, x, .. } = a.extended_gcd(&n);
-    assert_eq!(gcd, 1, "{} is not invertible in mod {}", a, n);
+    assert_eq!(gcd, 1, "{a} is not invertible in mod {n}");
     x
 }
 

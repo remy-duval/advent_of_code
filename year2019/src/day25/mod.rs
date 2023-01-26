@@ -28,14 +28,14 @@ pub fn run(raw: String) -> Result<()> {
                 let timer = std::time::Instant::now();
                 return if let Some(code) = auto_play(&data.data) {
                     let elapsed = timer.elapsed();
-                    println!("The key code is '{}'", code);
+                    println!("The key code is '{code}'");
                     println!("Finding the key code took {}s", elapsed.as_secs_f64());
                     Ok(())
                 } else {
                     Err(eyre!("Could not find the key code at the end"))
                 };
             }
-            _ => println!("Unrecognized : {}", line),
+            _ => println!("Unrecognized : {line}"),
         }
     }
 }
@@ -71,7 +71,7 @@ fn play_manually(memory: &[i64]) {
         }
     }
 
-    println!("{}", CLEAR_COMMAND);
+    println!("{CLEAR_COMMAND}");
     let mut processor: Processor = memory.into();
     processor.run_with_ascii_callbacks(
         0,
@@ -82,7 +82,7 @@ fn play_manually(memory: &[i64]) {
             Some(line)
         },
         |_, line| {
-            print!("{}", line);
+            print!("{line}");
             Ok(())
         },
     );
@@ -113,7 +113,7 @@ fn auto_play(memory: &[i64]) -> Option<u64> {
     );
 
     if let Some(message) = last_state.buffer.split("\n\n").last() {
-        println!("{}", message);
+        println!("{message}");
     }
 
     last_state
@@ -141,7 +141,7 @@ fn main_loop((initialized, state): &mut (bool, GameState)) -> Option<String> {
 /// If there is a path to follow stored in the state, follow it
 fn follow_path(state: &mut GameState) -> Option<String> {
     if let Some(next) = state.path.pop_front() {
-        println!("Following path {}", next);
+        println!("Following path {next}");
         state.buffer.clear(); // We don't really need the output until we reach the end
         state.last_direction = next;
         Some(next.input().to_owned())
@@ -155,7 +155,7 @@ fn follow_path(state: &mut GameState) -> Option<String> {
 fn explore_room(state: &mut GameState) -> Option<String> {
     if state.exploring {
         let from = state.last_direction.reversed();
-        println!("Arrived in new room from {}, exploring it", from);
+        println!("Arrived in new room from {from}, exploring it");
         state.ship.on_explored_room(&state.buffer, from);
         state.exploring = false;
         state.buffer.clear();
@@ -165,7 +165,7 @@ fn explore_room(state: &mut GameState) -> Option<String> {
         let items = state.ship.take_items();
         state.inventory.extend_from_slice(&items);
         let command = items.iter().map(|item| item.take()).join("");
-        println!("Pick up all items in the room:\n{}\n", command);
+        println!("Pick up all items in the room:\n{command}\n");
 
         Some(command)
     } else {
@@ -179,13 +179,13 @@ fn deciding_next_direction(state: &mut GameState) -> Option<String> {
         state.buffer.clear();
         println!("Finding next action (either visit unexplored or go to checkpoint)");
         if let Some((path, room)) = state.ship.find_unexplored() {
-            println!("Decision: explore new room {} through {:?}\n", room, path);
+            println!("Decision: explore new room {room} through {path:?}\n");
             state.ship.current = room; // Set the current room to the one we arrive at
             state.path = VecDeque::from(path);
             state.exploring = true;
         } else {
             let (path, room) = state.ship.go_to_checkpoint()?;
-            println!("Decision: go to checkpoint {} through {:?}\n", room, path);
+            println!("Decision: go to checkpoint {room} through {path:?}\n");
             state.ship.current = room; // Set the current room to the one we arrive at
             state.path = VecDeque::from(path);
             state.to_checkpoint = true;

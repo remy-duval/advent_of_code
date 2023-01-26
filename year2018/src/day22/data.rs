@@ -157,15 +157,15 @@ impl FromStr for Cavern {
         let (depth, target) = s
             .lines()
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| eyre!("Expected two lines, depth and target, got {}", s))?;
+            .ok_or_else(|| eyre!("Expected two lines, depth and target, got {s}"))?;
 
         let depth = depth
             .strip_prefix("depth:")
-            .ok_or_else(|| eyre!("Expected 'depth: INT', got {}", depth))
+            .ok_or_else(|| eyre!("Expected 'depth: INT', got {depth}"))
             .and_then(|str| {
                 str.trim()
                     .parse()
-                    .wrap_err_with(|| format!("Could not parse integer {}", str))
+                    .wrap_err_with(|| format!("Could not parse integer {str}"))
             })?;
 
         let target = target
@@ -175,13 +175,13 @@ impl FromStr for Cavern {
                     str.split(',').map(|str| {
                         str.trim()
                             .parse()
-                            .wrap_err_with(|| format!("Could not parse integer {}", str))
+                            .wrap_err_with(|| format!("Could not parse integer {str}"))
                     }),
                     |iter| iter.collect_tuple::<(_, _)>(),
                 )
                 .transpose()
             })
-            .unwrap_or_else(|| Err(eyre!("Expected 'target: INT,INT', got {}", target)))?;
+            .unwrap_or_else(|| Err(eyre!("Expected 'target: INT,INT', got {target}")))?;
 
         let dimensions = (target.0 as usize + 1) * (target.1 as usize + 1);
         let mut grid = HashMap::with_capacity(dimensions);

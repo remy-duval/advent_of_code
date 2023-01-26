@@ -40,11 +40,11 @@ fn parse(s: &str) -> Result<Vec<Tile>> {
                 .next()
                 .and_then(|line| line.trim().strip_prefix("Tile "))
                 .and_then(|line| line.strip_suffix(':'))
-                .ok_or_else(|| eyre!("Did not find the ID field of a tile in:\n{}", s))?;
+                .ok_or_else(|| eyre!("Did not find the ID field of a tile in:\n{s}"))?;
 
             let id: u16 = id
                 .parse()
-                .wrap_err_with(|| format!("Could not parse the tile ID ({})", s))?;
+                .wrap_err_with(|| format!("Could not parse the tile ID ({s})"))?;
             let mut data = [[false; 10]; 10];
             for (y, line) in lines.enumerate() {
                 for (x, char) in line.chars().enumerate() {
@@ -52,8 +52,7 @@ fn parse(s: &str) -> Result<Vec<Tile>> {
                         Some(current) => *current = char == '#',
                         None =>
                             bail!(
-                                "Too many elements for a tile (expected 10 * 10, got ({}, {})) in a tile line:\n{}",
-                                x, y, s
+                                "Too many elements for a tile (expected 10 * 10, got ({x}, {y})) in a tile line:\n{s}"
                             ),
                     };
                 }

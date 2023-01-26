@@ -18,10 +18,7 @@ pub fn run(raw: String) -> Result<()> {
 
     let timestamp = second_part(&data.lines).ok_or_else(|| eyre!("No bus for second part"))??;
 
-    println!(
-        "The earliest timestamp at which all lines will start 1 min after the other is {time}",
-        time = timestamp
-    );
+    println!("The earliest time at which all lines will start 1min after the other is {timestamp}");
 
     Ok(())
 }
@@ -38,7 +35,7 @@ fn parse(s: &str) -> Result<Schedule> {
 
     let timestamp: Timestamp = first
         .parse()
-        .wrap_err_with(|| format!("Could not parse a bus line, got {}", first))?;
+        .wrap_err_with(|| format!("Could not parse a bus line, got {first}"))?;
 
     let lines: Vec<Option<Timestamp>> = second
         .split(',')
@@ -47,7 +44,7 @@ fn parse(s: &str) -> Result<Schedule> {
             number => number
                 .parse::<Timestamp>()
                 .map(Some)
-                .wrap_err_with(|| format!("Could not parse a timestamp, got {}", number)),
+                .wrap_err_with(|| format!("Could not parse a timestamp, got {number}")),
         })
         .try_collect()?;
 

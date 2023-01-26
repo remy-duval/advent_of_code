@@ -13,13 +13,10 @@ pub fn run(raw: String) -> Result<()> {
     // First part
     (0..STEPS).for_each(|_| moons.next());
     let total_energy = moons.energy();
-    println!(
-        "The total energy of the system after {} steps is {}",
-        STEPS, total_energy
-    );
+    println!("The total energy of the system after {STEPS} steps is {total_energy}");
     // Second part
     let period = find_periodicity(moons);
-    println!("The moons periodicity is {}", period);
+    println!("The moons periodicity is {period}");
 
     Ok(())
 }

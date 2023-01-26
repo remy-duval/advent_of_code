@@ -13,10 +13,10 @@ pub fn run(raw: String) -> Result<()> {
     let requirements = build_requirements(&data.data);
 
     let steps = process_steps(requirements.clone());
-    println!("The build steps are {}", steps);
+    println!("The build steps are {steps}");
 
     let time = count_time(requirements, 5, 60);
-    println!("The time to finish the sleigh is {}s", time);
+    println!("The time to finish the sleigh is {time}s");
 
     Ok(())
 }

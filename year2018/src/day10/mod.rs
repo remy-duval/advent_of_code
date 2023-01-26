@@ -11,7 +11,7 @@ pub const TITLE: &str = "Day 10: The Stars Align";
 pub fn run(raw: String) -> Result<()> {
     let message = parse(&raw)?;
     let (minimum, time) = message.into_minimum_size();
-    println!("The message took {}s to appear, it is:\n{}", time, minimum);
+    println!("The message took {time}s to appear, it is:\n{minimum}");
     Ok(())
 }
 
@@ -132,7 +132,7 @@ impl std::str::FromStr for Light {
     fn from_str(s: &str) -> Result<Self> {
         fn parse_int(int: &str) -> Result<i64> {
             int.parse()
-                .wrap_err_with(|| format!("Can't parse a point coordinate {}", int))
+                .wrap_err_with(|| format!("Can't parse a point coordinate {int}"))
         }
 
         fn parse_point(point: &str) -> Result<Point> {
@@ -146,7 +146,7 @@ impl std::str::FromStr for Light {
                         .map(|coord| parse_int(coord.trim()))
                         .collect_tuple::<(_, _)>()
                 })
-                .ok_or_else(|| eyre!("Bad format for point '<X, Y>>', got {}", point))?;
+                .ok_or_else(|| eyre!("Bad format for point '<X, Y>>', got {point}"))?;
 
             Ok(Point::new(x?, y?))
         }

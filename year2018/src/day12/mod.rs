@@ -11,10 +11,10 @@ const FIFTY_BILLION: usize = 50_000_000_000;
 pub fn run(raw: String) -> Result<()> {
     let rules = parse(&raw)?;
     let first = first_part(&rules);
-    println!("After 20 generations the sum is {}", first);
+    println!("After 20 generations the sum is {first}");
 
     let second = second_part(&rules);
-    println!("After fifty billion generations the sum is {}", second);
+    println!("After fifty billion generations the sum is {second}");
 
     Ok(())
 }
@@ -35,9 +35,9 @@ fn parse(s: &str) -> Result<Rules> {
     let mut lines = s.lines();
     let initial_state = lines
         .next()
-        .ok_or_else(|| eyre!("Missing either the initial state or the rules {}", s))?
+        .ok_or_else(|| eyre!("Missing either the initial state or the rules {s}"))?
         .strip_prefix("initial state:")
-        .ok_or_else(|| eyre!("Bad format for the initial state {}", s))?
+        .ok_or_else(|| eyre!("Bad format for the initial state {s}"))?
         .trim();
 
     let mut rules = vec![false; 32];
@@ -46,7 +46,7 @@ fn parse(s: &str) -> Result<Rules> {
             .splitn(2, "=>")
             .map(str::trim)
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| eyre!("Bad format for a rule {}", line))?;
+            .ok_or_else(|| eyre!("Bad format for a rule {line}"))?;
 
         let index = Rules::pattern(&state(pattern));
         let active = after.chars().next().map_or(false, |c| c == '#');

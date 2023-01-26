@@ -8,10 +8,10 @@ const SECOND_TURNS: u32 = 30000000;
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let first = nth_spoken_number(&data.data, FIRST_TURNS);
-    println!("The {}th spoken is {}", FIRST_TURNS, first);
+    println!("The {FIRST_TURNS}th spoken is {first}");
 
     let second = nth_spoken_number(&data.data, SECOND_TURNS);
-    println!("The {}th spoken is {}", SECOND_TURNS, second);
+    println!("The {SECOND_TURNS}th spoken is {second}");
 
     Ok(())
 }

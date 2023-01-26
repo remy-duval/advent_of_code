@@ -13,8 +13,8 @@ pub fn run(raw: String) -> Result<()> {
     let second =
         shortest_path(&from_origin, "YOU", "SAN").ok_or_else(|| eyre!("YOU or SAN not found"))?;
 
-    println!("The orbit check sum is {}", first);
-    println!("The shortest path from YOU to SAN is {}", second);
+    println!("The orbit check sum is {first}");
+    println!("The shortest path from YOU to SAN is {second}");
     Ok(())
 }
 

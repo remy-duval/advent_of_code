@@ -17,7 +17,7 @@ pub fn run(raw: String) -> Result<()> {
 fn parse(s: &str) -> Result<Rules> {
     fn parse_int(int: &str) -> Result<usize> {
         int.parse()
-            .wrap_err_with(|| format!("Could not parse number {}", int))
+            .wrap_err_with(|| format!("Could not parse number {int}"))
     }
 
     let (players, points) = s
@@ -29,10 +29,7 @@ fn parse(s: &str) -> Result<Rules> {
                 .collect_tuple::<(_, _)>()
         })
         .ok_or_else(|| {
-            eyre!(
-                "Expected '<PLAYERS> players; last marble is worth <POINTS> points', got {}",
-                s
-            )
+            eyre!("Expected '<PLAYERS> players; last marble is worth <POINTS> points', got {s}")
         })?;
 
     Ok(Rules {

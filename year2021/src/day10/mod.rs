@@ -4,8 +4,8 @@ pub const TITLE: &str = "Day 10: Syntax Scoring";
 
 pub fn run(data: String) -> Result<()> {
     let (errors, completion) = check_all(&data);
-    println!("1. Syntax error score is {}", errors);
-    println!("2. Completion score is {}", completion);
+    println!("1. Syntax error score is {errors}");
+    println!("2. Completion score is {completion}");
     Ok(())
 }
 

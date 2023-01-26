@@ -216,7 +216,7 @@ impl Processor {
                         }
                     } else {
                         use std::fmt::Write;
-                        writeln!(acc, "\n{}", out).expect("written to string");
+                        writeln!(acc, "\n{out}").expect("written to string");
                         return (acc, None);
                     }
                 }
@@ -269,7 +269,7 @@ impl Processor {
                 }
                 Ok(Status::Halted) => return Status::Halted,
                 Err(err) => {
-                    println!("Error : {}", err);
+                    println!("Error : {err}");
                     return Status::Halted;
                 }
             }

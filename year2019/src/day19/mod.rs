@@ -9,17 +9,13 @@ pub fn run(raw: String) -> Result<()> {
     let memory = parse(&raw)?.data;
     // First part
     let affected = count_pulled(&memory, Point::new(0, 0), Point::new(50, 50));
-    println!(
-        "{} tiles are affected by the beam in the (0,0) (49, 49) square",
-        affected
-    );
+    println!("{affected} tiles are affected by the beam in the (0,0) (49, 49) square");
 
     // Second part
     let first = find_first_square(&memory, 100);
     println!(
-        "The first point for the square is {}, with code {}",
-        first,
-        first.x * 10_000 + first.y
+        "The first point for the square is {first}, with code {code}",
+        code = first.x * 10_000 + first.y
     );
 
     Ok(())
@@ -50,7 +46,7 @@ fn count_pulled(drone: &[i64], top: Point, bottom: Point) -> usize {
         })
         .sum();
 
-    println!("{}", display);
+    println!("{display}");
     affected
 }
 
@@ -82,7 +78,7 @@ fn check_position(drone: &[i64], point: Point) -> bool {
     match drone.read_next() {
         Ok(result) => result == 1,
         Err(status) => {
-            println!("The drone should not stop, but we got status {:?}", status);
+            println!("The drone should not stop, but we got status {status:?}");
             false
         }
     }

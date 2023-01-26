@@ -9,9 +9,9 @@ pub fn run(raw: String) -> Result<()> {
     let serial_number = raw.parse()?;
     let grid = PartialSumGrid::new(serial_number);
     let (x, y) = first_part(&grid);
-    println!("The 3x3 square with the highest power is {},{}", x, y);
+    println!("The 3x3 square with the highest power is {x},{y}");
     let (x, y, s) = second_part(&grid);
-    println!("The square with the highest power is {},{},{}", x, y, s);
+    println!("The square with the highest power is {x},{y},{s}");
     Ok(())
 }
 

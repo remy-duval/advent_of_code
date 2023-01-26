@@ -10,7 +10,7 @@ pub const TITLE: &str = "Day 25: Four-Dimensional Adventure";
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let count = count_constellations(&data.data);
-    println!("The number of constellations is {}", count);
+    println!("The number of constellations is {count}");
     Ok(())
 }
 
@@ -77,11 +77,11 @@ impl FromStr for Point4 {
                 coord
                     .trim()
                     .parse()
-                    .wrap_err_with(|| format!("Can't parse an integer '{}'", coord))
+                    .wrap_err_with(|| format!("Can't parse an integer '{coord}'"))
             }),
             |iter| match iter.collect_tuple::<(_, _, _, _)>() {
                 Some((a, b, c, d)) => Ok(Point4([a, b, c, d])),
-                None => Err(eyre!("Bad format for a four dimensional point: {}", string)),
+                None => Err(eyre!("Bad format for a four dimensional point: {string}")),
             },
         )?
     }

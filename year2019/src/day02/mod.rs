@@ -14,7 +14,7 @@ pub fn run(raw: String) -> Result<()> {
     let (noun, verb) = find_match(&data.data, WANTED)
         .ok_or_else(|| int_code::IntCodeError::Other("Finding second program error".into()))?;
 
-    println!("1202 program : {}", first);
+    println!("1202 program : {first}");
     println!("Found {} program : {} ", noun * 100 + verb, WANTED);
     Ok(())
 }

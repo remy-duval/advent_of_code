@@ -13,11 +13,9 @@ pub const TITLE: &str = "Day 16: Chronal Classification";
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let (first, possible) = find_possible(&data.samples);
-    println!("{} samples behave like 3+ op codes", first);
-    println!(
-        "The register 0 contains {} after executing the program",
-        data.execute(&sieve(possible)).0[0]
-    );
+    println!("{first} samples behave like 3+ op codes");
+    let result = data.execute(&sieve(possible)).0[0];
+    println!("The register 0 contains {result} after executing the program");
 
     Ok(())
 }

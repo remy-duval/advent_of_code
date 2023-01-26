@@ -67,7 +67,7 @@ impl Program {
 fn parse_element(str: &str) -> Result<Int> {
     str.trim()
         .parse()
-        .wrap_err_with(|| format!("Could not parse an integer {}", str))
+        .wrap_err_with(|| format!("Could not parse an integer {str}"))
 }
 
 impl FromStr for Register {
@@ -84,10 +84,7 @@ impl FromStr for Register {
                     .collect_tuple::<(_, _, _, _)>()
             })
             .ok_or_else(|| {
-                eyre!(
-                    "Expected [A, B, C, D] for a register, where A, B, C, D integers, got: {}",
-                    s
-                )
+                eyre!("Expected [A, B, C, D] for a register, where A, B, C, D integers, got: {s}")
             })?;
 
         Ok(Self([first?, second?, third?, fourth?]))
@@ -103,10 +100,7 @@ impl FromStr for Instruction {
             .map(parse_element)
             .collect_tuple::<(_, _, _, _)>()
             .ok_or_else(|| {
-                eyre!(
-                    "Expected A, B, C, D for an instruction, where A, B, C, D integers, got: {}",
-                    s
-                )
+                eyre!("Expected A, B, C, D for an instruction, where A, B, C, D integers, got: {s}")
             })?;
 
         Ok(Self {
@@ -124,23 +118,14 @@ impl FromStr for Sample {
     fn from_str(s: &str) -> Result<Self> {
         let (before, instruction, after) =
             s.lines().collect_tuple::<(_, _, _)>().ok_or_else(|| {
-                eyre!(
-                    "Expected register instruction register for a sample, got: {}",
-                    s
-                )
+                eyre!("Expected register instruction register for a sample, got: {s}")
             })?;
 
         let before = before.strip_prefix("Before:").ok_or_else(|| {
-            eyre!(
-                "Expected register instruction register for a sample, got: {}",
-                s
-            )
+            eyre!("Expected register instruction register for a sample, got: {s}")
         })?;
         let after = after.strip_prefix("After:").ok_or_else(|| {
-            eyre!(
-                "Expected register instruction register for a sample, got: {}",
-                s
-            )
+            eyre!("Expected register instruction register for a sample, got: {s}")
         })?;
 
         Ok(Self {

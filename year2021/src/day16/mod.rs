@@ -74,7 +74,7 @@ fn parse(s: &str) -> Result<BitStream> {
     let bytes = std::iter::from_fn(move || {
         let hex = s.get(n..(n + 2))?;
         n += 2;
-        Some(u8::from_str_radix(hex, 16).wrap_err_with(|| format!("For '{}'", hex)))
+        Some(u8::from_str_radix(hex, 16).wrap_err_with(|| format!("For '{hex}'")))
     })
     .collect::<Result<Vec<u8>>>()?
     .into_iter();

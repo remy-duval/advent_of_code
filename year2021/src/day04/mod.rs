@@ -18,13 +18,13 @@ fn parse(s: &str) -> Result<Bingo> {
             .split(',')
             .map(|n| n.trim().parse())
             .collect::<core::result::Result<_, _>>()
-            .wrap_err_with(|| format!("Bad draws: {}", draws))?;
+            .wrap_err_with(|| format!("Bad draws: {draws}"))?;
         let boards: Vec<Board> = blocks
             .map(|b| -> Result<_> {
                 let mut board = [[0u8; Board::COLUMNS]; Board::ROWS];
                 for (y, line) in b.lines().take(Board::ROWS).enumerate() {
                     for (x, num) in line.split_whitespace().take(Board::COLUMNS).enumerate() {
-                        board[y][x] = num.parse().wrap_err_with(|| format!("Bad board:{}", b))?;
+                        board[y][x] = num.parse().wrap_err_with(|| format!("Bad board:{b}"))?;
                     }
                 }
                 Ok(Board(board))

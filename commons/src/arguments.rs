@@ -56,7 +56,7 @@ impl Display for Day {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::All => write!(f, "All days"),
-            Self::Number(n) => write!(f, "Day {}", n),
+            Self::Number(n) => write!(f, "Day {n}"),
         }
     }
 }
@@ -69,7 +69,7 @@ impl FromStr for Day {
             Ok(Self::All)
         } else {
             s.parse::<u8>()
-                .wrap_err_with(|| format!("For number: {}", s))
+                .wrap_err_with(|| format!("For number: {s}"))
                 .and_then(|day| {
                     if day > 0 && day <= 25 {
                         Ok(Self::Number(day))

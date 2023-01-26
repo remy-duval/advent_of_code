@@ -558,7 +558,7 @@ impl<T> Index<(isize, isize)> for Grid<T> {
 
     fn index(&self, index: (isize, isize)) -> &Self::Output {
         match self.get(index) {
-            None => panic!("Index {:?} out of bounds", index),
+            None => panic!("Index {index:?} out of bounds"),
             Some(value) => value,
         }
     }
@@ -567,7 +567,7 @@ impl<T> Index<(isize, isize)> for Grid<T> {
 impl<T> IndexMut<(isize, isize)> for Grid<T> {
     fn index_mut(&mut self, index: (isize, isize)) -> &mut Self::Output {
         match self.get_mut(index) {
-            None => panic!("Index {:?} out of bounds", index),
+            None => panic!("Index {index:?} out of bounds"),
             Some(value) => value,
         }
     }
@@ -578,7 +578,7 @@ impl<T> Index<isize> for Grid<T> {
 
     fn index(&self, index: isize) -> &Self::Output {
         match self.get_line(index) {
-            None => panic!("Line index {} out of bounds", index),
+            None => panic!("Line index {index} out of bounds"),
             Some(value) => value,
         }
     }
@@ -587,7 +587,7 @@ impl<T> Index<isize> for Grid<T> {
 impl<T> IndexMut<isize> for Grid<T> {
     fn index_mut(&mut self, index: isize) -> &mut Self::Output {
         match self.get_line_mut(index) {
-            None => panic!("Line index {} out of bounds", index),
+            None => panic!("Line index {index} out of bounds"),
             Some(value) => value,
         }
     }

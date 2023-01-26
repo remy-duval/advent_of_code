@@ -60,10 +60,10 @@ impl FromStr for Bot {
         }
 
         let (pos, radius) =
-            split(s).ok_or_else(|| eyre!("Expected pos=POINT, r=RADIUS, got: {}", s))?;
+            split(s).ok_or_else(|| eyre!("Expected pos=POINT, r=RADIUS, got: {s}"))?;
         let r = radius
             .parse::<Dimension>()
-            .wrap_err_with(|| format!("Couldn't parse the radius of the bot: {}", radius))?;
+            .wrap_err_with(|| format!("Couldn't parse the radius of the bot: {radius}"))?;
         let pos = pos
             .parse::<Point3>()
             .wrap_err("Couldn't parse the bot position")?;
@@ -84,14 +84,14 @@ impl FromStr for Point3 {
                 .split(',')
                 .map(|n| {
                     n.parse::<Dimension>()
-                        .wrap_err_with(|| format!("Couldn't parse a dimension of a point: {}", n))
+                        .wrap_err_with(|| format!("Couldn't parse a dimension of a point: {n}"))
                 });
 
             process_results(elements, |results| results.collect_tuple::<(_, _, _)>()).transpose()
         }
 
         let (x, y, z) =
-            inner(s).unwrap_or_else(|| Err(eyre!("Expected <X, Y, Z> for a point, got: {}", s)))?;
+            inner(s).unwrap_or_else(|| Err(eyre!("Expected <X, Y, Z> for a point, got: {s}")))?;
         Ok(Self { x, y, z })
     }
 }

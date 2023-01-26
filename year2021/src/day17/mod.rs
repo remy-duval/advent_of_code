@@ -28,10 +28,10 @@ fn parse(s: &str) -> Result<Target> {
         .ok_or_else(|| eyre!("Can't find target string known delimiters '{}'", s))?;
 
     Ok(Target {
-        min_x: min_x.parse().wrap_err_with(|| format!("For '{}'", min_x))?,
-        max_x: max_x.parse().wrap_err_with(|| format!("For '{}'", max_x))?,
-        min_y: min_y.parse().wrap_err_with(|| format!("For '{}'", min_y))?,
-        max_y: max_y.parse().wrap_err_with(|| format!("For '{}'", max_y))?,
+        min_x: min_x.parse().wrap_err_with(|| format!("For '{min_x}'"))?,
+        max_x: max_x.parse().wrap_err_with(|| format!("For '{max_x}'"))?,
+        min_y: min_y.parse().wrap_err_with(|| format!("For '{min_y}'"))?,
+        max_y: max_y.parse().wrap_err_with(|| format!("For '{max_y}'"))?,
     })
 }
 

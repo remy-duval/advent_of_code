@@ -9,17 +9,14 @@ pub fn run(raw: String) -> Result<()> {
     let signal = parse(&raw)?;
     // First part
     let output = naive_fft(&signal, 100).into_iter().take(8).join("");
-    println!("The first 8 digits of the simple output are {}", output);
+    println!("The first 8 digits of the simple output are {output}");
 
     // Second part
     let output = fast_second_half_fft(&signal, 100)
         .into_iter()
         .take(8)
         .join("");
-    println!(
-        "The first 8 digits of the repeated {} times output are {}",
-        REPEAT, output
-    );
+    println!("The first 8 digits of the repeated {REPEAT} times output are {output}");
 
     Ok(())
 }

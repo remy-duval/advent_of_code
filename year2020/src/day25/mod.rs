@@ -31,7 +31,7 @@ fn parse(s: &str) -> Result<Keys> {
         s.lines().map(|line| {
             line.trim()
                 .parse::<Key>()
-                .wrap_err_with(|| format!("Could not parse the key '{}'", line))
+                .wrap_err_with(|| format!("Could not parse the key '{line}'"))
         }),
         |result| result.collect_tuple::<(_, _)>(),
     )? {

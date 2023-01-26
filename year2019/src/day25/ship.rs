@@ -137,7 +137,7 @@ impl Room {
             .next()
             .and_then(|description| Some(description.strip_prefix("== ")?.split_once(" ==")?.0))
             .map_or(false, |name| {
-                println!("Discovered room: {}", name);
+                println!("Discovered room: {name}");
                 name == Self::CHECKPOINT
             });
 
@@ -257,7 +257,7 @@ impl Direction {
                     "east" => Some(Direction::East),
                     "west" => Some(Direction::West),
                     other => {
-                        eprintln!("Unknown direction ! {}", other);
+                        eprintln!("Unknown direction ! {other}");
                         None
                     }
                 })

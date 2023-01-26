@@ -11,15 +11,9 @@ pub fn run(raw: String) -> Result<()> {
     let (shortest, length) =
         shortest(&crossed[..]).ok_or_else(|| eyre!("Could not find shortest !"))?;
 
-    println!(
-        "Closest cross to origin : {} with distance {}",
-        closest,
-        closest.manhattan_distance()
-    );
-    println!(
-        "Shortest cross to origin : {} with length {}",
-        shortest, length
-    );
+    let distance = closest.manhattan_distance();
+    println!("Closest cross to origin : {closest} with distance {distance}");
+    println!("Shortest cross to origin : {shortest} with length {length}");
 
     Ok(())
 }

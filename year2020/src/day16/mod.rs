@@ -98,7 +98,7 @@ impl Tickets {
         self.ticket
             .iter()
             .zip(headers)
-            .try_for_each(|(&value, &header)| writeln!(out, "|{:>20} |{:>5} |", header, value))?;
+            .try_for_each(|(&value, &header)| writeln!(out, "|{header:>20} |{value:>5} |"))?;
         writeln!(out, "{}", "-".repeat(30))?;
 
         Ok(())
@@ -202,7 +202,7 @@ impl FromStr for Tickets {
 fn parse_int(s: &str) -> Result<u16> {
     s.trim()
         .parse()
-        .wrap_err_with(|| format!("Failed to parse a string into an int: {}", s))
+        .wrap_err_with(|| format!("Failed to parse a string into an int: {s}"))
 }
 
 /// Parse a comma separated line with a ParseError

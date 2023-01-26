@@ -51,7 +51,7 @@ fn parse(raw: &str) -> Result<Rules<'_>> {
                             })?;
 
                         let number = number.parse::<u32>().wrap_err_with(|| {
-                            format!("Could not parse a number of bag in the rule {}", rule)
+                            format!("Could not parse a number of bag in the rule {rule}")
                         })?;
 
                         Ok((bag, number))

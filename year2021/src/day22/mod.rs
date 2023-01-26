@@ -154,9 +154,9 @@ impl FromStr for Cuboid {
 
                 let (from, to) = c
                     .splitn(2, "..")
-                    .map(|n| n.parse().wrap_err_with(|| format!("In '{}'", c)))
+                    .map(|n| n.parse().wrap_err_with(|| format!("In '{c}'")))
                     .collect_tuple::<(Result<i32>, Result<i32>)>()
-                    .ok_or_else(|| eyre!("Missing '..' range delimiter in '{}'", c))?;
+                    .ok_or_else(|| eyre!("Missing '..' range delimiter in '{c}'"))?;
 
                 let (from, to) = (from?, to?);
                 Ok(from.min(to)..(from.max(to) + 1))

@@ -7,10 +7,10 @@ pub const TITLE: &str = "Day 19: Go With The Flow";
 pub fn run(raw: String) -> Result<()> {
     let program = parse(&raw)?;
     let first = run_optimized(program.clone(), 0)?;
-    println!("Run 1: The register 0 contains {} on exit", first);
+    println!("Run 1: The register 0 contains {first} on exit");
 
     let second = run_optimized(program, 1)?;
-    println!("Run 2: The register 0 contains {} on exit", second);
+    println!("Run 2: The register 0 contains {second} on exit");
 
     Ok(())
 }

@@ -12,7 +12,7 @@ pub const TITLE: &str = "Day 13: Care Package";
 const FRAME_DELAY: u64 = 0;
 
 pub fn run(raw: String) -> Result<()> {
-    println!("{}", CLEAR_COMMAND);
+    println!("{CLEAR_COMMAND}");
     let mut memory = parse(&raw)?.data;
     memory[0] = 2;
     let mut engine = Processor::new(&memory);
@@ -20,10 +20,7 @@ pub fn run(raw: String) -> Result<()> {
     let (score, (remaining, total_blocks)) =
         state.run_with_decider(&mut engine, true, simple_decider);
 
-    println!(
-        "Final score: {} with {}/{} blocks remaining.",
-        score, remaining, total_blocks
-    );
+    println!("Final score: {score} with {remaining}/{total_blocks} blocks remaining.");
 
     Ok(())
 }

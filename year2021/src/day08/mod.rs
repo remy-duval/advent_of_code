@@ -300,7 +300,7 @@ impl std::str::FromStr for Outputs {
     fn from_str(s: &str) -> Result<Self> {
         fn parse_into(s: &str, into: &mut [WireBitSet]) -> Result<()> {
             for (wires, dest) in s.split_whitespace().zip(into.iter_mut()) {
-                *dest = wires.parse().wrap_err_with(|| format!("In {}", s))?;
+                *dest = wires.parse().wrap_err_with(|| format!("In {s}"))?;
             }
 
             Ok(())

@@ -21,17 +21,14 @@ pub fn run(raw: String) -> Result<()> {
 
     // First part
     let calibration = scaffold.intersections_sum();
-    println!("The calibration sum is {}", calibration);
+    println!("The calibration sum is {calibration}");
 
     // Second part
     let path = scaffold.straight_ahead_path();
     println!("The path is {}", path.iter().join(","));
     let (main, a, b, c) =
         compression(&path, (5, 20)).ok_or_else(|| eyre!("The compression should succeed !"))?;
-    println!(
-        "We can send it as {} with \nA = {}\nB = {} \nC = {}",
-        main, a, b, c
-    );
+    println!("We can send it as {main} with \nA = {a}\nB = {b} \nC = {c}");
 
     // Run the robot with the path
     let mut robot: Processor = {

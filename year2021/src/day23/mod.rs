@@ -10,9 +10,9 @@ pub const TITLE: &str = "Day 23: Amphipod";
 pub fn run(raw: String) -> Result<()> {
     let rows = parse(&raw)?;
     let first = Positions::from(rows).a_star_search().unwrap_or(usize::MAX);
-    println!("1. Min cost: {}", first);
+    println!("1. Min cost: {first}");
     let second = add_rows(&rows).a_star_search().unwrap_or(usize::MAX);
-    println!("2. Min cost with added units: {}", second);
+    println!("2. Min cost with added units: {second}");
 
     Ok(())
 }

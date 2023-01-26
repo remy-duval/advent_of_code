@@ -11,12 +11,12 @@ pub fn run(raw: String) -> Result<()> {
     let memory = parse(&raw)?.data;
     let output = run_until_nat_packet(&memory)
         .ok_or_else(|| eyre!("No NAT packet received, but the network has stopped"))?;
-    println!("First NAT packet was : {}\n", output);
+    println!("First NAT packet was : {output}\n");
 
     println!("Starting network with NAT ON");
     let output = run_until_duplicate_wakeup(&memory)
         .ok_or_else(|| eyre!("The network stopped before sending twice the same wakeup"))?;
-    println!("Duplicate Y wake-up was : {}", output);
+    println!("Duplicate Y wake-up was : {output}");
 
     Ok(())
 }
@@ -40,7 +40,7 @@ fn run_until_nat_packet(memory: &[i64]) -> Option<Packet> {
                         return if not_sent.destination == 255 {
                             Some(not_sent)
                         } else {
-                            println!("Error : unhandled packet {}", not_sent);
+                            println!("Error : unhandled packet {not_sent}");
                             None
                         };
                     }
@@ -78,7 +78,7 @@ fn run_until_duplicate_wakeup(memory: &[i64]) -> Option<Packet> {
                             not_sent.destination = 0;
                             nat_buffer = Some(not_sent);
                         } else {
-                            println!("Error : unhandled packet {}", not_sent);
+                            println!("Error : unhandled packet {not_sent}");
                             return None;
                         }
                     };

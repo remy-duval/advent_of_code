@@ -36,12 +36,12 @@ fn parse(s: &str) -> Result<Game> {
                 .map(|line| {
                     line.trim()
                         .parse::<Card>()
-                        .wrap_err_with(|| format!("Could not parse a card as an integer {}", line))
+                        .wrap_err_with(|| format!("Could not parse a card as an integer {line}"))
                 })
                 .collect::<Result<VecDeque<Card>, _>>()
         })
         .collect_tuple::<(_, _)>()
-        .ok_or_else(|| eyre!("Missing a player section in {}", s))?;
+        .ok_or_else(|| eyre!("Missing a player section in {s}"))?;
 
     let first_player = first_player?;
     let second_player: VecDeque<Card> = second_player?;

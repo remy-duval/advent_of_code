@@ -361,7 +361,7 @@ fn parse_number(number: &str) -> Result<Int> {
     number
         .trim()
         .parse()
-        .wrap_err_with(|| format!("Could not parse an integer '{0}'", number))
+        .wrap_err_with(|| format!("Could not parse an integer '{number}'"))
 }
 
 /// Find the index of the given element in the element vector

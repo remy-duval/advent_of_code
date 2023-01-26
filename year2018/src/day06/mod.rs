@@ -32,10 +32,10 @@ fn parse(s: &str) -> Result<Coordinates> {
                 .map(|part| {
                     part.trim()
                         .parse::<i64>()
-                        .wrap_err_with(|| format!("Could not parse a number {0}", part))
+                        .wrap_err_with(|| format!("Could not parse a number {part}"))
                 })
                 .collect_tuple::<(_, _)>()
-                .ok_or_else(|| eyre!("Expected '<X>, <Y>' but got: {}", line))?;
+                .ok_or_else(|| eyre!("Expected '<X>, <Y>' but got: {line}"))?;
 
             Ok(Point::new(x?, y?))
         })

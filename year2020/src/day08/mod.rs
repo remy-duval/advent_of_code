@@ -11,19 +11,13 @@ pub fn run(raw: String) -> Result<()> {
     let mut state = ProgramState::new(parse(&raw)?.data);
     let (cause, accumulator) = run_until_duplicate_execution(&mut state);
 
-    println!(
-        "A loop was detected (caused by {pos}), the accumulator was at {acc}",
-        pos = cause,
-        acc = accumulator
-    );
+    println!("A loop was detected (caused by {cause}), the accumulator was at {accumulator}");
 
     // Part 2
     let (last, accumulator) = replace_and_run(&mut state);
     println!(
-        "Ran program until {pos}/{max}, the accumulator was at {acc}",
-        pos = last,
+        "Ran program until {last}/{max}, the accumulator was at {accumulator}",
         max = state.operations.len(),
-        acc = accumulator
     );
 
     Ok(())
@@ -149,7 +143,7 @@ impl FromStr for Operation {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         fn parse_arg(arg: &str) -> Result<i32> {
             arg.parse()
-                .wrap_err_with(|| format!("Could not parse the argument in '{}'", arg))
+                .wrap_err_with(|| format!("Could not parse the argument in '{arg}'"))
         }
 
         if let Some((op, arg)) = s.split_once(' ') {
@@ -157,10 +151,10 @@ impl FromStr for Operation {
                 "acc" => Ok(Operation::Acc(parse_arg(arg)?)),
                 "jmp" => Ok(Operation::Jmp(parse_arg(arg)?)),
                 "nop" => Ok(Operation::Noop(parse_arg(arg)?)),
-                _ => Err(eyre!("Unknown operation name '{}'", op)),
+                _ => Err(eyre!("Unknown operation name '{op}'")),
             }
         } else {
-            Err(eyre!("The operation is not formatted correctly '{}'", s))
+            Err(eyre!("The operation is not formatted correctly '{s}'"))
         }
     }
 }

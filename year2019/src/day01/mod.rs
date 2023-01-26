@@ -5,8 +5,8 @@ pub const TITLE: &str = "Day 1 : The Tyranny of the Rocket Equation";
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let (first, second) = solve(&data.data);
-    println!("Fuel for single stage : {}", first);
-    println!("Fuel complete : {}", second);
+    println!("Fuel for single stage : {first}");
+    println!("Fuel complete : {second}");
     Ok(())
 }
 

@@ -6,14 +6,11 @@ pub const TITLE: &str = "Day 4: Secure Container";
 
 pub fn run(raw: String) -> Result<()> {
     let (from, to) = parse(&raw)?;
-    println!("Range is {}..{}", from, to);
+    println!("Range is {from}..{to}");
 
     let (first, second) = solve(from, to);
-    println!("The number of valid possibilities is {}", first);
-    println!(
-        "The number of valid possibilities with increased strictness is {}",
-        second
-    );
+    println!("The number of valid possibilities is {first}");
+    println!("The number of valid possibilities with increased strictness is {second}");
 
     Ok(())
 }

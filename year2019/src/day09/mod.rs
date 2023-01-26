@@ -19,13 +19,13 @@ pub fn run(raw: String) -> Result<()> {
         },
     );
     assert_eq!(output_count, 1, "The TEST program should output once only");
-    println!("The TEST program single output was {}", current);
+    println!("The TEST program single output was {current}");
 
     let mut boost_process = Processor::with_initial_inputs(&memory, &[2]);
     match boost_process.read_next() {
-        Err(status) => Err(eyre!("BOOST failed ! (Status was {:?})", status)),
+        Err(status) => Err(eyre!("BOOST failed ! (Status was {status:?})")),
         Ok(coordinates) => {
-            println!("The BOOST program coordinates were {}", coordinates);
+            println!("The BOOST program coordinates were {coordinates}");
             Ok(())
         }
     }

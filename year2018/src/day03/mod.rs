@@ -111,28 +111,19 @@ impl FromStr for Claim {
     fn from_str(s: &str) -> Result<Self> {
         // Generate a bad format error
         fn bad_format(s: &str) -> Report {
-            eyre!(
-                "Expected #<ID> @ <LEFT>,<TOP>: <WIDTH>x<HEIGHT> for claim, got {}",
-                s
-            )
+            eyre!("Expected #<ID> @ <LEFT>,<TOP>: <WIDTH>x<HEIGHT> for claim, got {s}")
         }
 
         fn parse_int(s: &str) -> Result<i16> {
             s.parse()
-                .wrap_err_with(|| format!("Could not parse a number in the claim {}", s))
+                .wrap_err_with(|| format!("Could not parse a number in the claim {s}"))
         }
 
         fn parse_coordinates(s: &str, sep: char) -> Result<(i16, i16)> {
             itertools::process_results(s.splitn(2, sep).map(|s| parse_int(s.trim())), |iter| {
                 iter.collect_tuple::<(_, _)>()
             })?
-            .ok_or_else(|| {
-                eyre!(
-                    "Expected <FIRST>{1}<SECOND> for coordinates, got {0}",
-                    sep,
-                    s
-                )
-            })
+            .ok_or_else(|| eyre!("Expected <FIRST>{s}<SECOND> for coordinates, got {sep}"))
         }
 
         let (id, claim) = s

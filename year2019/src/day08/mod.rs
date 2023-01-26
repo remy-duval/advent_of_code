@@ -13,7 +13,7 @@ pub fn run(raw: String) -> Result<()> {
     let (_, w, t) = image.check_sum();
     image.build();
     println!("Image checksum is {} * {} =  {}", w, t, w * t);
-    println!("{}", image);
+    println!("{image}");
 
     Ok(())
 }

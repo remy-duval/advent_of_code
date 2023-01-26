@@ -14,11 +14,11 @@ pub const TITLE: &str = "Day 22: Mode Maze";
 pub fn run(raw: String) -> Result<()> {
     let mut cavern = parse(&raw)?;
     let risk = cavern.risk_level();
-    println!("The total danger level in the maze is {}", risk);
+    println!("The total danger level in the maze is {risk}");
 
     let shortest = shortest_path(&mut cavern)
         .ok_or_else(|| eyre!("Could not find the shortest path to the target"))?;
-    println!("The shortest path to the target is {}", shortest);
+    println!("The shortest path to the target is {shortest}");
 
     Ok(())
 }

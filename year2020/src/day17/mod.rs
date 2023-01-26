@@ -8,16 +8,10 @@ pub const TITLE: &str = "Day 17: Conway Cubes";
 pub fn run(raw: String) -> Result<()> {
     let input = parse(&raw);
     let first = first_part(input.clone());
-    println!(
-        "After 6 cycles in 3D the number of active cubes is {}",
-        first
-    );
+    println!("After 6 cycles in 3D the number of active cubes is {first}");
 
     let second = second_part(input);
-    println!(
-        "After 6 cycles in 4D the number of active cubes is {}",
-        second
-    );
+    println!("After 6 cycles in 4D the number of active cubes is {second}");
 
     Ok(())
 }
