@@ -22,8 +22,15 @@
 
 /// Re-export of eyre error library
 pub use eyre;
+
 /// Re-export of num library
-pub use num;
+pub mod num {
+    pub use num_traits::*;
+
+    pub mod integer {
+        pub use num_integer::*;
+    }
+}
 
 /// String to print in the console to return to the top
 pub const TO_TOP: &str = "\u{001b}[H";

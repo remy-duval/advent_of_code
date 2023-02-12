@@ -8,7 +8,7 @@ use std::{
     ops::{Add, Sub},
 };
 
-use num::{Num, Signed, ToPrimitive};
+use crate::num::{Num, Signed, ToPrimitive};
 
 /// Represents a point in a plane (x is from West to East, y from North to South)
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
