@@ -10,7 +10,7 @@ itertools = "0.10.5"
 eyre = "0.6.8"
 
 [dependencies.clap]
-version = "4.1.4"
+version = "4.2.1"
 default-features = false
 features = ["std", "help", "usage", "error-context", "suggestions"]
 
