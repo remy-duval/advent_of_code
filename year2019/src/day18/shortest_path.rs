@@ -1,7 +1,7 @@
 //! All the methods for getting the shortest path on a maze
 
 use commons::grid::Point;
-use hashbrown::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 use super::{HallWay, Keys};
 

@@ -11,6 +11,7 @@ members = [
 lto = 'thin'
 strip = true
 opt-level = 3
+panic = 'abort'
 
 [profile.dev]
 opt-level = 0

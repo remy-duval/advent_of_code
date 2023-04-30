@@ -3,8 +3,8 @@
 use std::collections::VecDeque;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-use hashbrown::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 /// The status of the ship
 #[derive(Debug, Default)]

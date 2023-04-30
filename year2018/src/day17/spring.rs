@@ -3,8 +3,8 @@ use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 use commons::eyre::{eyre, Report, Result, WrapErr};
-use hashbrown::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 use commons::grid::Point;
 

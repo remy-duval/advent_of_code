@@ -1,4 +1,4 @@
-use hashbrown::HashMap;
+use std::collections::HashMap;
 
 use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Point};

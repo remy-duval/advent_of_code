@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-use hashbrown::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 use commons::eyre::{bail, eyre, Result, WrapErr};
 

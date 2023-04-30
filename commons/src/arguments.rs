@@ -1,38 +1,32 @@
-use std::fmt::{Debug, Display};
+use std::borrow::Cow;
 use std::path::PathBuf;
-use std::str::FromStr;
 
-use clap::{value_parser, Arg, ArgAction, Command};
-use eyre::{eyre, Report, Result, WrapErr};
-
-/// Parse the advent of code arguments
-pub fn parse_arguments(name: &'static str) -> Arguments {
-    let mut matches = Command::new(name)
-        .about("Solutions for the advent of code problems")
-        .arg(
-            Arg::new("day")
-                .short('d')
-                .long("day")
-                .value_name("DAY")
-                .help("The specific day of the problem or 'all'")
-                .action(ArgAction::Set)
-                .required(true)
-                .value_parser(value_parser!(Day)),
-        )
-        .arg(
-            Arg::new("input")
-                .long("input")
-                .value_name("FILE")
-                .help("The problem's input. If day is 'all', a directory from 01.txt to 25.txt")
-                .action(ArgAction::Set)
-                .required(true)
-                .value_parser(value_parser!(PathBuf)),
-        )
-        .get_matches();
-
-    Arguments {
-        day: matches.remove_one("day").expect("valid day is required"),
-        input: matches.remove_one("input").expect("'input' is required"),
+/// Parse the advent of code arguments (not using clap to learn how this can be done)
+pub fn parse_arguments(name: &str) -> Arguments {
+    let mut args = std::env::args().skip(1);
+    let mut day: Option<Day> = None;
+    let mut input: Option<PathBuf> = None;
+    loop {
+        match next_opt(&mut args) {
+            Ok(Some(Opt::Day(d))) => day = Some(d),
+            Ok(Some(Opt::Input(i))) => input = Some(i),
+            Ok(Some(Opt::Help)) => print_help_and_exit(name),
+            Ok(None) => match (day, input) {
+                (Some(day), Some(input)) => return Arguments { day, input },
+                (None, _) => {
+                    println!("'day' is required\n");
+                    print_help_and_exit(name)
+                }
+                (_, None) => {
+                    println!("'input' is required\n");
+                    print_help_and_exit(name)
+                }
+            },
+            Err(reason) => {
+                println!("{reason}\n");
+                print_help_and_exit(name);
+            }
+        }
     }
 }
 
@@ -52,7 +46,7 @@ pub enum Day {
     Number(u8),
 }
 
-impl Display for Day {
+impl std::fmt::Display for Day {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::All => write!(f, "All days"),
@@ -61,23 +55,69 @@ impl Display for Day {
     }
 }
 
-impl FromStr for Day {
-    type Err = Report;
+enum Opt {
+    Day(Day),
+    Input(PathBuf),
+    Help,
+}
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s == "all" {
-            Ok(Self::All)
+fn print_help_and_exit(name: &str) -> ! {
+    println!(
+        "Solutions for the advent of code problems
+  Usage: {name}.exe --day <DAY> --input <FILE>
+  Options:
+  -d, --day <DAY>     The specific day of the problem or 'all'
+  -i, --input <FILE>  The problem's input. If day is 'all', a directory from 01..txt to 25.txt
+  -h, --help          Print help"
+    );
+    std::process::exit(1)
+}
+
+fn next_opt<Args: Iterator<Item = String>>(args: &mut Args) -> Result<Option<Opt>, String> {
+    let arg = match args.next() {
+        Some(a) => a,
+        None => return Ok(None),
+    };
+
+    if let Some(d) = opt_value(&arg, "-d", "--day", args)? {
+        if d == "all" {
+            Ok(Some(Opt::Day(Day::All)))
         } else {
-            s.parse::<u8>()
-                .wrap_err_with(|| format!("For number: {s}"))
-                .and_then(|day| {
-                    if day > 0 && day <= 25 {
-                        Ok(Self::Number(day))
-                    } else {
-                        Err(eyre!("Day must be between 1 and 25"))
-                    }
-                })
-                .wrap_err("Should be 'all' or a number between 1 and 25")
+            match d.parse::<u8>() {
+                Ok(d) if (1..26).contains(&d) => Ok(Some(Opt::Day(Day::Number(d)))),
+                _ => Err(format!("day must be 'all' or a number from 1 to 25: {d}")),
+            }
         }
+    } else if let Some(input) = opt_value(&arg, "-i", "--input", args)? {
+        Ok(Some(Opt::Input(PathBuf::from(input.into_owned()))))
+    } else if arg == "-h" || arg == "--help" {
+        Ok(Some(Opt::Help))
+    } else {
+        Err(format!("unknown argument: {arg}"))
+    }
+}
+
+fn opt_value<'a, Args: Iterator<Item = String>>(
+    arg: &'a String,
+    short: &str,
+    long: &str,
+    remaining_arguments: &mut Args,
+) -> Result<Option<Cow<'a, str>>, String> {
+    // Short arguments can contain the value directly after the prefix
+    // Long arguments can contain the value after the prefix separated by a '='
+    // Some if the argument matches the opt, the inner option contains the value if present
+    let value = arg
+        .strip_prefix(short)
+        .map(Some)
+        .or_else(|| arg.strip_prefix(long).map(|r| r.strip_prefix('=')));
+
+    match value {
+        Some(Some(v)) if !v.is_empty() => Ok(Some(Cow::Borrowed(v))),
+        // If the value was not directly inside the argument, find it from the remaining args
+        Some(_) => match remaining_arguments.next() {
+            Some(v) => Ok(Some(Cow::Owned(v))),
+            None => Err(format!("missing value for argument {arg}")),
+        },
+        None => Ok(None),
     }
 }

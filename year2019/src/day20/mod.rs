@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use hashbrown::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Point};

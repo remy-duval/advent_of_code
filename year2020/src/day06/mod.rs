@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use hashbrown::HashSet;
+use std::collections::HashSet;
 
 use commons::eyre::Result;
 

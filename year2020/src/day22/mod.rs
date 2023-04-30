@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 use std::hash::{BuildHasher, Hash, Hasher};
 
-use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 
 use commons::eyre::{eyre, Result, WrapErr};
 use commons::parse::sep_by_empty_lines;

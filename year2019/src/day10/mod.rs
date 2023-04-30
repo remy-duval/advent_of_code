@@ -4,8 +4,8 @@ use std::fmt::{Display, Formatter};
 use std::io::{stdin, stdout, BufWriter, Write};
 use std::time::Duration;
 
-use hashbrown::HashSet;
 use itertools::Itertools;
+use std::collections::HashSet;
 
 use commons::eyre::{eyre, Result, WrapErr};
 use commons::grid::Point;

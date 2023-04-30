@@ -1,4 +1,4 @@
-use hashbrown::{hash_map::Entry, HashMap};
+use std::collections::{hash_map::Entry, HashMap};
 
 use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::grid::Point;

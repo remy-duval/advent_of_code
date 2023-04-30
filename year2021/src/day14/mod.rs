@@ -1,5 +1,5 @@
-use hashbrown::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 use commons::eyre::{ensure, eyre, Result};
 use commons::parse::sep_by_empty_lines;

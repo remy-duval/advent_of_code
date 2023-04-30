@@ -1,6 +1,6 @@
 use std::ops::Add;
 
-use hashbrown::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 use commons::eyre::Result;
 use commons::grid::Point;

@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
-use hashbrown::HashSet;
 use itertools::Itertools;
+use std::collections::HashSet;
 
 use commons::eyre::{eyre, Result};
 
@@ -109,7 +109,7 @@ fn second_part(rules: &Rules) -> isize {
 
 /// The core of a generation
 fn score(gen: &HashSet<isize>) -> isize {
-    gen.into_iter().sum()
+    gen.iter().sum()
 }
 
 /// Compute the next generation of `from`, writing it in `into` (reuse the allocation)

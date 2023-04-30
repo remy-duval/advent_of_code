@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use hashbrown::HashMap;
+use std::collections::HashMap;
 
 use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;

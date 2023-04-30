@@ -3,8 +3,8 @@
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 
-use hashbrown::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 use commons::eyre::{eyre, Report, Result};
 use commons::grid::{Direction, Point};
@@ -207,10 +207,7 @@ fn fuse_paths(map: HashMap<Point, HallWay>) -> (HashMap<Point, HallWay>, HashMap
     }
 
     let with_pathways: HashMap<Point, HallWay> = result.clone();
-    result = result
-        .into_iter()
-        .filter(|(_, hall)| !hall.connections.is_empty())
-        .collect();
+    result.retain(|_, hall| !hall.connections.is_empty());
 
     (result, with_pathways)
 }

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 
-use hashbrown::HashMap;
+use std::collections::HashMap;
 
 use commons::eyre::Result;
 use commons::grid::Direction;

@@ -1,5 +1,5 @@
-use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 
 use commons::eyre::{eyre, Result, WrapErr};
 
@@ -122,7 +122,7 @@ fn count_bags_inside<'a>(
 ) -> u32 {
     if let Some(rules) = all_rules.get(bag) {
         rules
-            .into_iter()
+            .iter()
             .map(|(inner, times)| {
                 if let Some(count) = already_counted.get(*inner).copied() {
                     count * times

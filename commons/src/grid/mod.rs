@@ -26,17 +26,6 @@ impl<T> Grid<T> {
     /// ### Arguments
     /// * `width` - The width of a line in the Grid
     /// * `height_capacity` - The number of lines to allocate space for
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let created: Grid<usize> = Grid::new(5, 4);
-    ///
-    /// assert_eq!(created.width(), 5);
-    /// assert_eq!(created.height(), 0);
-    /// assert_eq!(created.flattened(), &[]);
-    /// ```
     pub fn new(width: usize, height_capacity: usize) -> Self {
         Self {
             storage: Vec::with_capacity(height_capacity * width),
@@ -50,19 +39,6 @@ impl<T> Grid<T> {
     /// * `width` - The width of a line in the Grid
     /// * `height` - The number of lines to create
     /// * `f` - The function to compute the element for the index (x, y)
-    ///
-    /// ### Examples
-    /// ```
-    /// use commons::grid::Grid;
-    /// let created = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    ///
-    /// assert_eq!(created.width(), 5);
-    /// assert_eq!(created.height(), 4);
-    /// assert_eq!(
-    ///     created.flattened(),
-    ///     &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-    /// )
-    /// ```
     pub fn tabulate(width: usize, height: usize, mut f: impl FnMut((usize, usize)) -> T) -> Self {
         let mut created = Self::new(width, height);
         for y in 0..height {
@@ -90,20 +66,6 @@ impl<T: Clone> Grid<T> {
     /// * `width` - The width of a line in the Grid
     /// * `height_capacity` - The number of lines to create
     /// * `element` - The element to duplicate for each position
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let created = Grid::fill(2, 2, 3);
-    ///
-    /// assert_eq!(created.width(), 2);
-    /// assert_eq!(created.height(), 2);
-    /// assert_eq!(
-    ///     created.flattened(),
-    ///     &[3, 3, 3, 3]
-    /// )
-    /// ```
     pub fn fill(width: usize, height: usize, element: T) -> Self {
         Self {
             storage: vec![element; width * height],
@@ -118,20 +80,6 @@ impl<T: Default + Clone> Grid<T> {
     /// ### Argument
     /// * `width` - The width of a line in the Grid
     /// * `height_capacity` - The number of lines to create
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let created: Grid<usize> = Grid::with_default(2, 2);
-    ///
-    /// assert_eq!(created.width(), 2);
-    /// assert_eq!(created.height(), 2);
-    /// assert_eq!(
-    ///     created.flattened(),
-    ///     &[0, 0, 0, 0]
-    /// )
-    /// ```
     pub fn with_default(width: usize, height: usize) -> Self {
         Self::fill(width, height, T::default())
     }
@@ -143,22 +91,6 @@ impl<T: Default> Grid<T> {
     ///
     /// ### Returns
     /// A mutable slice of the inserted line
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut grid: Grid<usize> = Grid::new(5, 3);
-    /// grid.insert_default_line();
-    /// grid.insert_default_line();
-    /// let mut added_line = grid.insert_default_line();
-    /// added_line[2] = 69;
-    ///
-    /// assert_eq!(
-    ///     grid.flattened(),
-    ///     &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 0, 0]
-    /// )
-    /// ```
     pub fn insert_default_line(&mut self) -> &mut [T] {
         self.insert_filled_line(|_| T::default())
     }
@@ -166,38 +98,16 @@ impl<T: Default> Grid<T> {
 
 impl<T> Grid<T> {
     /// The width of this Grid
-    ///
-    /// ### Examples
-    /// ```
-    /// use commons::grid::Grid;
-    /// let vec: Grid<usize> = Grid::new(5, 0);
-    /// assert_eq!(vec.width(), 5);
-    /// ```
     pub fn width(&self) -> usize {
         self.width
     }
 
     /// The height of this Grid
-    ///
-    /// ### Examples
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    ///
-    /// assert_eq!(vec.height(), 4);
-    /// ```
     pub fn height(&self) -> usize {
         self.storage.len() / self.width
     }
 
     /// The (`width`, `height`) of this Grid
-    /// The height of this Grid
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    ///
-    /// assert_eq!(vec.size(), (5, 4));
-    /// ```
     pub fn size(&self) -> (usize, usize) {
         (self.width(), self.height())
     }
@@ -211,15 +121,6 @@ impl<T> Grid<T> {
     /// ### Returns
     /// None if the given position does not exist
     /// Some of a reference to the element if it is found
-    ///
-    /// ### Examples
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    ///
-    /// assert_eq!(8, *vec.get((3, 1)).unwrap());
-    /// assert_eq!(19, *vec.get((4, 3)).unwrap())
-    /// ```
     pub fn get(&self, (x, y): (isize, isize)) -> Option<&T> {
         if x < 0 || x >= self.width as isize || y < 0 {
             None
@@ -237,16 +138,6 @@ impl<T> Grid<T> {
     /// ### Returns
     /// None if the given position does not exist
     /// Some of a reference to the element if it is found
-    ///
-    /// ### Examples
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    ///
-    /// let inside = vec.get_mut((3, 1)).unwrap();
-    /// *inside = 50;
-    /// assert_eq!(50, *vec.get((3, 1)).unwrap());
-    /// ```
     pub fn get_mut(&mut self, (x, y): (isize, isize)) -> Option<&mut T> {
         if x < 0 || x >= self.width as isize || y < 0 {
             None
@@ -263,17 +154,6 @@ impl<T> Grid<T> {
     /// ### Returns
     /// None if the line does not exist
     /// Some of a reference to the line if it is found
-    ///
-    /// ### Examples
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    ///
-    /// assert_eq!(
-    ///     &[15, 16, 17, 18, 19],
-    ///     vec.get_line(3).unwrap()
-    /// );
-    /// ```
     pub fn get_line(&self, y: isize) -> Option<&[T]> {
         let start = y as usize * self.width;
         let end = start + self.width;
@@ -292,18 +172,6 @@ impl<T> Grid<T> {
     /// ### Returns
     /// None if the line does not exist
     /// Some of a mutable reference to the line if it is found
-    /// ### Examples
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    ///
-    /// let inside = vec.get_line_mut(3).unwrap();
-    /// inside[2] = 2;
-    /// assert_eq!(
-    ///     &[15, 16, 2, 18, 19],
-    ///     vec.get_line(3).unwrap()
-    /// );
-    /// ```
     pub fn get_line_mut(&mut self, y: isize) -> Option<&mut [T]> {
         let start = y as usize * self.width;
         let end = start + self.width;
@@ -321,24 +189,6 @@ impl<T> Grid<T> {
     ///
     /// ### Panics
     /// If the line is shorter or longer than the vec `width`
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::new(5, 1);
-    ///
-    /// vec.push_line(vec![1, 2, 3, 4, 5]);
-    /// assert_eq!(1, vec.height());
-    /// assert_eq!(&[1, 2, 3, 4, 5], vec.get_line(0).unwrap());
-    /// ```
-    ///
-    /// ```should_panic
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::new(5, 1);
-    ///
-    /// vec.push_line(vec![1, 2, 3, 4]); // Too short
-    /// ```
     pub fn push_line(&mut self, line: Vec<T>) {
         if let Err(line) = self.try_push_line(line) {
             panic!(
@@ -357,22 +207,6 @@ impl<T> Grid<T> {
     ///
     /// ### Returns
     /// A mutable slice of the inserted line
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut grid = Grid::new(5, 3);
-    /// grid.insert_filled_line(|i| i);
-    /// grid.insert_filled_line(|i| 2 * i);
-    /// let added_line = grid.insert_filled_line(|i| 3 * i);
-    /// added_line[2] = 500;
-    ///
-    /// assert_eq!(
-    ///     grid.flattened(),
-    ///     &[0, 1, 2, 3, 4, 0, 2, 4, 6, 8, 0, 3, 500, 9, 12]
-    /// )
-    /// ```
     pub fn insert_filled_line(&mut self, mut produce: impl FnMut(usize) -> T) -> &mut [T] {
         let start = self.storage.len();
         self.storage.reserve(self.width);
@@ -390,19 +224,6 @@ impl<T> Grid<T> {
     ///
     /// ### Returns
     /// Err if the line is shorter or longer than the vec `width`
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let mut vec = Grid::new(5, 1);
-    ///
-    /// vec.try_push_line(vec![1, 2, 3, 4, 5]).unwrap(); // Ok
-    /// vec.try_push_line(vec![1, 2, 3, 4]).unwrap_err(); // Too short
-    /// vec.try_push_line(vec![1, 2, 3, 4, 5, 6]).unwrap_err(); // Too long
-    /// assert_eq!(1, vec.height());
-    /// assert_eq!(&[1, 2, 3, 4, 5], vec.get_line(0).unwrap());
-    /// ```
     pub fn try_push_line(&mut self, line: Vec<T>) -> Result<(), Vec<T>> {
         if line.len() == self.width {
             self.storage.extend(line);
@@ -433,58 +254,16 @@ impl<T> Grid<T> {
     }
 
     /// An iterator on the lines of the Grid as slices
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    /// let mut lines = vec.lines();
-    ///
-    /// assert_eq!(lines.next().unwrap(), &[0, 1, 2, 3, 4]);
-    /// assert_eq!(lines.next().unwrap(), &[5, 6, 7, 8, 9]);
-    /// assert_eq!(lines.next().unwrap(), &[10, 11, 12, 13, 14]);
-    /// assert_eq!(lines.next().unwrap(), &[15, 16, 17, 18, 19]);
-    /// assert_eq!(lines.next(), None);
-    /// ```
     pub fn lines(&self) -> iter::LineIterator<'_, T> {
         iter::LineIterator::new(self)
     }
 
     /// An iterator over the points in the Grid
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let vec: Grid<u8> = Grid::with_default(2, 2);
-    /// let mut keys = vec.indices();
-    ///
-    /// assert_eq!(keys.next(), Some((0, 0)));
-    /// assert_eq!(keys.next(), Some((1, 0)));
-    /// assert_eq!(keys.next(), Some((0, 1)));
-    /// assert_eq!(keys.next(), Some((1, 1)));
-    /// assert_eq!(keys.next(), None);
-    /// ```
     pub fn indices(&self) -> iter::Indices {
         iter::Indices::new(self)
     }
 
     /// An iterator on the points and their values in the Grid
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let vec: Grid<u8> = Grid::with_default(2, 2);
-    /// let mut keys = vec.indexed_values();
-    ///
-    /// assert_eq!(keys.next(), Some(((0, 0), &0)));
-    /// assert_eq!(keys.next(), Some(((1, 0), &0)));
-    /// assert_eq!(keys.next(), Some(((0, 1), &0)));
-    /// assert_eq!(keys.next(), Some(((1, 1), &0)));
-    /// assert_eq!(keys.next(), None);
-    /// ```
     pub fn indexed_values(&self) -> iter::IndexedValues<'_, T> {
         iter::IndexedValues::new(self)
     }
@@ -497,26 +276,6 @@ impl<T> Grid<T> {
     ///
     /// ### Panics
     /// If `increment` is (0, 0) as this would be an infinite iterator
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use commons::grid::Grid;
-    /// let vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    /// let mut points = vec.half_line((2, 2), (1, -1));
-    ///
-    /// assert_eq!(points.next(), Some(((2, 2), &12)));
-    /// assert_eq!(points.next(), Some(((3, 1), &8)));
-    /// assert_eq!(points.next(), Some(((4, 0), &4)));
-    /// assert_eq!(points.next(), None);
-    /// ```
-    ///
-    /// It will panic if the increment happens to be (0, 0)
-    /// ```should_panic
-    /// use commons::grid::Grid;
-    /// let vec = Grid::tabulate(5, 4, |(x, y)| x + 5 * y);
-    /// let mut points = vec.half_line((2, 2), (0, 0));
-    /// ```
     pub fn half_line(&self, from: (isize, isize), step: (isize, isize)) -> iter::HalfLine<'_, T> {
         iter::HalfLine::new(self, from, step)
     }
@@ -619,3 +378,6 @@ impl<'a, T> IntoIterator for &'a mut Grid<T> {
         self.iter_mut()
     }
 }
+
+#[cfg(test)]
+mod tests;

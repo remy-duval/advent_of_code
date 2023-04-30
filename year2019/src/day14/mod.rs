@@ -1,7 +1,7 @@
 use std::iter::Iterator;
 use std::str::FromStr;
 
-use hashbrown::HashMap;
+use std::collections::HashMap;
 
 use commons::eyre::{eyre, Report, Result};
 use commons::parse::LineSep;

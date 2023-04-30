@@ -1,8 +1,8 @@
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
-use hashbrown::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::grid::Grid;

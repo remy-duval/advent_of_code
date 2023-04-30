@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
-use hashbrown::HashSet;
 use itertools::Itertools;
+use std::collections::HashSet;
 
 use commons::eyre::{eyre, Result};
 use commons::grid::Point;

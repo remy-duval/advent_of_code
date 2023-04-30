@@ -1,4 +1,4 @@
-use hashbrown::HashSet;
+use std::collections::HashSet;
 
 use commons::eyre::Result;
 use commons::parse::LineSep;

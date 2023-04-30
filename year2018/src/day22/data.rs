@@ -2,8 +2,8 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use commons::eyre::{eyre, Report, Result, WrapErr};
-use hashbrown::HashMap;
 use itertools::{process_results, Itertools};
+use std::collections::HashMap;
 
 /// The type of a point in the cavern
 pub type Point = (u32, u32);

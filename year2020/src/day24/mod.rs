@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use hashbrown::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 use commons::eyre::{eyre, Report, Result};
 use commons::grid::Point;

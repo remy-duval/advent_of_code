@@ -1,5 +1,5 @@
 use commons::eyre::{eyre, Result};
-use hashbrown::HashMap;
+use std::collections::HashMap;
 
 use commons::num::integer::lcm;
 

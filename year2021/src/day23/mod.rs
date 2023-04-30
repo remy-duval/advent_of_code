@@ -1,7 +1,7 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
-use hashbrown::HashMap;
+use std::collections::HashMap;
 
 use commons::eyre::{eyre, Result};
 
