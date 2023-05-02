@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
-use commons::eyre::Result;
+use commons::Result;
 
 pub const TITLE: &str = "Day 21: Allergen Assessment";
 

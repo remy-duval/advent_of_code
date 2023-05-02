@@ -1,4 +1,4 @@
-use commons::eyre::{eyre, Result, WrapErr};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 16: Packet Decoder";
 
@@ -103,7 +103,7 @@ fn first_part(mut stream: BitStream) -> Result<u64> {
     }
 
     let mut sum = VersionSum(0);
-    fold_stream(&mut stream, &mut sum).map_err(|pos| eyre!("Failed at {}", pos))?;
+    fold_stream(&mut stream, &mut sum).map_err(|pos| err!("Failed at {}", pos))?;
     Ok(sum.0)
 }
 
@@ -145,7 +145,7 @@ fn second_part(mut stream: BitStream) -> Result<u64> {
     }
 
     let mut decoder = Decoder::default();
-    fold_stream(&mut stream, &mut decoder).map_err(|pos| eyre!("Failed at {}", pos))?;
+    fold_stream(&mut stream, &mut decoder).map_err(|pos| err!("Failed at {}", pos))?;
     Ok(decoder.result.unwrap_or_default())
 }
 

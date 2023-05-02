@@ -4,8 +4,8 @@ use std::hash::{BuildHasher, Hash, Hasher};
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
-use commons::eyre::{eyre, Result, WrapErr};
 use commons::parse::sep_by_empty_lines;
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 22: Crab Combat";
 
@@ -41,7 +41,7 @@ fn parse(s: &str) -> Result<Game> {
                 .collect::<Result<VecDeque<Card>, _>>()
         })
         .collect_tuple::<(_, _)>()
-        .ok_or_else(|| eyre!("Missing a player section in {s}"))?;
+        .ok_or_else(|| err!("Missing a player section in {s}"))?;
 
     let first_player = first_player?;
     let second_player: VecDeque<Card> = second_player?;

@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::Result;
+use commons::Result;
 
 pub const TITLE: &str = "Day 14: Chocolate Charts";
 

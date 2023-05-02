@@ -3,9 +3,9 @@ use std::collections::VecDeque;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
-use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Point};
 use commons::TO_TOP;
+use commons::{err, Result};
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
@@ -36,7 +36,7 @@ fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize)> {
         bfs(Point::default(), map, |p, _| {
             matches!(map.get(&p), Some(Tile::OxygenSystem))
         })
-        .ok_or_else(|| eyre!("Breadth first search failed for path to the oxygen"))?,
+        .ok_or_else(|| err!("Breadth first search failed for path to the oxygen"))?,
     );
     let oxygen = Direction::compute_movement(Point::default(), &path);
 
@@ -46,7 +46,7 @@ fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize)> {
 fn second_part(map: &HashMap<Point, Tile>, oxygen: Point) -> Result<usize> {
     let walkable_tiles = map.iter().filter(|(_, tile)| **tile != Tile::Wall).count();
     let path = bfs(oxygen, map, |_, visited| visited.len() >= walkable_tiles).ok_or_else(|| {
-        eyre!("Breadth first search failed for the longest path to fill with oxyge")
+        err!("Breadth first search failed for the longest path to fill with oxyge")
     })?;
 
     Ok(path.len())

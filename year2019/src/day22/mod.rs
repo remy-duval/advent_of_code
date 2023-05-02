@@ -1,8 +1,7 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result};
-use commons::num::integer::{mod_floor, ExtendedGcd, Integer};
 use commons::parse::LineSep;
+use commons::{err, Report, Result};
 
 pub const TITLE: &str = "Day 22: Slam Shuffle";
 const DECK: i128 = 119_315_717_514_047;
@@ -38,12 +37,45 @@ fn second_part(shuffles: Vec<Shuffle>) -> i128 {
         .apply(2020, DECK)
 }
 
-/// Invert a number in the modulo space of Z/size using the extended euclidean algorithm
+/// The modulo operation which returns only positive numbers
+/// The remainder (%) operation of Rust is not entirely like a modulo
+/// If a is negative, then a % b is negative, whereas for modulo we need it positive.
+/// This functions dirty fixes that issue by re-implementing the modulo for i128.
+fn modulo(a: i128, m: i128) -> i128 {
+    if a < 0 {
+        a % m + m
+    } else {
+        a % m
+    }
+}
+
+/// Invert a number in the modulo space of Z/size.
 /// See https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-fn modular_inverse(a: i128, n: i128) -> i128 {
-    let ExtendedGcd { gcd, x, .. } = a.extended_gcd(&n);
-    assert_eq!(gcd, 1, "{a} is not invertible in mod {n}");
-    x
+fn modular_inverse(to_inverse: i128, size: i128) -> i128 {
+    let (mut inverse, mut temp_inv) = (0, 1);
+    let (mut remainder, mut temp_rem) = (size, to_inverse);
+
+    while temp_rem > 0 {
+        let quotient = remainder / temp_rem;
+        let tmp = inverse - quotient * temp_inv;
+        inverse = temp_inv;
+        temp_inv = tmp;
+
+        let tmp = remainder % temp_rem;
+        remainder = temp_rem;
+        temp_rem = tmp;
+    }
+
+    assert_eq!(
+        remainder, 1,
+        "{} is not invertible in mod {}",
+        to_inverse, size
+    );
+    if inverse < 0 {
+        inverse + size
+    } else {
+        inverse
+    }
 }
 
 /// Represents a Shuffle operations for the problem.
@@ -64,16 +96,16 @@ impl FromStr for Shuffle {
             if let Ok(int) = s.replace("cut", "").trim().parse() {
                 Ok(Shuffle::Cut(int))
             } else {
-                Err(eyre!("Could not parse the cut number"))
+                Err(err!("Could not parse the cut number"))
             }
         } else if s.starts_with("deal with increment") {
             if let Ok(int) = s.replace("deal with increment", "").trim().parse() {
                 Ok(Shuffle::Deal(int))
             } else {
-                Err(eyre!("Could not parse the deal with increment number"))
+                Err(err!("Could not parse the deal with increment number"))
             }
         } else {
-            Err(eyre!("Could not parse the next shuffle"))
+            Err(err!("Could not parse the next shuffle"))
         }
     }
 }
@@ -117,7 +149,7 @@ impl LinearFunction {
     /// This produces the position of the card after the shuffling.
     fn apply(&self, input: i128, size: i128) -> i128 {
         let &Self(a, b) = self;
-        mod_floor(mod_floor(a * input, size) + b, size)
+        modulo(modulo(a * input, size) + b, size)
     }
 
     /// Compose this LCF with another one (with the given modulo)
@@ -125,8 +157,8 @@ impl LinearFunction {
     fn compose_with(self, rhs: Self, size: i128) -> Self {
         let Self(a, b) = self;
         let Self(c, d) = rhs;
-        let first = mod_floor(a * c, size);
-        let second = mod_floor(mod_floor(b * c, size) + d, size);
+        let first = modulo(a * c, size);
+        let second = modulo(modulo(b * c, size) + d, size);
 
         Self(first, second)
     }
@@ -159,7 +191,7 @@ impl LinearFunction {
         let Self(a, b) = self;
         let a_inverse = modular_inverse(a, size);
 
-        Self(a_inverse, mod_floor(-a_inverse * b, size))
+        Self(a_inverse, modulo(-a_inverse * b, size))
     }
 
     /// Fold the given collection of LCF into one single LCF.

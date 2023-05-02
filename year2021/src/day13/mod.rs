@@ -3,9 +3,9 @@ use std::collections::VecDeque;
 use itertools::Itertools;
 use std::collections::HashSet;
 
-use commons::eyre::{eyre, Result};
 use commons::grid::Point;
 use commons::parse::sep_by_empty_lines;
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 13: Transparent Origami";
 
@@ -21,14 +21,14 @@ pub fn run(raw: String) -> Result<()> {
 fn parse(s: &str) -> Result<Origami> {
     let (dots, folds) = sep_by_empty_lines(s)
         .collect_tuple::<(_, _)>()
-        .ok_or_else(|| eyre!("Missing empty line between dots and folds"))?;
+        .ok_or_else(|| err!("Missing empty line between dots and folds"))?;
 
     let dots = dots
         .lines()
         .map(|d| -> Result<Point<i16>> {
             let (x, y) = d
                 .split_once(',')
-                .ok_or_else(|| eyre!("Missing ',' for a point: {}", d))?;
+                .ok_or_else(|| err!("Missing ',' for a point: {}", d))?;
             Ok(Point::new(x.parse()?, y.parse()?))
         })
         .collect::<Result<HashSet<_>>>()?;
@@ -42,7 +42,7 @@ fn parse(s: &str) -> Result<Origami> {
             {
                 Some(("x", x)) => Ok(Fold::Left(x.parse()?)),
                 Some(("y", y)) => Ok(Fold::Up(y.parse()?)),
-                _ => Err(eyre!("Can't parse fold instruction: {}", f)),
+                _ => Err(err!("Can't parse fold instruction: {}", f)),
             }
         })
         .collect::<Result<VecDeque<_>>>()?;

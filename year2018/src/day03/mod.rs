@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 3: No Matter How You Slice It";
 const DIMENSION: usize = 1000;
@@ -20,7 +20,7 @@ pub fn run(raw: String) -> Result<()> {
         "The claim #{} is intact",
         tissue
             .find_intact_claim()
-            .ok_or_else(|| eyre!("Could not find the intact claim on the tissue"))?
+            .ok_or_else(|| err!("Could not find the intact claim on the tissue"))?
             .id
     );
 
@@ -111,7 +111,7 @@ impl FromStr for Claim {
     fn from_str(s: &str) -> Result<Self> {
         // Generate a bad format error
         fn bad_format(s: &str) -> Report {
-            eyre!("Expected #<ID> @ <LEFT>,<TOP>: <WIDTH>x<HEIGHT> for claim, got {s}")
+            err!("Expected #<ID> @ <LEFT>,<TOP>: <WIDTH>x<HEIGHT> for claim, got {s}")
         }
 
         fn parse_int(s: &str) -> Result<i16> {
@@ -123,7 +123,7 @@ impl FromStr for Claim {
             itertools::process_results(s.splitn(2, sep).map(|s| parse_int(s.trim())), |iter| {
                 iter.collect_tuple::<(_, _)>()
             })?
-            .ok_or_else(|| eyre!("Expected <FIRST>{s}<SECOND> for coordinates, got {sep}"))
+            .ok_or_else(|| err!("Expected <FIRST>{s}<SECOND> for coordinates, got {sep}"))
         }
 
         let (id, claim) = s

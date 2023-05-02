@@ -2,9 +2,9 @@ use std::str::FromStr;
 
 use std::collections::{HashMap, HashSet};
 
-use commons::eyre::{eyre, Report, Result};
 use commons::grid::Point;
 use commons::parse::LineSep;
+use commons::{err, Report, Result};
 
 pub const TITLE: &str = "Day 24: Lobby Layout";
 
@@ -149,7 +149,7 @@ impl FromStr for Path {
                 }),
                 _ => None,
             }
-            .ok_or_else(|| eyre!("Unknown direction in line '{}'", line))?;
+            .ok_or_else(|| err!("Unknown direction in line '{}'", line))?;
 
             path.push(direction);
         }

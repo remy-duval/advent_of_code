@@ -3,7 +3,7 @@ use std::collections::BinaryHeap;
 
 use std::collections::HashMap;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 23: Amphipod";
 
@@ -57,14 +57,14 @@ fn parse(s: &str) -> Result<[[Tile; 4]; 2]> {
                 *result = tiles;
                 Ok(acc + 1)
             } else {
-                Err(eyre!("The rooms are too deep in {}", s))
+                Err(err!("The rooms are too deep in {}", s))
             }
         })?;
 
     if count == 2 {
         Ok(done)
     } else {
-        Err(eyre!("The rooms aren't deep enough in {}", s))
+        Err(err!("The rooms aren't deep enough in {}", s))
     }
 }
 

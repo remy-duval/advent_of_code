@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
+use commons::{err, Report, Result, WrapErr};
 use itertools::Itertools;
 use std::collections::HashMap;
 
@@ -176,11 +176,11 @@ impl FromStr for Scan {
             let (x, y) = {
                 if line.starts_with('x') {
                     split_coordinates(line, "x=", "y=").ok_or_else(|| {
-                        eyre!("Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {line}")
+                        err!("Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {line}")
                     })?
                 } else {
                     let (y, x) = split_coordinates(line, "y=", "x=").ok_or_else(|| {
-                        eyre!("Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {line}")
+                        err!("Expected 'AXIS=RANGE, AXIS=RANGE' where AXIS = x/y, but got {line}")
                     })?;
                     (x, y)
                 }

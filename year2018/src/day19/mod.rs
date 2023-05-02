@@ -1,4 +1,4 @@
-use commons::eyre::Result;
+use commons::Result;
 
 use super::instructions::{Int, Program};
 

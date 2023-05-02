@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result, WrapErr};
+use commons::{err, Result, WrapErr};
 
 mod ring;
 
@@ -29,7 +29,7 @@ fn parse(s: &str) -> Result<Rules> {
                 .collect_tuple::<(_, _)>()
         })
         .ok_or_else(|| {
-            eyre!("Expected '<PLAYERS> players; last marble is worth <POINTS> points', got {s}")
+            err!("Expected '<PLAYERS> players; last marble is worth <POINTS> points', got {s}")
         })?;
 
     Ok(Rules {

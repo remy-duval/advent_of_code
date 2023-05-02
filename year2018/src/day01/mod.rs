@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use commons::eyre::Result;
 use commons::parse::LineSep;
+use commons::Result;
 
 pub const TITLE: &str = "Day 1: Chronal Calibration";
 

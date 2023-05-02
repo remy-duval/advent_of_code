@@ -1,5 +1,5 @@
-use commons::eyre::Result;
 use commons::grid::Point;
+use commons::Result;
 
 use super::int_code::{IntCodeInput, Processor};
 

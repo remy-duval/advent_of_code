@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
-use commons::eyre::Result;
 use commons::parse::sep_by_empty_lines;
+use commons::Result;
 
 pub const TITLE: &str = "Day 4: Passport Processing";
 

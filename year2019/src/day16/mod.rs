@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 16: Flawed Frequency Transmission";
 const REPEAT: usize = 10000;
@@ -28,7 +28,7 @@ fn parse(s: &str) -> Result<Vec<i32>> {
         .map(|c| c.to_digit(10).and_then(|d| d.try_into().ok()))
         .collect::<Option<_>>();
 
-    data.ok_or_else(|| eyre!("Error parsing the input !"))
+    data.ok_or_else(|| err!("Error parsing the input !"))
 }
 
 /// Applies the FFT using the algorithm given. It is correct but slow.

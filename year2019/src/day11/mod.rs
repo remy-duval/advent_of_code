@@ -1,8 +1,8 @@
 use itertools::Itertools;
 use std::collections::HashMap;
 
-use commons::eyre::Result;
 use commons::grid::{Direction, Point};
+use commons::Result;
 
 use super::int_code::{IntCodeError, IntCodeInput, Processor, Status};
 

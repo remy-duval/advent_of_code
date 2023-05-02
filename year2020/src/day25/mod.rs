@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result, WrapErr};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 25: Combo Breaker";
 
@@ -37,7 +37,7 @@ fn parse(s: &str) -> Result<Keys> {
     )? {
         Ok(Keys { card, door })
     } else {
-        Err(eyre!("Wanted exactly two keys, one each line"))
+        Err(err!("Wanted exactly two keys, one each line"))
     }
 }
 

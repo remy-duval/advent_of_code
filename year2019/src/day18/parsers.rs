@@ -6,8 +6,8 @@ use std::fmt::{Display, Formatter};
 use itertools::Itertools;
 use std::collections::HashMap;
 
-use commons::eyre::{eyre, Report, Result};
 use commons::grid::{Direction, Point};
+use commons::{err, Report, Result};
 
 use super::{HallWay, Keys};
 
@@ -256,7 +256,7 @@ impl TryFrom<char> for Tile {
             '.' | '@' => Ok(Tile::Empty(c)),
             c if c.is_ascii_uppercase() => Ok(Tile::Door(c)),
             c if c.is_ascii_lowercase() => Ok(Tile::Key(c)),
-            _ => Err(eyre!("Unknown tile {}", c)),
+            _ => Err(err!("Unknown tile {}", c)),
         }
     }
 }

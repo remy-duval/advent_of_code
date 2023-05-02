@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 18: Operation Order";
 
@@ -75,7 +75,7 @@ impl Operation {
                     } else if let Some(res) = op.binary_op(operands.pop().zip(operands.pop())) {
                         operands.push(res);
                     } else {
-                        return Err(eyre!("Bad operator call {:?}", op));
+                        return Err(err!("Bad operator call {:?}", op));
                     }
                 }
 
@@ -105,7 +105,7 @@ impl Operation {
         if operands.len() == 1 {
             Ok(operands[0])
         } else {
-            Err(eyre!(
+            Err(err!(
                 "Not exactly 1 element at the end in the operands: {:?}",
                 operands
             ))
@@ -186,7 +186,7 @@ impl Token {
                 Some('*') => Ok((Token::Operator(Operator::Mul), &current[1..])),
                 Some('(') => Ok((Token::Operator(Operator::OpenParen), &current[1..])),
                 Some(')') => Ok((Token::Operator(Operator::ClosingParen), &current[1..])),
-                _ => Err(eyre!(
+                _ => Err(err!(
                     "Expected token to be number, +, *, ( or ), but was {}",
                     current
                 )),

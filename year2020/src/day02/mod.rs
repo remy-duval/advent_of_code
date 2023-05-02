@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 2: Password Philosophy";
 
@@ -80,7 +80,7 @@ impl FromStr for Password {
         }
 
         fn missing() -> Report {
-            eyre!("Part of the password is missing, the format is 'int-int char: password'")
+            err!("Part of the password is missing, the format is 'int-int char: password'")
         }
 
         let (pol, pwd) = s.split_once(':').ok_or_else(missing)?;

@@ -1,6 +1,6 @@
 use std::collections::{hash_map::Entry, HashMap, HashSet};
 
-use commons::eyre::Result;
+use commons::Result;
 use instructions::{Int, OpCode};
 use parse::Sample;
 

@@ -3,8 +3,8 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 
 use std::collections::HashMap;
 
-use commons::eyre::Result;
 use commons::grid::Direction;
+use commons::Result;
 
 use crate::points::Point;
 

@@ -1,4 +1,4 @@
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 3: Binary Diagnostic";
 
@@ -109,7 +109,7 @@ fn rating(data: &Binaries, oxygen: bool) -> Result<Binary> {
         }
     }
 
-    Err(eyre!(
+    Err(err!(
         "Rating not found after sieving, there remains the following {:?}",
         remaining
     ))

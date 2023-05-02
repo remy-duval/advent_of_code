@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
+use commons::{err, Report, Result, WrapErr};
 use itertools::Itertools;
 use std::collections::HashMap;
 
@@ -84,7 +84,7 @@ impl FromStr for Register {
                     .collect_tuple::<(_, _, _, _)>()
             })
             .ok_or_else(|| {
-                eyre!("Expected [A, B, C, D] for a register, where A, B, C, D integers, got: {s}")
+                err!("Expected [A, B, C, D] for a register, where A, B, C, D integers, got: {s}")
             })?;
 
         Ok(Self([first?, second?, third?, fourth?]))
@@ -100,7 +100,7 @@ impl FromStr for Instruction {
             .map(parse_element)
             .collect_tuple::<(_, _, _, _)>()
             .ok_or_else(|| {
-                eyre!("Expected A, B, C, D for an instruction, where A, B, C, D integers, got: {s}")
+                err!("Expected A, B, C, D for an instruction, where A, B, C, D integers, got: {s}")
             })?;
 
         Ok(Self {
@@ -116,17 +116,17 @@ impl FromStr for Sample {
     type Err = Report;
 
     fn from_str(s: &str) -> Result<Self> {
-        let (before, instruction, after) =
-            s.lines().collect_tuple::<(_, _, _)>().ok_or_else(|| {
-                eyre!("Expected register instruction register for a sample, got: {s}")
-            })?;
+        let (before, instruction, after) = s
+            .lines()
+            .collect_tuple::<(_, _, _)>()
+            .ok_or_else(|| err!("Expected register instruction register for a sample, got: {s}"))?;
 
-        let before = before.strip_prefix("Before:").ok_or_else(|| {
-            eyre!("Expected register instruction register for a sample, got: {s}")
-        })?;
-        let after = after.strip_prefix("After:").ok_or_else(|| {
-            eyre!("Expected register instruction register for a sample, got: {s}")
-        })?;
+        let before = before
+            .strip_prefix("Before:")
+            .ok_or_else(|| err!("Expected register instruction register for a sample, got: {s}"))?;
+        let after = after
+            .strip_prefix("After:")
+            .ok_or_else(|| err!("Expected register instruction register for a sample, got: {s}"))?;
 
         Ok(Self {
             before: before.trim().parse()?,

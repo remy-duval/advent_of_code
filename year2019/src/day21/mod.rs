@@ -34,7 +34,7 @@
 
 use std::io::{stdout, BufWriter, Write};
 
-use commons::eyre::Result;
+use commons::Result;
 
 use super::int_code::{IntCodeInput, Processor, Status};
 

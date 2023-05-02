@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
+use commons::{err, Report, Result, WrapErr};
 use itertools::{process_results, Itertools};
 
 /// The type of the dimensions of the point
@@ -60,7 +60,7 @@ impl FromStr for Bot {
         }
 
         let (pos, radius) =
-            split(s).ok_or_else(|| eyre!("Expected pos=POINT, r=RADIUS, got: {s}"))?;
+            split(s).ok_or_else(|| err!("Expected pos=POINT, r=RADIUS, got: {s}"))?;
         let r = radius
             .parse::<Dimension>()
             .wrap_err_with(|| format!("Couldn't parse the radius of the bot: {radius}"))?;
@@ -91,7 +91,7 @@ impl FromStr for Point3 {
         }
 
         let (x, y, z) =
-            inner(s).unwrap_or_else(|| Err(eyre!("Expected <X, Y, Z> for a point, got: {s}")))?;
+            inner(s).unwrap_or_else(|| Err(err!("Expected <X, Y, Z> for a point, got: {s}")))?;
         Ok(Self { x, y, z })
     }
 }

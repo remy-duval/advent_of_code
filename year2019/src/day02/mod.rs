@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::Result;
+use commons::error::Result;
 
 use super::int_code;
 

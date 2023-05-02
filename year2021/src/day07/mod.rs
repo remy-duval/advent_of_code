@@ -1,5 +1,5 @@
-use commons::eyre::Result;
 use commons::parse::CommaSep;
+use commons::Result;
 
 pub const TITLE: &str = "Day 7: The Treachery of Whales";
 

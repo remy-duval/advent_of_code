@@ -1,5 +1,5 @@
-use commons::eyre::{bail, eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 8: Seven Segment Search";
 
@@ -49,7 +49,7 @@ fn second_part(outputs: &[Outputs]) -> Result<usize> {
             let number = digits
                 .iter()
                 .position(|x| x == next)
-                .ok_or_else(|| eyre!("Missing {:?} in {:?}", next, digits))?;
+                .ok_or_else(|| err!("Missing {:?} in {:?}", next, digits))?;
 
             Ok(acc * 10 + number)
         })?;
@@ -81,7 +81,7 @@ fn resolve(output: &Outputs) -> Result<[WireBitSet; DIGITS]> {
         }
     }
 
-    Err(eyre!("Exhausted all possibilities for {:?}", output))
+    Err(err!("Exhausted all possibilities for {:?}", output))
 }
 
 /// The puzzle input
@@ -285,7 +285,7 @@ impl std::str::FromStr for WireBitSet {
                 'e' => 1 << 4,
                 'f' => 1 << 5,
                 'g' => 1 << 6,
-                _ => bail!("Bad number wire {}", c),
+                _ => return Err(err!("Bad number wire {c}")),
             };
         }
 
@@ -306,7 +306,7 @@ impl std::str::FromStr for Outputs {
             Ok(())
         }
 
-        let (s, o) = s.split_once('|').ok_or_else(|| eyre!("Missing '|' sep"))?;
+        let (s, o) = s.split_once('|').ok_or_else(|| err!("Missing '|' sep"))?;
         let mut unknown: [WireBitSet; DIGITS] = Default::default();
         parse_into(s, &mut unknown)?;
         let mut outputs: [WireBitSet; OUTPUT] = Default::default();

@@ -1,8 +1,8 @@
 use itertools::Itertools;
 use std::collections::HashMap;
 
-use commons::eyre::{ensure, eyre, Result};
 use commons::parse::sep_by_empty_lines;
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 14: Extended Polymerization";
 
@@ -21,12 +21,12 @@ fn parse(s: &str) -> Result<Polymer> {
     fn alpha_index(b: u8) -> Result<u8> {
         b.to_ascii_uppercase()
             .checked_sub(b'A')
-            .ok_or_else(|| eyre!("Bad character {}", b))
+            .ok_or_else(|| err!("Bad character {}", b))
     }
 
     let (initial, rules) = sep_by_empty_lines(s)
         .collect_tuple::<(_, _)>()
-        .ok_or_else(|| eyre!("Missing empty line between polymer and rules in {}", s))?;
+        .ok_or_else(|| err!("Missing empty line between polymer and rules in {}", s))?;
 
     let initial = initial.bytes().map(alpha_index).collect::<Result<_>>()?;
     let rules = rules
@@ -34,11 +34,15 @@ fn parse(s: &str) -> Result<Polymer> {
         .map(|r| -> Result<_> {
             let (from, to) = r
                 .split_once("->")
-                .ok_or_else(|| eyre!("Missing '->' in {}", r))?;
+                .ok_or_else(|| err!("Missing '->' in {}", r))?;
             let from = from.trim().as_bytes();
             let to = to.trim().as_bytes();
-            ensure!(from.len() == 2, "Not 2 elements left of {}", r);
-            ensure!(to.len() == 1, "Not 1 element right of {}", r);
+            if from.len() != 2 {
+                return Err(err!("Not 2 elements left of {r}"));
+            }
+            if to.len() != 1 {
+                return Err(err!("Not 1 element right of {r}"));
+            }
             Ok((
                 (alpha_index(from[0])?, alpha_index(from[1])?),
                 alpha_index(to[0])?,

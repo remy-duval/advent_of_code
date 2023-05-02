@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use std::collections::HashMap;
 
-use commons::eyre::Result;
+use commons::Result;
 
 mod events;
 

@@ -3,8 +3,8 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use itertools::Itertools;
 use std::collections::HashSet;
 
-use commons::eyre::{eyre, Result, WrapErr};
 use commons::grid::Point;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 10: The Stars Align";
 
@@ -127,7 +127,7 @@ impl Light {
 }
 
 impl std::str::FromStr for Light {
-    type Err = commons::eyre::Report;
+    type Err = Report;
 
     fn from_str(s: &str) -> Result<Self> {
         fn parse_int(int: &str) -> Result<i64> {
@@ -146,7 +146,7 @@ impl std::str::FromStr for Light {
                         .map(|coord| parse_int(coord.trim()))
                         .collect_tuple::<(_, _)>()
                 })
-                .ok_or_else(|| eyre!("Bad format for point '<X, Y>>', got {point}"))?;
+                .ok_or_else(|| err!("Bad format for point '<X, Y>>', got {point}"))?;
 
             Ok(Point::new(x?, y?))
         }
@@ -160,7 +160,7 @@ impl std::str::FromStr for Light {
                     .collect_tuple::<(_, _)>()
             })
             .ok_or_else(|| {
-                eyre!(
+                err!(
                     "Bad format for light 'position=POINT velocity=POINT', got {}",
                     s
                 )

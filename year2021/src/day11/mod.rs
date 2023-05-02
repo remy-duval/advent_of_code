@@ -1,4 +1,4 @@
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 11: Dumbo Octopus";
 
@@ -16,7 +16,7 @@ fn parse(s: &str) -> Result<[u8; 100]> {
         .take(grid.len())
         .enumerate()
         .try_for_each(|(index, c)| -> Result<()> {
-            let number = c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c))?;
+            let number = c.to_digit(10).ok_or_else(|| err!("Bad digit {}", c))?;
             grid[index] = number as u8;
             Ok(())
         })?;

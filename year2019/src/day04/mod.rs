@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 4: Secure Container";
 
@@ -20,12 +20,12 @@ fn parse(s: &str) -> Result<(i32, i32)> {
         let from: i32 = a.parse()?;
         let to: i32 = b.parse()?;
         if from >= to {
-            Err(eyre!("{} >= {}", from, to))
+            Err(err!("{} >= {}", from, to))
         } else {
             Ok((from, to))
         }
     } else {
-        Err(eyre!("Didn't find the lower and higher bound in {}", s))
+        Err(err!("Didn't find the lower and higher bound in {}", s))
     }
 }
 

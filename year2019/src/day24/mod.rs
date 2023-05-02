@@ -5,7 +5,7 @@ use std::{
 
 use itertools::Itertools;
 
-use commons::eyre::Result;
+use commons::Result;
 
 pub const TITLE: &str = "Day 24: Planet of Discord";
 

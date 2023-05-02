@@ -1,4 +1,4 @@
-use commons::eyre::{eyre, Report, Result, WrapErr};
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 24: Arithmetic Logic Unit";
 
@@ -63,7 +63,7 @@ fn search(s: &str) -> Result<(i64, i64)> {
         }
         Ok((min, max))
     } else {
-        Err(eyre!("Can't find a solution to have z equals to 0"))
+        Err(err!("Can't find a solution to have z equals to 0"))
     }
 }
 
@@ -82,7 +82,7 @@ impl std::str::FromStr for Block {
             if line.trim() == expected {
                 Ok(())
             } else {
-                Err(eyre!("Expected '{}', got '{}'", expected, line))
+                Err(err!("Expected '{}', got '{}'", expected, line))
             }
         }
 
@@ -90,7 +90,7 @@ impl std::str::FromStr for Block {
             *into = line
                 .trim()
                 .strip_prefix(prefix)
-                .ok_or_else(|| eyre!("Missing '{prefix}' prefix"))
+                .ok_or_else(|| err!("Missing '{prefix}' prefix"))
                 .and_then(|s| Ok(s.trim().parse::<i32>()?))
                 .wrap_err_with(|| format!("Expected '{prefix} <NUMBER>', got '{line}'"))?;
 

@@ -2,8 +2,8 @@ use std::collections::VecDeque;
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result};
 use commons::CLEAR_COMMAND;
+use commons::{err, Result};
 
 use super::int_code::{IntCodeInput, Processor};
 
@@ -32,7 +32,7 @@ pub fn run(raw: String) -> Result<()> {
                     println!("Finding the key code took {}s", elapsed.as_secs_f64());
                     Ok(())
                 } else {
-                    Err(eyre!("Could not find the key code at the end"))
+                    Err(err!("Could not find the key code at the end"))
                 };
             }
             _ => println!("Unrecognized : {line}"),

@@ -1,4 +1,4 @@
-use commons::eyre::{eyre, Result, WrapErr};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 4: Giant Squid";
 
@@ -32,7 +32,7 @@ fn parse(s: &str) -> Result<Bingo> {
             .collect::<Result<_>>()?;
         Ok(Bingo { draws, boards })
     } else {
-        Err(eyre!("Missing draws"))
+        Err(err!("Missing draws"))
     }
 }
 
@@ -66,7 +66,7 @@ impl Bingo {
                 })
         });
 
-        first.ok_or_else(|| eyre!("No board has won after all draws !"))
+        first.ok_or_else(|| err!("No board has won after all draws !"))
     }
 
     /// Find the score of the last board to win in the draw
@@ -93,7 +93,7 @@ impl Bingo {
             }
         });
 
-        last.ok_or_else(|| eyre!("No board has won after all draws !"))
+        last.ok_or_else(|| err!("No board has won after all draws !"))
     }
 }
 

@@ -140,13 +140,18 @@ impl Indices {
         }
     }
 
-    /// Move a point nth steps in a direction (negative to go backward)
-    fn move_point(&self, point: (isize, isize), n: isize) -> (isize, isize) {
-        let x = point.0 + n;
-        match x.div_euclid(self.width) {
-            0 => (x, point.1),
-            n => (x - n * self.width, point.1 + n),
+    /// Move a point nth steps (negative to go backward)
+    fn move_point(&self, (mut x, mut y): (isize, isize), n: isize) -> (isize, isize) {
+        x += n;
+        while x < 0 {
+            x += self.width;
+            y -= 1;
         }
+        while x >= self.width {
+            x -= self.width;
+            y += 1;
+        }
+        (x, y)
     }
 }
 

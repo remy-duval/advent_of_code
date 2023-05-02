@@ -2,8 +2,8 @@ use std::ops::Add;
 
 use std::collections::{HashMap, HashSet};
 
-use commons::eyre::Result;
 use commons::grid::Point;
+use commons::Result;
 
 pub const TITLE: &str = "Day 20: A Regular Map";
 

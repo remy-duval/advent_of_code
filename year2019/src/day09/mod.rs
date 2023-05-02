@@ -1,4 +1,4 @@
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 use super::int_code::{IntCodeInput, Processor};
 
@@ -23,7 +23,7 @@ pub fn run(raw: String) -> Result<()> {
 
     let mut boost_process = Processor::with_initial_inputs(&memory, &[2]);
     match boost_process.read_next() {
-        Err(status) => Err(eyre!("BOOST failed ! (Status was {status:?})")),
+        Err(status) => Err(err!("BOOST failed ! (Status was {status:?})")),
         Ok(coordinates) => {
             println!("The BOOST program coordinates were {coordinates}");
             Ok(())

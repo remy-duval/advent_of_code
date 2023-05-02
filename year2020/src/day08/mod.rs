@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use std::collections::HashSet;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 8: Handheld Halting";
 
@@ -151,10 +151,10 @@ impl FromStr for Operation {
                 "acc" => Ok(Operation::Acc(parse_arg(arg)?)),
                 "jmp" => Ok(Operation::Jmp(parse_arg(arg)?)),
                 "nop" => Ok(Operation::Noop(parse_arg(arg)?)),
-                _ => Err(eyre!("Unknown operation name '{op}'")),
+                _ => Err(err!("Unknown operation name '{op}'")),
             }
         } else {
-            Err(eyre!("The operation is not formatted correctly '{s}'"))
+            Err(err!("The operation is not formatted correctly '{s}'"))
         }
     }
 }

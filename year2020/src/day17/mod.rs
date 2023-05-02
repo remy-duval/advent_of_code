@@ -1,7 +1,7 @@
 use itertools::iproduct;
 use std::collections::{HashMap, HashSet};
 
-use commons::eyre::Result;
+use commons::Result;
 
 pub const TITLE: &str = "Day 17: Conway Cubes";
 

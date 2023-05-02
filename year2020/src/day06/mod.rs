@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use std::collections::HashSet;
 
-use commons::eyre::Result;
+use commons::Result;
 
 pub const TITLE: &str = "Day 6: Custom Customs";
 

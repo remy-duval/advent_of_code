@@ -1,13 +1,13 @@
 use std::collections::HashSet;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
-pub const TITLE: &str = "Day 1: Report Repair";
+pub const TITLE: &str = "Day 1: AdventOfCodeError Repair";
 
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let (first, second) = first_part(&data.data)
-        .ok_or_else(|| eyre!("No 2020 2-elements sum found in {:?}", data.data))?;
+        .ok_or_else(|| err!("No 2020 2-elements sum found in {:?}", data.data))?;
     println!(
         "2 expenses that sum to 2020: {a} * {b} = {product}",
         a = first,
@@ -16,7 +16,7 @@ pub fn run(raw: String) -> Result<()> {
     );
 
     let (first, second, third) = second_part(&data.data)
-        .ok_or_else(|| eyre!("No 2020 3-elements sum found in {:?}", data.data))?;
+        .ok_or_else(|| err!("No 2020 3-elements sum found in {:?}", data.data))?;
 
     println!(
         "3 expenses that sum to 2020: {a} * {b} * {c} = {product}",

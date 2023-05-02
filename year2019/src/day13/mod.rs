@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use itertools::Itertools;
 
-use commons::eyre::Result;
+use commons::Result;
 use commons::{CLEAR_COMMAND, TO_TOP};
 
 use super::int_code::{IntCodeInput, Processor, Status};

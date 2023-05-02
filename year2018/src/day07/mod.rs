@@ -3,8 +3,8 @@ use std::str::FromStr;
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Report, Result};
 use commons::parse::LineSep;
+use commons::{err, Report, Result};
 
 pub const TITLE: &str = "Day 7: The Sum of Its Parts";
 
@@ -133,7 +133,7 @@ impl FromStr for Step {
                     .filter_map(|s| s.trim().chars().next())
                     .collect_tuple::<(_, _)>()
             })
-            .ok_or_else(|| eyre!("Bad format for a step, got {}", s))?;
+            .ok_or_else(|| err!("Bad format for a step, got {}", s))?;
 
         Ok(Self { step, requires })
     }

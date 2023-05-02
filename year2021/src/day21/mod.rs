@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 21: Dirac Dice";
 
@@ -19,7 +19,7 @@ fn parse(s: &str) -> Result<[u8; 2]> {
         .filter_map(|line| line.trim().split_once("position:"))
         .map(|(_, pos)| pos.trim().parse().map(|i: u8| i - 1))
         .collect_tuple::<(_, _)>()
-        .ok_or_else(|| eyre!("Expected 2 players in '{}'", s))?;
+        .ok_or_else(|| err!("Expected 2 players in '{}'", s))?;
 
     Ok([a?, b?])
 }

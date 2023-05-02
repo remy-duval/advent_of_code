@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 use super::instructions::{Int, Program};
 
@@ -10,11 +10,11 @@ pub fn run(raw: String) -> Result<()> {
     let mut program = parse(&raw)?;
     println!(
         "The program will halt after the fewest cycles for input {}",
-        first_exit_value(&mut program)?.ok_or_else(|| eyre!("No exit values were found"))?
+        first_exit_value(&mut program)?.ok_or_else(|| err!("No exit values were found"))?
     );
     println!(
         "The program will halt after the most cycles for input {}",
-        last_exit_value(&mut program)?.ok_or_else(|| eyre!("No exit values were found"))?
+        last_exit_value(&mut program)?.ok_or_else(|| err!("No exit values were found"))?
     );
 
     Ok(())

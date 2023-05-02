@@ -1,7 +1,7 @@
 use std::ops::Add;
 
-use commons::eyre::Result;
 use commons::grid::Point;
+use commons::Result;
 
 mod parsers;
 mod shortest_path;

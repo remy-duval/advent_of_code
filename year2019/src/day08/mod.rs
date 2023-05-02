@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display, Formatter};
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 8: Space Image Format";
 const WIDTH: usize = 25;
@@ -37,7 +37,7 @@ fn parse(s: &str) -> Result<Image> {
 
     Ok(Image::new(match layers {
         Some(ok) => ok,
-        None => return Err(eyre!("Could not build the Image.")),
+        None => return Err(err!("Could not build the Image.")),
     }))
 }
 

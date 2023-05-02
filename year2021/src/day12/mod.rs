@@ -1,4 +1,4 @@
-use commons::eyre::{ensure, eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 12: Passage Pathing";
 
@@ -32,14 +32,14 @@ fn parse(s: &str) -> Result<Paths> {
             caves[to_id].paths.push(from_id);
             Ok(())
         } else {
-            Err(eyre!("Missing delimiter '-'"))
+            Err(err!("Missing delimiter '-'"))
         }
     })?;
 
     let start = caves.iter().position(|c| c.id == "start");
-    let start = start.ok_or_else(|| eyre!("Missing start cave"))?;
+    let start = start.ok_or_else(|| err!("Missing start cave"))?;
     let end = caves.iter().position(|c| c.id == "end");
-    let end = end.ok_or_else(|| eyre!("Missing end cave"))?;
+    let end = end.ok_or_else(|| err!("Missing end cave"))?;
     Ok(Paths { start, end, caves })
 }
 
@@ -54,7 +54,9 @@ fn second_part(paths: &Paths) -> Result<usize> {
 /// Count all possible paths from "start" to "end" that don't visit small caves twice.
 /// If `can_visit_one_small_cave_twice`, then at most once small cave can be visited 2 times.
 fn count_paths(paths: &Paths, can_visit_small_twice: bool) -> Result<usize> {
-    ensure!(paths.caves.len() <= 32, "too many caves (> 32)");
+    if paths.caves.len() > 32 {
+        return Err(err!("too many caves (> 32)"));
+    }
     // A path under construction
     struct Current {
         next: usize,                 // The next path to take

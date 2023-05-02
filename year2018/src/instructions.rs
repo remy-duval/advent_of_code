@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
+use commons::{err, Report, Result, WrapErr};
 use itertools::Itertools;
 
 /// The type of an integer in the system
@@ -52,7 +52,7 @@ impl Program {
         self.registers.iter_mut().for_each(|reg| *reg = 0);
     }
 
-    /// Report an error during the program execution
+    /// AdventOfCodeError an error during the program execution
     fn error(&self) -> String {
         format!(
             "The program failed on {line}.\n- registers: {reg:?}\n- inst: {inst}",
@@ -164,19 +164,19 @@ fn equal(a: Int, b: Int) -> Int {
 
 /// Try to convert an [Int](Int) into a [usize](usize) for indexing purpose
 pub fn index(idx: Int) -> Result<usize> {
-    usize::try_from(idx).map_err(|_| eyre!("{} is out of bounds for a register", idx))
+    usize::try_from(idx).map_err(|_| err!("{} is out of bounds for a register", idx))
 }
 
 /// Get the `idx`th element in the registers
 fn get(reg: &[Int], idx: Int) -> Result<&Int> {
     reg.get(index(idx)?)
-        .ok_or_else(|| eyre!("{} is out of bounds for a register", idx))
+        .ok_or_else(|| err!("{} is out of bounds for a register", idx))
 }
 
 /// Get the `idx`th element in the registers, mutable version
 fn get_mut(reg: &mut [Int], idx: Int) -> Result<&mut Int> {
     reg.get_mut(index(idx)?)
-        .ok_or_else(|| eyre!("{} is out of bounds for a register", idx))
+        .ok_or_else(|| err!("{} is out of bounds for a register", idx))
 }
 
 impl FromStr for Program {
@@ -193,7 +193,7 @@ impl FromStr for Program {
                             ip_index = ip;
                             None
                         }
-                        Err(_) => Some(Err(eyre!("Could not parse Instruction pointer {ip}"))),
+                        Err(_) => Some(Err(err!("Could not parse Instruction pointer {ip}"))),
                     }
                 } else {
                     Some(line.parse())
@@ -224,7 +224,7 @@ impl FromStr for Instruction {
             .split_whitespace()
             .filter(|s| !s.is_empty())
             .collect_tuple::<(_, _, _, _)>()
-            .ok_or_else(|| eyre!("Bad format for a instruction: {s} (expected 'CODE A B C')"))?;
+            .ok_or_else(|| err!("Bad format for a instruction: {s} (expected 'CODE A B C')"))?;
 
         Ok(Self {
             code: code.parse()?,
@@ -256,7 +256,7 @@ impl FromStr for OpCode {
             "eqir" => Ok(Self::EqIR),
             "eqri" => Ok(Self::EqRI),
             "eqrr" => Ok(Self::EqRR),
-            other => Err(eyre!("Unknown op code {other}")),
+            other => Err(err!("Unknown op code {other}")),
         }
     }
 }

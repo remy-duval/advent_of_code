@@ -1,7 +1,7 @@
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 use std::collections::HashMap;
 
-use commons::num::integer::lcm;
+use commons::math::lcm;
 
 pub const TITLE: &str = "Day 12: The N-Body Problem";
 const DIMENSIONS: usize = 3;
@@ -25,7 +25,7 @@ fn parse(s: &str) -> Result<Moons> {
     let mut lines = s.lines();
     let mut next = move || match lines.next() {
         Some(line) => Ok(line),
-        _ => Err(eyre!("Could not get one of the moon description")),
+        _ => Err(err!("Could not get one of the moon description")),
     };
 
     let moons = [
@@ -204,7 +204,7 @@ impl Moons {
 
         match (values.get(&'x'), values.get(&'y'), values.get(&'z')) {
             (Some(x), Some(y), Some(z)) => Ok([*x, *y, *z]),
-            _ => Err(eyre!("Could not parse x, y or z from the moon: {}", data)),
+            _ => Err(err!("Could not parse x, y or z from the moon: {}", data)),
         }
     }
 }

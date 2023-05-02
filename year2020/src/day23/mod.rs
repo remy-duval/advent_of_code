@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 23: Crab Cups";
 
@@ -29,7 +29,7 @@ fn parse(s: &str) -> Result<Vec<usize>> {
         .chars()
         .map(|c| {
             c.to_digit(10).map_or_else(
-                || Err(eyre!("'{}' is not a valid base 10 digit", c)),
+                || Err(err!("'{}' is not a valid base 10 digit", c)),
                 |ok| Ok(ok as usize - 1),
             )
         })

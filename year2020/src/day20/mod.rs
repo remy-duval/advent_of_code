@@ -1,9 +1,9 @@
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use itertools::Itertools;
-use std::collections::HashMap;
 
-use commons::eyre::{bail, eyre, Result, WrapErr};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 20: Jurassic Jigsaw";
 const IMAGE_WIDTH: usize = 12;
@@ -16,13 +16,12 @@ const SEA_MONSTER_LEN: usize = SEA_MONSTER[0].len();
 
 pub fn run(raw: String) -> Result<()> {
     let tiles = parse(&raw)?;
-    let image =
-        match_tiles(tiles, IMAGE_WIDTH).ok_or_else(|| eyre!("Could not build the image"))?;
+    let image = match_tiles(tiles, IMAGE_WIDTH).ok_or_else(|| err!("Could not build the image"))?;
 
     println!(
         "The corners ID product is {}",
         first_part(&image, IMAGE_WIDTH)
-            .ok_or_else(|| eyre!("Could not find the corners of the image"))?
+            .ok_or_else(|| err!("Could not find the corners of the image"))?
     );
 
     println!(
@@ -40,7 +39,7 @@ fn parse(s: &str) -> Result<Vec<Tile>> {
                 .next()
                 .and_then(|line| line.trim().strip_prefix("Tile "))
                 .and_then(|line| line.strip_suffix(':'))
-                .ok_or_else(|| eyre!("Did not find the ID field of a tile in:\n{s}"))?;
+                .ok_or_else(|| err!("Did not find the ID field of a tile in:\n{s}"))?;
 
             let id: u16 = id
                 .parse()
@@ -51,9 +50,9 @@ fn parse(s: &str) -> Result<Vec<Tile>> {
                     match data.get_mut(y).and_then(|row| row.get_mut(x)) {
                         Some(current) => *current = char == '#',
                         None =>
-                            bail!(
+                            return Err(err!(
                                 "Too many elements for a tile (expected 10 * 10, got ({x}, {y})) in a tile line:\n{s}"
-                            ),
+                            )),
                     };
                 }
             }

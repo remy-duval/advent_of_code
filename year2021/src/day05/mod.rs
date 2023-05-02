@@ -1,8 +1,9 @@
 use std::collections::{hash_map::Entry, HashMap};
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::grid::Point;
+use commons::math::{gcd, SignedInteger};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 5: Hydrothermal Venture";
 
@@ -67,11 +68,11 @@ impl Segment {
     /// An iterator over all the points of this segment
     fn points(&self) -> impl Iterator<Item = Point<i16>> {
         let (step, count) = match self.to - self.from {
-            Point { x: 0, y } => (Point::new(0, y.signum()), y.unsigned_abs() as usize),
-            Point { x, y: 0 } => (Point::new(x.signum(), 0), x.unsigned_abs() as usize),
+            Point { x: 0, y } => (Point::new(0, y.sign()), y.unsigned_abs() as usize),
+            Point { x, y: 0 } => (Point::new(x.sign(), 0), x.unsigned_abs() as usize),
             Point { x, y } => {
                 // Always positive
-                let steps = commons::num::integer::gcd(x, y);
+                let steps = gcd(x, y);
                 (Point::new(x / steps, y / steps), steps as usize)
             }
         };
@@ -85,7 +86,7 @@ impl std::str::FromStr for Segment {
 
     fn from_str(s: &str) -> Result<Self> {
         fn point(s: &str) -> Result<Point<i16>> {
-            let (x, y) = s.split_once(',').ok_or_else(|| eyre!("Bad point {}", s))?;
+            let (x, y) = s.split_once(',').ok_or_else(|| err!("Bad point {}", s))?;
             let x = x.parse().wrap_err("Bad x coordinate")?;
             let y = y.parse().wrap_err("Bad y coordinate")?;
             Ok(Point::new(x, y))
@@ -93,7 +94,7 @@ impl std::str::FromStr for Segment {
 
         let (from, to) = s
             .split_once("->")
-            .ok_or_else(|| eyre!("Missing '->' separator: {}", s))?;
+            .ok_or_else(|| err!("Missing '->' separator: {}", s))?;
 
         Ok(Self {
             from: point(from.trim()).wrap_err_with(|| from.to_owned())?,

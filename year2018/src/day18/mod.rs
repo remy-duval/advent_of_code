@@ -1,9 +1,8 @@
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
-use commons::eyre::{bail, eyre, Report, Result};
 use commons::grid::Grid;
-use commons::num::integer::Integer;
+use commons::{err, Report, Result};
 
 pub const TITLE: &str = "Day 18: Settlers of The North Pole";
 
@@ -14,7 +13,7 @@ pub fn run(raw: String) -> Result<()> {
     println!("After 10 minutes: {trees} trees and {lumberyard} lumberyards: {first} resources");
 
     let second =
-        second_part(area).ok_or_else(|| eyre!("Could not find the period of the system"))?;
+        second_part(area).ok_or_else(|| err!("Could not find the period of the system"))?;
     println!("After one billion minutes: {second} resources");
 
     Ok(())
@@ -65,7 +64,8 @@ fn second_part(mut area: Area) -> Option<isize> {
     let (period, from) = find_period(&resources)?;
     let rest = BILLION - from - STABILIZE;
     let result: isize = {
-        let (periods, remainder) = rest.div_mod_floor(&period.len());
+        let periods = rest / period.len();
+        let remainder = rest % period.len();
         initial_resources
             + resources.iter().take(from).sum::<isize>() // The part before the period starts
             + period.iter().sum::<isize>() * periods as isize // The total of the following periods
@@ -164,12 +164,12 @@ impl FromStr for Area {
             } else if next_width == width {
                 Ok((width, height + 1))
             } else {
-                bail!(
+                return Err(err!(
                     "Line n°{line} is of width {actual} instead of expected {expected}",
                     line = height + 1,
                     expected = width,
                     actual = next_width,
-                );
+                ));
             }
         })?;
 
@@ -178,7 +178,7 @@ impl FromStr for Area {
             line.chars()
                 .enumerate()
                 .try_for_each(|(x, c)| match Tile::from_char(c) {
-                    None => Err(eyre!("Tile {c} in line n°{y} is not '.', '|' or '#'")),
+                    None => Err(err!("Tile {c} in line n°{y} is not '.', '|' or '#'")),
                     Some(tile) => {
                         grid[(x as isize, y as isize)] = tile;
                         Ok(())

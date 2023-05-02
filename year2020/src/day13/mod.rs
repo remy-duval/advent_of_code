@@ -1,13 +1,13 @@
 use itertools::Itertools;
 
-use commons::eyre::{ensure, eyre, Result, WrapErr};
-use commons::num::integer::{ExtendedGcd, Integer};
+use commons::math::{extended_gcd, ExtendedGcd, Integer};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 13: Shuttle Search";
 
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
-    let (bus, time) = earliest(&data).ok_or_else(|| eyre!("No bus to find the earliest one"))?;
+    let (bus, time) = earliest(&data).ok_or_else(|| err!("No bus to find the earliest one"))?;
 
     println!(
         "The earliest bus to depart with is {bus} by waiting {min}, product is {product}",
@@ -16,7 +16,7 @@ pub fn run(raw: String) -> Result<()> {
         product = bus * time
     );
 
-    let timestamp = second_part(&data.lines).ok_or_else(|| eyre!("No bus for second part"))??;
+    let timestamp = second_part(&data.lines).ok_or_else(|| err!("No bus for second part"))??;
 
     println!("The earliest time at which all lines will start 1min after the other is {timestamp}");
 
@@ -27,7 +27,7 @@ type Timestamp = i128;
 
 fn parse(s: &str) -> Result<Schedule> {
     let (first, second) = s.lines().collect_tuple::<(_, _)>().ok_or_else(|| {
-        eyre!(
+        err!(
             "Expected two lines: earliest timestamp then comma separated bus lines, got {}",
             s
         )
@@ -57,7 +57,7 @@ fn earliest(schedule: &Schedule) -> Option<(Timestamp, Timestamp)> {
         .lines
         .iter()
         .filter_map(|&x| x)
-        .map(|bus| (bus, bus - schedule.timestamp.rem_euclid(bus)))
+        .map(|bus| (bus, bus - schedule.timestamp.remainder_euclid(bus)))
         .min_by_key(|(_, earliest)| *earliest)
 }
 
@@ -110,18 +110,13 @@ fn chinese_remainder_theorem_2(
     (a1, a2): (Timestamp, Timestamp),
     (n1, n2): (Timestamp, Timestamp),
 ) -> Result<Timestamp> {
-    let ExtendedGcd {
-        gcd, x: m1, y: m2, ..
-    } = n1.extended_gcd(&n2);
-    ensure!(
-        gcd == 1,
-        "Can't apply the chinese remainder theorem, as {} and {} are not co-prime",
-        n1,
-        n2
-    );
+    let ExtendedGcd { a, b, gcd } = extended_gcd(n1, n2);
+    if gcd != 1 {
+        return Err(err!("{n1} and {n2} are not co-prime"));
+    }
     let n = n1 * n2;
-    let x = a1 * m2 * n2 + a2 * m1 * n1;
-    Ok(x.mod_floor(&n))
+    let x = a1 * b * n2 + a2 * a * n1;
+    Ok(if x < 0 { x % n + n } else { x % n })
 }
 
 /// The bus schedules

@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
+use commons::{err, Report, Result, WrapErr};
 use itertools::{process_results, Itertools};
 use std::collections::HashMap;
 
@@ -157,11 +157,11 @@ impl FromStr for Cavern {
         let (depth, target) = s
             .lines()
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| eyre!("Expected two lines, depth and target, got {s}"))?;
+            .ok_or_else(|| err!("Expected two lines, depth and target, got {s}"))?;
 
         let depth = depth
             .strip_prefix("depth:")
-            .ok_or_else(|| eyre!("Expected 'depth: INT', got {depth}"))
+            .ok_or_else(|| err!("Expected 'depth: INT', got {depth}"))
             .and_then(|str| {
                 str.trim()
                     .parse()
@@ -181,7 +181,7 @@ impl FromStr for Cavern {
                 )
                 .transpose()
             })
-            .unwrap_or_else(|| Err(eyre!("Expected 'target: INT,INT', got {target}")))?;
+            .unwrap_or_else(|| Err(err!("Expected 'target: INT,INT', got {target}")))?;
 
         let dimensions = (target.0 as usize + 1) * (target.1 as usize + 1);
         let mut grid = HashMap::with_capacity(dimensions);

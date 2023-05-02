@@ -1,4 +1,4 @@
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
@@ -7,7 +7,7 @@ pub const TITLE: &str = "Day 5: Sunny with a Chance of Asteroids";
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let (first, second) =
-        solve(&data.data[..]).ok_or_else(|| eyre!("Program should not have crashed !"))?;
+        solve(&data.data[..]).ok_or_else(|| err!("Program should not have crashed !"))?;
     println!("Input 1 produced : {first}");
     println!("Input 5 produced : {second}");
 

@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::eyre::Result;
+use commons::Result;
 
 use super::int_code::{IntCodeInput, Processor, Status};
 

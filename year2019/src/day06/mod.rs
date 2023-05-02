@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 6: Universal Orbit Map";
 type PlanetName<'a> = &'a str;
@@ -8,10 +8,10 @@ const COM: &str = "COM";
 
 pub fn run(raw: String) -> Result<()> {
     let orbits = parse(&raw);
-    let from_origin = depth_first_search(COM, orbits).ok_or_else(|| eyre!("DFS error !"))?;
+    let from_origin = depth_first_search(COM, orbits).ok_or_else(|| err!("DFS error !"))?;
     let first = check_sum(&from_origin);
     let second =
-        shortest_path(&from_origin, "YOU", "SAN").ok_or_else(|| eyre!("YOU or SAN not found"))?;
+        shortest_path(&from_origin, "YOU", "SAN").ok_or_else(|| err!("YOU or SAN not found"))?;
 
     println!("The orbit check sum is {first}");
     println!("The shortest path from YOU to SAN is {second}");

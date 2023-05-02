@@ -1,4 +1,4 @@
-use commons::eyre::Result;
+use commons::Result;
 
 pub const TITLE: &str = "Day 5: Alchemical Reduction";
 

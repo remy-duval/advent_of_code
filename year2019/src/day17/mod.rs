@@ -1,14 +1,14 @@
 use std::{
     collections::{HashMap, HashSet},
-    fmt::{Display, Error, Formatter},
+    fmt::{Display, Formatter, Result as FmtResult},
     io::{stdout, BufWriter, Write},
     str::FromStr,
 };
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Point};
+use commons::{err, error::Result};
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
@@ -17,7 +17,7 @@ pub const TITLE: &str = "Day 17: Set and Forget";
 pub fn run(raw: String) -> Result<()> {
     let memory = parse(&raw)?.data;
     let scaffold = Scaffold::from_camera_program(&memory, true)
-        .ok_or_else(|| eyre!("The camera program should have worked !"))?;
+        .ok_or_else(|| err!("The camera program should have worked !"))?;
 
     // First part
     let calibration = scaffold.intersections_sum();
@@ -27,7 +27,7 @@ pub fn run(raw: String) -> Result<()> {
     let path = scaffold.straight_ahead_path();
     println!("The path is {}", path.iter().join(","));
     let (main, a, b, c) =
-        compression(&path, (5, 20)).ok_or_else(|| eyre!("The compression should succeed !"))?;
+        compression(&path, (5, 20)).ok_or_else(|| err!("The compression should succeed !"))?;
     println!("We can send it as {main} with \nA = {a}\nB = {b} \nC = {c}");
 
     // Run the robot with the path
@@ -282,7 +282,7 @@ enum Path {
 }
 
 impl Display for Path {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match *self {
             Path::Ahead(number) => number.fmt(f),
             Path::Right => 'R'.fmt(f),

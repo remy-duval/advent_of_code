@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use std::collections::HashMap;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 14: Docking Data";
 
@@ -143,7 +143,7 @@ impl FromStr for Instruction {
         let (instruction, value) = s
             .split_once('=')
             .map(|(a, b)| (a.trim(), b.trim()))
-            .ok_or_else(|| eyre!("Unknown line {} (expected 'instruction = value')", s))?;
+            .ok_or_else(|| err!("Unknown line {} (expected 'instruction = value')", s))?;
 
         // This is really dirty, at some point I should consider adding regex
         match instruction.get(0..4) {
@@ -163,7 +163,7 @@ impl FromStr for Instruction {
             Some("mem[") => {
                 let index = instruction
                     .get(4..(instruction.len() - 1)) // Take everything until the ']'
-                    .ok_or_else(|| eyre!("Unknown line {s} (expected 'instruction = value')"))?
+                    .ok_or_else(|| err!("Unknown line {s} (expected 'instruction = value')"))?
                     .parse::<Value>()
                     .wrap_err_with(|| format!("Could not parse a memory index or value {s}"))?;
 
@@ -173,7 +173,7 @@ impl FromStr for Instruction {
 
                 Ok(Instruction::SetValue { index, value })
             }
-            _ => Err(eyre!("Unknown line {s} (expected 'instruction = value')")),
+            _ => Err(err!("Unknown line {s} (expected 'instruction = value')")),
         }
     }
 }

@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
-use commons::eyre::Result;
 use commons::grid::Grid;
+use commons::Result;
 
 pub const TITLE: &str = "Day 11: Seating System";
 

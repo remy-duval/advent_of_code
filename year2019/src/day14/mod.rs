@@ -3,8 +3,8 @@ use std::str::FromStr;
 
 use std::collections::HashMap;
 
-use commons::eyre::{eyre, Report, Result};
 use commons::parse::LineSep;
+use commons::{err, Report, Result};
 
 pub const TITLE: &str = "Day 14: Space Stoichiometry";
 const ORE: &str = "ORE";
@@ -134,18 +134,18 @@ impl FromStr for Reaction {
         let mut split = s.split("=>");
         let ingredients = split
             .next()
-            .ok_or_else(|| eyre!("Could not find the ingredients"))?;
+            .ok_or_else(|| err!("Could not find the ingredients"))?;
         let product = split
             .next()
-            .ok_or_else(|| eyre!("Could not find the product"))?;
+            .ok_or_else(|| err!("Could not find the product"))?;
 
         let ingredients = ingredients
             .split(',')
             .map(parse_ingredient)
             .collect::<Option<HashMap<_, _>>>()
-            .ok_or_else(|| eyre!("Could not parse the ingredients"))?;
+            .ok_or_else(|| err!("Could not parse the ingredients"))?;
         let (result, times) =
-            parse_ingredient(product).ok_or_else(|| eyre!("Could not parse the product"))?;
+            parse_ingredient(product).ok_or_else(|| err!("Could not parse the product"))?;
 
         Ok(Self {
             result,

@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use itertools::Itertools;
+
+use commons::{err, Report, Result, WrapErr};
 
 /// (Month, Day)
 pub type Day = (u8, u8);
@@ -62,7 +63,7 @@ impl FromStr for TimedEvent {
         let (timestamp, event) = s
             .splitn(2, ']')
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| eyre!("Bad format for: [<TIMESTAMP>] <EVENT>, got {}", s))?;
+            .ok_or_else(|| err!("Bad format for: [<TIMESTAMP>] <EVENT>, got {}", s))?;
 
         Ok(Self {
             timestamp: timestamp
@@ -87,7 +88,7 @@ impl FromStr for Timestamp {
                 .splitn(2, sep)
                 .collect_tuple::<(_, _)>()
                 .ok_or_else(|| {
-                    eyre!(
+                    err!(
                         "Bad format for a timestamp <YEAR>-<MONTH>-<DAY> <HOUR>:<MINUTES>, got {s}"
                     )
                 })
@@ -124,7 +125,7 @@ impl FromStr for Event {
             "falls asleep" => Ok(Event::Sleep),
             "wakes up" => Ok(Event::WakeUp),
             other => parse_guard(other).map_or_else(
-                || Err(eyre!("Unknown event {other}")),
+                || Err(err!("Unknown event {other}")),
                 |result| result.map(Event::Change),
             ),
         }

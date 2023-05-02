@@ -1,6 +1,6 @@
 use std::collections::BinaryHeap;
 
-use commons::eyre::{eyre, Result};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 15: Chiton";
 
@@ -21,7 +21,7 @@ fn parse(s: &str) -> Result<CostSquare> {
             .chars()
             .chain(lines.flat_map(|l| l.chars()))
             .try_for_each(|c| match c.to_digit(10) {
-                None => Err(eyre!("Bad digit {}", c)),
+                None => Err(err!("Bad digit {}", c)),
                 Some(i) => {
                     storage.push(i as u8);
                     Ok(())
@@ -30,7 +30,7 @@ fn parse(s: &str) -> Result<CostSquare> {
 
         Ok(CostSquare { width, storage })
     } else {
-        Err(eyre!("Missing first line in {}", s))
+        Err(err!("Missing first line in {}", s))
     }
 }
 

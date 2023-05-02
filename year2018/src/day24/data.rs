@@ -2,7 +2,7 @@ use std::cmp::Reverse;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
+use commons::{err, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;
@@ -276,7 +276,7 @@ impl FromStr for Battle {
                     infection.push(parse_unit(line, &mut elements)?);
                 }
             } else {
-                return Err(eyre!("Unknown section for the battle data: {}", section));
+                return Err(err!("Unknown section for the battle data: {}", section));
             }
         }
 
@@ -353,7 +353,7 @@ fn parse_unit(line: &str, elements: &mut Vec<String>) -> Result<Units> {
         }))
     }
 
-    inner(line, elements).unwrap_or_else(|| Err(eyre!("Bad format for a units line: {}", line)))
+    inner(line, elements).unwrap_or_else(|| Err(err!("Bad format for a units line: {}", line)))
 }
 
 /// Parse a number for a unit, wrapping any error in a ParseError

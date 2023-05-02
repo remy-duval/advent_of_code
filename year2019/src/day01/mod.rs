@@ -1,4 +1,4 @@
-use commons::eyre::Result;
+use commons::error::Result;
 
 pub const TITLE: &str = "Day 1 : The Tyranny of the Rocket Equation";
 

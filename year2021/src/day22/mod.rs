@@ -3,8 +3,8 @@ use std::str::FromStr;
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 22: Reactor Reboot";
 
@@ -130,7 +130,7 @@ impl FromStr for Boot {
     fn from_str(s: &str) -> Result<Self> {
         let (active, zone) = s
             .split_once(' ')
-            .ok_or_else(|| eyre!("Bad format for '{}'", s))?;
+            .ok_or_else(|| err!("Bad format for '{}'", s))?;
 
         Ok(Self {
             active: active == "on",
@@ -150,19 +150,19 @@ impl FromStr for Cuboid {
                     .strip_prefix("x=")
                     .or_else(|| coord.strip_prefix("y="))
                     .or_else(|| coord.strip_prefix("z="))
-                    .ok_or_else(|| eyre!("Missing x=, y= or z= prefix: '{}'", coord))?;
+                    .ok_or_else(|| err!("Missing x=, y= or z= prefix: '{}'", coord))?;
 
                 let (from, to) = c
                     .splitn(2, "..")
                     .map(|n| n.parse().wrap_err_with(|| format!("In '{c}'")))
                     .collect_tuple::<(Result<i32>, Result<i32>)>()
-                    .ok_or_else(|| eyre!("Missing '..' range delimiter in '{c}'"))?;
+                    .ok_or_else(|| err!("Missing '..' range delimiter in '{c}'"))?;
 
                 let (from, to) = (from?, to?);
                 Ok(from.min(to)..(from.max(to) + 1))
             })
             .collect_tuple::<(_, _, _)>()
-            .ok_or_else(|| eyre!("Missing X, Y or Z in '{}'", s))?;
+            .ok_or_else(|| err!("Missing X, Y or Z in '{}'", s))?;
 
         Ok(Self([x?, y?, z?]))
     }

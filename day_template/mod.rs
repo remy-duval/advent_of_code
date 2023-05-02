@@ -1,6 +1,4 @@
-#![allow(unused)]
-
-use commons::eyre::{eyre, Result};
+use commons::{err, error::{Context, Error, Result}};
 
 pub const TITLE: &str = "";
 
@@ -9,7 +7,7 @@ pub fn run(raw: String) -> Result<()> {
     println!("1. TODO");
     println!("2. TODO");
 
-    Err(eyre!("TODO"))
+    Err(err!("TODO"))
 }
 
 fn parse(s: &str) -> Result<String> {

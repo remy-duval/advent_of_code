@@ -1,5 +1,5 @@
-use commons::eyre::Result;
 use commons::parse::CommaSep;
+use commons::Result;
 
 pub const TITLE: &str = "Day 15: Rambunctious Recitation";
 const FIRST_TURNS: u32 = 2020;

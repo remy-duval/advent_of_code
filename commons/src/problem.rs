@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::time::Instant;
 
-use eyre::{Result, WrapErr};
+use crate::{Result, WrapErr};
 
 /// Solve the problem using the given input, displaying the title and time of completion.
 ///
@@ -46,5 +46,5 @@ where
 /// ### Arguments
 /// * `input_path` - The path to the input file for this problem
 pub fn load(path: PathBuf) -> Result<String> {
-    std::fs::read_to_string(&path).wrap_err_with(|| format!("Can't load input from '{path:?}'"))
+    std::fs::read_to_string(&path).wrap_err_with(|| format!("Can't load input from {path:?}"))
 }

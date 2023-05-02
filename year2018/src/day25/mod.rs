@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use itertools::Itertools;
 
-use commons::eyre::{eyre, Report, Result, WrapErr};
 use commons::parse::LineSep;
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 25: Four-Dimensional Adventure";
 
@@ -81,7 +81,7 @@ impl FromStr for Point4 {
             }),
             |iter| match iter.collect_tuple::<(_, _, _, _)>() {
                 Some((a, b, c, d)) => Ok(Point4([a, b, c, d])),
-                None => Err(eyre!("Bad format for a four dimensional point: {string}")),
+                None => Err(err!("Bad format for a four dimensional point: {string}")),
             },
         )?
     }

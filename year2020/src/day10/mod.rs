@@ -1,5 +1,5 @@
-use commons::eyre::Result;
 use commons::parse::LineSep;
+use commons::Result;
 
 pub const TITLE: &str = "Day 10: Adapter Array";
 

@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use commons::eyre::{eyre, Result};
 use commons::grid::{Direction, Grid, Point};
+use commons::{err, Result};
 
 pub const TITLE: &str = "Day 9: Smoke Basin";
 
@@ -14,14 +14,14 @@ pub fn run(raw: String) -> Result<()> {
 
 fn parse(s: &str) -> Result<HeightMap> {
     let mut lines = s.lines();
-    let first = lines.next().ok_or_else(|| eyre!("Missing first line"))?;
+    let first = lines.next().ok_or_else(|| err!("Missing first line"))?;
     let width = first.chars().count();
     let mut storage = Vec::with_capacity(width * width);
     first
         .chars()
         .chain(lines.flat_map(move |f| f.chars()))
         .try_for_each(|c| -> Result<()> {
-            let i = c.to_digit(10).ok_or_else(|| eyre!("Bad digit {}", c))?;
+            let i = c.to_digit(10).ok_or_else(|| err!("Bad digit {}", c))?;
             storage.push(i as u8);
             Ok(())
         })?;
