@@ -4,8 +4,6 @@
 
 use std::str::FromStr;
 
-use itertools::Itertools;
-
 /// An intermediate struct to parse commas-separated input.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CommaSep<T> {
@@ -17,12 +15,10 @@ impl<T: FromStr> FromStr for CommaSep<T> {
     type Err = T::Err;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self {
-            data: s
-                .split(',')
-                .map(|elt| elt.trim().parse::<T>())
-                .try_collect()?,
-        })
+        s.split(',')
+            .map(|elt| elt.trim().parse::<T>())
+            .collect::<Result<Vec<_>, _>>()
+            .map(|data| Self { data })
     }
 }
 
@@ -37,9 +33,10 @@ impl<T: FromStr> FromStr for LineSep<T> {
     type Err = T::Err;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self {
-            data: s.lines().map(|elt| elt.trim().parse::<T>()).try_collect()?,
-        })
+        s.lines()
+            .map(|elt| elt.trim().parse::<T>())
+            .collect::<Result<Vec<_>, _>>()
+            .map(|data| Self { data })
     }
 }
 
@@ -60,11 +57,10 @@ impl<T: FromStr> FromStr for SepByEmptyLine<T> {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // Since Windows exists, splitting on "\n\n" isn't enough
-        let data: Vec<T> = sep_by_empty_lines(s)
+        sep_by_empty_lines(s)
             .map(|block| block.parse())
-            .try_collect()?;
-
-        Ok(SepByEmptyLine { data })
+            .collect::<Result<Vec<_>, _>>()
+            .map(|data| Self { data })
     }
 }
 

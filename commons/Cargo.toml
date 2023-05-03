@@ -5,5 +5,3 @@ authors = ["Remy Duval <remy_duval@laposte.net>"]
 edition = "2021"
 rust-version = "1.65.0"
 
-[dependencies]
-itertools = "0.10.5"
