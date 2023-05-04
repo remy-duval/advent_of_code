@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::{err, Result};
+use commons::{bail, Result};
 
 pub const TITLE: &str = "Day 25: Sea Cucumber";
 
@@ -30,7 +30,7 @@ fn parse(s: &str) -> Result<Sea> {
                 '.' => EMPTY,
                 '>' => EAST,
                 'v' => SOUTH,
-                _ => return Err(err!("Bad tile '{}' in {} (line {})", c, line, height)),
+                _ => bail!("Bad tile '{c}' in {line} (line {height})"),
             };
             grid.push(tile);
         }

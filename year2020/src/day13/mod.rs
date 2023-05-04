@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use commons::math::{extended_gcd, ExtendedGcd, Integer};
-use commons::{err, Result, WrapErr};
+use commons::{ensure, err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 13: Shuttle Search";
 
@@ -111,9 +111,7 @@ fn chinese_remainder_theorem_2(
     (n1, n2): (Timestamp, Timestamp),
 ) -> Result<Timestamp> {
     let ExtendedGcd { a, b, gcd } = extended_gcd(n1, n2);
-    if gcd != 1 {
-        return Err(err!("{n1} and {n2} are not co-prime"));
-    }
+    ensure!(gcd == 1, "{n1} and {n2} are not co-prime");
     let n = n1 * n2;
     let x = a1 * b * n2 + a2 * a * n1;
     Ok(if x < 0 { x % n + n } else { x % n })

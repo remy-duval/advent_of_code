@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use commons::parse::LineSep;
-use commons::{err, Report, Result, WrapErr};
+use commons::{bail, err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 18: Operation Order";
 
@@ -75,7 +75,7 @@ impl Operation {
                     } else if let Some(res) = op.binary_op(operands.pop().zip(operands.pop())) {
                         operands.push(res);
                     } else {
-                        return Err(err!("Bad operator call {:?}", op));
+                        bail!("Bad operator call {:?}", op);
                     }
                 }
 

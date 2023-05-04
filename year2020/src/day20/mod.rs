@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use itertools::Itertools;
 
-use commons::{err, Result, WrapErr};
+use commons::{bail, Result, WrapErr};
 
 pub const TITLE: &str = "Day 20: Jurassic Jigsaw";
 const IMAGE_WIDTH: usize = 12;
@@ -49,9 +49,9 @@ fn parse(s: &str) -> Result<Vec<Tile>> {
                     match data.get_mut(y).and_then(|row| row.get_mut(x)) {
                         Some(current) => *current = char == '#',
                         None =>
-                            return Err(err!(
+                            bail!(
                                 "Too many elements for a tile (expected 10 * 10, got ({x}, {y})) in a tile line:\n{s}"
-                            )),
+                            ),
                     };
                 }
             }

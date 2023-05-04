@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use commons::grid::{Direction, Point};
 use commons::parse::LineSep;
-use commons::{err, Report, Result, WrapErr};
+use commons::{ensure, err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 12: Rain Risk";
 
@@ -122,9 +122,10 @@ impl FromStr for Instruction {
     type Err = Report;
 
     fn from_str(s: &str) -> Result<Self> {
-        if !s.is_char_boundary(1) {
-            return Err(err!("Not enough characters to parse an instruction"));
-        }
+        ensure!(
+            s.is_char_boundary(1),
+            "Not enough characters to parse an instruction"
+        );
         let (instruction, argument) = s.split_at(1);
         let argument: i64 = argument
             .parse()

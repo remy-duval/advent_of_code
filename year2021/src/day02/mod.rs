@@ -1,5 +1,5 @@
 use commons::parse::LineSep;
-use commons::{err, Report, Result};
+use commons::{bail, Report, Result};
 
 pub const TITLE: &str = "Day 2: Dive!";
 
@@ -29,7 +29,7 @@ impl std::str::FromStr for Command {
             Some(("forward", amount)) => Command::Forward(amount.parse()?),
             Some(("up", amount)) => Command::Up(amount.parse()?),
             Some(("down", amount)) => Command::Down(amount.parse()?),
-            _ => return Err(err!("unknown command {}", s)),
+            _ => bail!("unknown command {s}"),
         };
 
         Ok(command)

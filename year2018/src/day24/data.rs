@@ -2,7 +2,7 @@ use std::cmp::Reverse;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use commons::{err, Report, Result, WrapErr};
+use commons::{bail, err, Report, Result, WrapErr};
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;
@@ -276,7 +276,7 @@ impl FromStr for Battle {
                     infection.push(parse_unit(line, &mut elements)?);
                 }
             } else {
-                return Err(err!("Unknown section for the battle data: {}", section));
+                bail!("Unknown section for the battle data: {section}");
             }
         }
 

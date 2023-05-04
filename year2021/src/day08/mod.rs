@@ -1,5 +1,5 @@
 use commons::parse::LineSep;
-use commons::{err, Report, Result, WrapErr};
+use commons::{bail, err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 8: Seven Segment Search";
 
@@ -285,7 +285,7 @@ impl std::str::FromStr for WireBitSet {
                 'e' => 1 << 4,
                 'f' => 1 << 5,
                 'g' => 1 << 6,
-                _ => return Err(err!("Bad number wire {c}")),
+                _ => bail!("Bad number wire {c}"),
             };
         }
 

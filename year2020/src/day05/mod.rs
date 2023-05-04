@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use commons::parse::LineSep;
-use commons::{err, Report, Result};
+use commons::{bail, ensure, Report, Result};
 
 pub const TITLE: &str = "Day 5: Binary Boarding";
 
@@ -50,22 +50,17 @@ impl std::str::FromStr for BoardingPass {
     type Err = Report;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() != 10 {
-            return Err(err!(
-                "The boarding pass should have a length of 10 characters, not {}",
-                s.len()
-            ));
-        }
+        ensure!(
+            s.len() == 10,
+            "The boarding pass should have a length of 10 characters, not {}",
+            s.len()
+        );
 
         let seat = s.chars().try_fold(0, |acc, c| {
             let bit = match c {
                 'F' | 'L' => 0,
                 'B' | 'R' => 1,
-                _ => {
-                    return Err(err!(
-                        "The boarding pass should only contain be F, B, L or R, not {c}"
-                    ))
-                }
+                _ => bail!("The boarding pass should only contain be F, B, L or R, not {c}"),
             };
 
             Ok(acc * 2 + bit)

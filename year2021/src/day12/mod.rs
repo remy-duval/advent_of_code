@@ -1,4 +1,4 @@
-use commons::{err, Result, WrapErr};
+use commons::{ensure, err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 12: Passage Pathing";
 
@@ -54,9 +54,7 @@ fn second_part(paths: &Paths) -> Result<usize> {
 /// Count all possible paths from "start" to "end" that don't visit small caves twice.
 /// If `can_visit_one_small_cave_twice`, then at most once small cave can be visited 2 times.
 fn count_paths(paths: &Paths, can_visit_small_twice: bool) -> Result<usize> {
-    if paths.caves.len() > 32 {
-        return Err(err!("too many caves (> 32)"));
-    }
+    ensure!(paths.caves.len() <= 32, "too many caves (> 32)");
     // A path under construction
     struct Current {
         next: usize,                 // The next path to take

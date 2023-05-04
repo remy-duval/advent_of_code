@@ -1,4 +1,4 @@
-use commons::{err, Result};
+use commons::{bail, Result};
 
 pub const TITLE: &str = "Day 18: Snailfish";
 
@@ -56,7 +56,7 @@ fn parse_one(s: &str) -> Result<Vec<Part>> {
             ',' => (),
             d => match d.to_digit(10).map(|d| d as u8) {
                 Some(value) => result.push(Part { depth, value }),
-                None => return Err(err!("Expected '[', ']', ',' or digit, got {}", d)),
+                None => bail!("Expected '[', ']', ',' or digit, got {d}"),
             },
         }
     }

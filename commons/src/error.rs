@@ -83,10 +83,42 @@ impl<Ok> WrapErr<Ok> for Option<Ok> {
 #[macro_export]
 macro_rules! err {
     ($msg:literal $(,)?) => ({
-        $crate::error::Report::formatted(format_args!($msg))
+        $crate::error::Report::formatted(::std::format_args!($msg))
     });
     ($fmt:expr, $($arg:tt)*) => {
-        $crate::error::Report::formatted(format_args!($fmt, $($arg)*))
+        $crate::error::Report::formatted(::std::format_args!($fmt, $($arg)*))
+    };
+}
+
+/// Format an error message into a report and return it directly
+#[macro_export]
+macro_rules! bail {
+    ($msg:literal $(,)?) => ({
+        return Err($crate::error::Report::formatted(::std::format_args!($msg)))
+    });
+    ($fmt:expr, $($arg:tt)*) => {
+         return Err($crate::error::Report::formatted(::std::format_args!($fmt, $($arg)*)))
+    };
+}
+
+/// Check a condition, and return an error if it is not true
+#[macro_export]
+macro_rules! ensure {
+    ($cond:expr) => ({
+        if (!$cond) {
+            let msg = ::std::format_args!(::std::concat!("Condition failed: ", ::std::stringify!($cond)));
+            return Err($crate::error::Report::formatted(msg));
+        }
+    });
+    ($cond:expr, $msg:literal $(,)?) => ({
+        if (!$cond) {
+            return Err($crate::error::Report::formatted(::std::format_args!($msg)));
+        }
+    });
+    ($cond:expr, $fmt:expr, $($arg:tt)*) => {
+        if (!$cond) {
+            return Err($crate::error::Report::formatted(::std::format_args!($fmt, $($arg)*)));
+        }
     };
 }
 
@@ -388,5 +420,94 @@ mod tests {
             .unwrap()
             .downcast_ref::<EmptyOptionError>()
             .is_some());
+    }
+
+    #[test]
+    fn bail_test_literal() {
+        fn test_fn() -> Result<i32> {
+            bail!("hello bail")
+        }
+
+        let error = test_fn().unwrap_err();
+        assert_eq!(format!("{error}"), "hello bail");
+    }
+
+    #[test]
+    fn bail_test_formatted_1() {
+        fn test_fn() -> Result<i32> {
+            let x = 3;
+            bail!("test bail {x}")
+        }
+
+        let error = test_fn().unwrap_err();
+        assert_eq!(format!("{error}"), "test bail 3");
+    }
+
+    #[test]
+    fn bail_test_formatted_2() {
+        fn test_fn() -> Result<i32> {
+            bail!("template {x}, {1} {0}", 44, "second", x = "named")
+        }
+
+        let error = test_fn().unwrap_err();
+        assert_eq!(format!("{error}"), "template named, second 44");
+    }
+
+    #[test]
+    fn ensure_test_no_message() {
+        fn test_fn(ok: &str) -> Result<i32> {
+            ensure!(ok == "ok");
+            Ok(3)
+        }
+
+        let ok = test_fn("ok").unwrap();
+        assert_eq!(ok, 3);
+        let not_ok = test_fn("not ok").unwrap_err();
+        assert_eq!(format!("{not_ok}"), "Condition failed: ok == \"ok\"");
+    }
+
+    #[test]
+    fn ensure_test_literal() {
+        fn test_fn(ok: &str) -> Result<i32> {
+            ensure!(ok == "ok", "woops");
+            Ok(3)
+        }
+
+        let ok = test_fn("ok").unwrap();
+        assert_eq!(ok, 3);
+        let not_ok = test_fn("not ok").unwrap_err();
+        assert_eq!(format!("{not_ok}"), "woops");
+    }
+
+    #[test]
+    fn ensure_test_formatted_1() {
+        fn test_fn(ok: &str) -> Result<i32> {
+            ensure!(ok == "ok", "test {ok}");
+            Ok(3)
+        }
+
+        let ok = test_fn("ok").unwrap();
+        assert_eq!(ok, 3);
+        let not_ok = test_fn("not ok").unwrap_err();
+        assert_eq!(format!("{not_ok}"), "test not ok");
+    }
+
+    #[test]
+    fn ensure_test_formatted_2() {
+        fn test_fn(ok: &str) -> Result<i32> {
+            ensure!(
+                ok == "ok",
+                "message {text:?} {1} {0}",
+                true,
+                3,
+                text = "this is some text"
+            );
+            Ok(3)
+        }
+
+        let ok = test_fn("ok").unwrap();
+        assert_eq!(ok, 3);
+        let not_ok = test_fn("not ok").unwrap_err();
+        assert_eq!(format!("{not_ok}"), "message \"this is some text\" 3 true");
     }
 }

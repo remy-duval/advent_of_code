@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use itertools::Itertools;
 
 use commons::parse::sep_by_empty_lines;
-use commons::{err, Result, WrapErr};
+use commons::{ensure, Result, WrapErr};
 
 pub const TITLE: &str = "Day 14: Extended Polymerization";
 
@@ -38,12 +38,8 @@ fn parse(s: &str) -> Result<Polymer> {
                 .wrap_err_with(|| format!("Missing '->' in {r}"))?;
             let from = from.trim().as_bytes();
             let to = to.trim().as_bytes();
-            if from.len() != 2 {
-                return Err(err!("Not 2 elements left of {r}"));
-            }
-            if to.len() != 1 {
-                return Err(err!("Not 1 element right of {r}"));
-            }
+            ensure!(from.len() == 2, "Not 2 elements left of {r}");
+            ensure!(to.len() == 1, "Not 1 element right of {r}");
             Ok((
                 (alpha_index(from[0])?, alpha_index(from[1])?),
                 alpha_index(to[0])?,

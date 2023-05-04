@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use commons::grid::Grid;
-use commons::{err, Report, Result, WrapErr};
+use commons::{bail, err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 18: Settlers of The North Pole";
 
@@ -163,12 +163,12 @@ impl FromStr for Area {
             } else if next_width == width {
                 Ok((width, height + 1))
             } else {
-                return Err(err!(
+                bail!(
                     "Line n°{line} is of width {actual} instead of expected {expected}",
                     line = height + 1,
                     expected = width,
                     actual = next_width,
-                ));
+                );
             }
         })?;
 
