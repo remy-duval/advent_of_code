@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 20: Trench Map";
 
@@ -16,7 +16,7 @@ pub fn run(raw: String) -> Result<()> {
 fn parse(s: &str) -> Result<(Enhancer, Image)> {
     let (enhancer, image) = commons::parse::sep_by_empty_lines(s)
         .collect_tuple()
-        .ok_or_else(|| err!("Missing sections in {}", s))?;
+        .wrap_err_with(|| format!("Missing sections in {s}"))?;
 
     Ok((Enhancer::parse(enhancer), Image::parse(image)))
 }

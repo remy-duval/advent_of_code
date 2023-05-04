@@ -3,7 +3,7 @@ use std::collections::BinaryHeap;
 
 use std::collections::HashMap;
 
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 use data::{Cavern, Point, Tool};
 
 /// The data structures to represent the cavern
@@ -16,8 +16,8 @@ pub fn run(raw: String) -> Result<()> {
     let risk = cavern.risk_level();
     println!("The total danger level in the maze is {risk}");
 
-    let shortest = shortest_path(&mut cavern)
-        .ok_or_else(|| err!("Could not find the shortest path to the target"))?;
+    let shortest =
+        shortest_path(&mut cavern).wrap_err("Could not find the shortest path to the target")?;
     println!("The shortest path to the target is {shortest}");
 
     Ok(())

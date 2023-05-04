@@ -1,4 +1,4 @@
-use commons::{err, Result, WrapErr};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 17: Trick Shot";
 
@@ -25,7 +25,7 @@ fn parse(s: &str) -> Result<Target> {
             let (x, y) = s.split_once(", y=")?;
             Some((x.split_once("..")?, y.split_once("..")?))
         })
-        .ok_or_else(|| err!("Can't find target string known delimiters '{}'", s))?;
+        .wrap_err_with(|| format!("Can't find target string known delimiters '{s}'"))?;
 
     Ok(Target {
         min_x: min_x.parse().wrap_err_with(|| format!("For '{min_x}'"))?,

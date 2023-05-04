@@ -8,7 +8,7 @@ use std::{
 use itertools::Itertools;
 
 use commons::grid::{Direction, Point};
-use commons::{err, error::Result};
+use commons::{Result, WrapErr};
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
@@ -17,7 +17,7 @@ pub const TITLE: &str = "Day 17: Set and Forget";
 pub fn run(raw: String) -> Result<()> {
     let memory = parse(&raw)?.data;
     let scaffold = Scaffold::from_camera_program(&memory, true)
-        .ok_or_else(|| err!("The camera program should have worked !"))?;
+        .wrap_err("The camera program should have worked !")?;
 
     // First part
     let calibration = scaffold.intersections_sum();
@@ -27,7 +27,7 @@ pub fn run(raw: String) -> Result<()> {
     let path = scaffold.straight_ahead_path();
     println!("The path is {}", path.iter().join(","));
     let (main, a, b, c) =
-        compression(&path, (5, 20)).ok_or_else(|| err!("The compression should succeed !"))?;
+        compression(&path, (5, 20)).wrap_err("The compression should succeed !")?;
     println!("We can send it as {main} with \nA = {a}\nB = {b} \nC = {c}");
 
     // Run the robot with the path

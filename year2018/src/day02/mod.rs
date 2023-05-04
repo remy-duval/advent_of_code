@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use commons::{err, error::Result};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 2: Inventory Management System";
 
@@ -8,7 +8,7 @@ pub fn run(raw: String) -> Result<()> {
     println!("The checksum is {}", check_sum(&raw));
     println!(
         "The common part of the two found box is {}",
-        find_different_by_one(&raw).ok_or_else(|| err!("Could not find the two common boxes"))?
+        find_different_by_one(&raw).wrap_err("Could not find the two common boxes")?
     );
 
     Ok(())

@@ -1,8 +1,9 @@
-use itertools::Itertools;
 use std::collections::HashMap;
 
+use itertools::Itertools;
+
 use commons::parse::sep_by_empty_lines;
-use commons::{err, Result};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 14: Extended Polymerization";
 
@@ -21,12 +22,12 @@ fn parse(s: &str) -> Result<Polymer> {
     fn alpha_index(b: u8) -> Result<u8> {
         b.to_ascii_uppercase()
             .checked_sub(b'A')
-            .ok_or_else(|| err!("Bad character {}", b))
+            .wrap_err_with(|| format!("Bad character {b}"))
     }
 
     let (initial, rules) = sep_by_empty_lines(s)
         .collect_tuple::<(_, _)>()
-        .ok_or_else(|| err!("Missing empty line between polymer and rules in {}", s))?;
+        .wrap_err_with(|| format!("Missing empty line between polymer and rules in {s}"))?;
 
     let initial = initial.bytes().map(alpha_index).collect::<Result<_>>()?;
     let rules = rules
@@ -34,7 +35,7 @@ fn parse(s: &str) -> Result<Polymer> {
         .map(|r| -> Result<_> {
             let (from, to) = r
                 .split_once("->")
-                .ok_or_else(|| err!("Missing '->' in {}", r))?;
+                .wrap_err_with(|| format!("Missing '->' in {r}"))?;
             let from = from.trim().as_bytes();
             let to = to.trim().as_bytes();
             if from.len() != 2 {

@@ -60,7 +60,7 @@ impl FromStr for Bot {
         }
 
         let (pos, radius) =
-            split(s).ok_or_else(|| err!("Expected pos=POINT, r=RADIUS, got: {s}"))?;
+            split(s).wrap_err_with(|| format!("Expected pos=POINT, r=RADIUS, got: {s}"))?;
         let r = radius
             .parse::<Dimension>()
             .wrap_err_with(|| format!("Couldn't parse the radius of the bot: {radius}"))?;

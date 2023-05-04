@@ -49,7 +49,7 @@ fn second_part(outputs: &[Outputs]) -> Result<usize> {
             let number = digits
                 .iter()
                 .position(|x| x == next)
-                .ok_or_else(|| err!("Missing {:?} in {:?}", next, digits))?;
+                .wrap_err_with(|| format!("Missing {next:?} in {digits:?}"))?;
 
             Ok(acc * 10 + number)
         })?;
@@ -306,7 +306,7 @@ impl std::str::FromStr for Outputs {
             Ok(())
         }
 
-        let (s, o) = s.split_once('|').ok_or_else(|| err!("Missing '|' sep"))?;
+        let (s, o) = s.split_once('|').wrap_err("Missing '|' sep")?;
         let mut unknown: [WireBitSet; DIGITS] = Default::default();
         parse_into(s, &mut unknown)?;
         let mut outputs: [WireBitSet; OUTPUT] = Default::default();

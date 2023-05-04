@@ -5,7 +5,7 @@ use std::collections::HashSet;
 
 use commons::grid::Point;
 use commons::parse::sep_by_empty_lines;
-use commons::{err, Result};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 13: Transparent Origami";
 
@@ -21,14 +21,14 @@ pub fn run(raw: String) -> Result<()> {
 fn parse(s: &str) -> Result<Origami> {
     let (dots, folds) = sep_by_empty_lines(s)
         .collect_tuple::<(_, _)>()
-        .ok_or_else(|| err!("Missing empty line between dots and folds"))?;
+        .wrap_err("Missing empty line between dots and folds")?;
 
     let dots = dots
         .lines()
         .map(|d| -> Result<Point<i16>> {
             let (x, y) = d
                 .split_once(',')
-                .ok_or_else(|| err!("Missing ',' for a point: {}", d))?;
+                .wrap_err_with(|| format!("Missing ',' for a point: {d}"))?;
             Ok(Point::new(x.parse()?, y.parse()?))
         })
         .collect::<Result<HashSet<_>>>()?;

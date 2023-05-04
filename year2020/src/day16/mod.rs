@@ -1,12 +1,12 @@
+use std::collections::HashMap;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 use itertools::Itertools;
-use std::collections::HashMap;
 
 use commons::grid::Grid;
 use commons::parse::sep_by_empty_lines;
-use commons::{err, Report, Result, WrapErr};
+use commons::{Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 16: Ticket Translation";
 
@@ -16,7 +16,7 @@ pub fn run(raw: String) -> Result<()> {
 
     let headers = data
         .find_headers()
-        .ok_or_else(|| err!("Could not find the headers for the tickets"))?;
+        .wrap_err("Could not find the headers for the tickets")?;
 
     data.print_ticket(&headers)?;
 
@@ -138,14 +138,14 @@ impl FromStr for Rule {
         fn parse_range(s: &str) -> Result<RangeInclusive<u16>> {
             let (from, to) = s
                 .split_once('-')
-                .ok_or_else(|| err!("Expected rules for the tickets, got {}", s))?;
+                .wrap_err_with(|| format!("Expected rules for the tickets, got {s}"))?;
 
             Ok(parse_int(from)?..=parse_int(to)?)
         }
 
         let (first, second) = s
             .split_once("or")
-            .ok_or_else(|| err!("Expected rules for the tickets, got {}", s))?;
+            .wrap_err_with(|| format!("Expected rules for the tickets, got {s}"))?;
 
         Ok(Rule(parse_range(first)?, parse_range(second)?))
     }
@@ -157,34 +157,26 @@ impl FromStr for Tickets {
     fn from_str(s: &str) -> Result<Self> {
         let (rule_section, ticket, others) = sep_by_empty_lines(s)
             .collect_tuple::<(_, _, _)>()
-            .ok_or_else(|| {
-                err!(
-                    "Expected three blocks: rules, ticket and nearby tickets, but got {}",
-                    s
-                )
+            .wrap_err_with(|| {
+                format!("Expected three blocks: rules, ticket and nearby tickets, but got {s}")
             })?;
 
-        let ticket: Vec<_> = parse_line(ticket.strip_prefix("your ticket:").ok_or_else(|| {
-            err!(
-                "Expected 'your ticket:' followed by a comma separated numbers, got {}",
-                ticket
-            )
-        })?)?;
+        let ticket: Vec<_> =
+            parse_line(ticket.strip_prefix("your ticket:").wrap_err_with(|| {
+                format!("Expected 'your ticket:' then ',' sep numbers, got {ticket}")
+            })?)?;
 
         let mut rules = HashMap::with_capacity(ticket.len());
         for line in rule_section.lines() {
             let (name, rule) = line
                 .split_once(':')
-                .ok_or_else(|| err!("Expected rules for the tickets, got {}", s))?;
+                .wrap_err_with(|| format!("Expected rules for the tickets, got {s}"))?;
 
             rules.insert(name.to_owned(), rule.parse::<Rule>()?);
         }
 
-        let nearby = others.strip_prefix("nearby tickets:").ok_or_else(|| {
-            err!(
-                "Expected 'nearby tickets:' followed by comma separated numbers per line, got {}",
-                others
-            )
+        let nearby = others.strip_prefix("nearby tickets:").wrap_err_with(|| {
+            format!("Expected 'nearby tickets:'then ',' sep numbers, got {others}")
         })?;
 
         let (valid, error_rate) = parse_valid_tickets(nearby, ticket.len(), &rules)?;

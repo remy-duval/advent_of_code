@@ -16,12 +16,11 @@ const SEA_MONSTER_LEN: usize = SEA_MONSTER[0].len();
 
 pub fn run(raw: String) -> Result<()> {
     let tiles = parse(&raw)?;
-    let image = match_tiles(tiles, IMAGE_WIDTH).ok_or_else(|| err!("Could not build the image"))?;
+    let image = match_tiles(tiles, IMAGE_WIDTH).wrap_err("Could not build the image")?;
 
     println!(
         "The corners ID product is {}",
-        first_part(&image, IMAGE_WIDTH)
-            .ok_or_else(|| err!("Could not find the corners of the image"))?
+        first_part(&image, IMAGE_WIDTH).wrap_err("Could not find the corners of the image")?
     );
 
     println!(
@@ -39,7 +38,7 @@ fn parse(s: &str) -> Result<Vec<Tile>> {
                 .next()
                 .and_then(|line| line.trim().strip_prefix("Tile "))
                 .and_then(|line| line.strip_suffix(':'))
-                .ok_or_else(|| err!("Did not find the ID field of a tile in:\n{s}"))?;
+                .wrap_err_with(|| format!("Did not find the ID field of a tile in:\n{s}"))?;
 
             let id: u16 = id
                 .parse()

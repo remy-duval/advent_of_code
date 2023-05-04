@@ -170,13 +170,13 @@ pub fn index(idx: Int) -> Result<usize> {
 /// Get the `idx`th element in the registers
 fn get(reg: &[Int], idx: Int) -> Result<&Int> {
     reg.get(index(idx)?)
-        .ok_or_else(|| err!("{} is out of bounds for a register", idx))
+        .wrap_err_with(|| format!("{} is out of bounds for a register", idx))
 }
 
 /// Get the `idx`th element in the registers, mutable version
 fn get_mut(reg: &mut [Int], idx: Int) -> Result<&mut Int> {
     reg.get_mut(index(idx)?)
-        .ok_or_else(|| err!("{} is out of bounds for a register", idx))
+        .wrap_err_with(|| format!("{} is out of bounds for a register", idx))
 }
 
 impl FromStr for Program {
@@ -224,7 +224,9 @@ impl FromStr for Instruction {
             .split_whitespace()
             .filter(|s| !s.is_empty())
             .collect_tuple::<(_, _, _, _)>()
-            .ok_or_else(|| err!("Bad format for a instruction: {s} (expected 'CODE A B C')"))?;
+            .wrap_err_with(|| {
+                format!("Bad format for a instruction: {s} (expected 'CODE A B C')")
+            })?;
 
         Ok(Self {
             code: code.parse()?,

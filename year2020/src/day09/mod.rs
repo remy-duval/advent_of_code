@@ -1,19 +1,19 @@
 use itertools::Itertools;
 
 use commons::parse::LineSep;
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 9: Encoding Error";
 
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
     let wanted = first_not_sum(&data.data, PREAMBLE)
-        .ok_or_else(|| err!("Did not find the first element that is not a sum"))?;
+        .wrap_err("Did not find the first element that is not a sum")?;
 
     println!("The first element that is not a sum of the previous ones is {wanted}");
 
     let (min, max) = second_part(&data.data, wanted)
-        .ok_or_else(|| err!("Did not find the slice that can be summed to {wanted}"))?;
+        .wrap_err_with(|| format!("Did not find the slice that can be summed to {wanted}"))?;
 
     println!(
         "The slice between {min} and {max} (sum is {sum}) will sum up to it",

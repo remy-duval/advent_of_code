@@ -1,4 +1,4 @@
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 
 mod data;
 
@@ -11,7 +11,7 @@ pub fn run(raw: String) -> Result<()> {
 
     let (remaining, hp) = fight
         .second_part()
-        .ok_or_else(|| err!("Didn't find an outcome where the elves won without casualties"))?;
+        .wrap_err("Didn't find an outcome where the elves won without casualties")?;
     println!("The elves win with an outcome of {}", remaining * hp);
 
     Ok(())

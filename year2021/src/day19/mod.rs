@@ -1,7 +1,8 @@
-use itertools::{process_results, Itertools};
 use std::collections::HashSet;
 
-use commons::{err, Result, WrapErr};
+use itertools::{process_results, Itertools};
+
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 19: Beacon Scanner";
 
@@ -175,7 +176,7 @@ fn parse(s: &str) -> Result<Vec<Scanner>> {
                         Some([r.next()?, r.next()?, r.next()?])
                     })
                     .wrap_err_with(|| format!("Failed to parse coordinate in '{p}'"))
-                    .and_then(|r| r.ok_or_else(|| err!("Not enough coordinates in '{p}'")))
+                    .and_then(|r| r.wrap_err_with(|| format!("Not enough coordinates in '{p}'")))
                 })
                 .collect::<Result<_>>()
                 .wrap_err_with(|| format!("For {s}"))?;

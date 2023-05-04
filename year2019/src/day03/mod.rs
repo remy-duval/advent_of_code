@@ -1,15 +1,14 @@
 use std::collections::HashMap;
 
 use commons::grid::{Direction, Point};
-use commons::{err, error::Result};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 3: Crossed Wires";
 
 pub fn run(raw: String) -> Result<()> {
     let crossed = parse(&raw);
-    let closest = closest(&crossed[..]).ok_or_else(|| err!("Could not find closest !"))?;
-    let (shortest, length) =
-        shortest(&crossed[..]).ok_or_else(|| err!("Could not find shortest !"))?;
+    let closest = closest(&crossed[..]).wrap_err("Could not find closest !")?;
+    let (shortest, length) = shortest(&crossed[..]).wrap_err("Could not find shortest !")?;
 
     let distance = closest.manhattan_distance();
     println!("Closest cross to origin : {closest} with distance {distance}");

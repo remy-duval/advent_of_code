@@ -3,7 +3,7 @@ use std::collections::{hash_map::Entry, HashMap};
 use commons::grid::Point;
 use commons::math::{gcd, SignedInteger};
 use commons::parse::LineSep;
-use commons::{err, Report, Result, WrapErr};
+use commons::{Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 5: Hydrothermal Venture";
 
@@ -86,7 +86,7 @@ impl std::str::FromStr for Segment {
 
     fn from_str(s: &str) -> Result<Self> {
         fn point(s: &str) -> Result<Point<i16>> {
-            let (x, y) = s.split_once(',').ok_or_else(|| err!("Bad point {}", s))?;
+            let (x, y) = s.split_once(',').wrap_err("Bad point")?;
             let x = x.parse().wrap_err("Bad x coordinate")?;
             let y = y.parse().wrap_err("Bad y coordinate")?;
             Ok(Point::new(x, y))
@@ -94,7 +94,7 @@ impl std::str::FromStr for Segment {
 
         let (from, to) = s
             .split_once("->")
-            .ok_or_else(|| err!("Missing '->' separator: {}", s))?;
+            .wrap_err_with(|| format!("Missing '->' separator: {s}"))?;
 
         Ok(Self {
             from: point(from.trim()).wrap_err_with(|| from.to_owned())?,

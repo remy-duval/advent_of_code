@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use commons::grid::Point;
-use commons::{err, Result, WrapErr};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 6: Chronal Coordinates";
 const MAXIMUM_DISTANCE: i64 = 10_000;
@@ -11,7 +11,7 @@ pub fn run(raw: String) -> Result<()> {
     println!(
         "The largest finite area is of size {}",
         data.largest_finite_area()
-            .ok_or_else(|| err!("Could not find a finite area"))?
+            .wrap_err("Could not find a finite area")?
     );
 
     println!(
@@ -35,7 +35,7 @@ fn parse(s: &str) -> Result<Coordinates> {
                         .wrap_err_with(|| format!("Could not parse a number {part}"))
                 })
                 .collect_tuple::<(_, _)>()
-                .ok_or_else(|| err!("Expected '<X>, <Y>' but got: {line}"))?;
+                .wrap_err_with(|| format!("Expected '<X>, <Y>' but got: {line}"))?;
 
             Ok(Point::new(x?, y?))
         })

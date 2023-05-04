@@ -20,7 +20,7 @@ pub fn run(raw: String) -> Result<()> {
         "The claim #{} is intact",
         tissue
             .find_intact_claim()
-            .ok_or_else(|| err!("Could not find the intact claim on the tissue"))?
+            .wrap_err("Could not find the intact claim on the tissue")?
             .id
     );
 
@@ -123,7 +123,7 @@ impl FromStr for Claim {
             itertools::process_results(s.splitn(2, sep).map(|s| parse_int(s.trim())), |iter| {
                 iter.collect_tuple::<(_, _)>()
             })?
-            .ok_or_else(|| err!("Expected <FIRST>{s}<SECOND> for coordinates, got {sep}"))
+            .wrap_err_with(|| format!("Expected <FIRST>{s}<SECOND> for coordinates, got {sep}"))
         }
 
         let (id, claim) = s

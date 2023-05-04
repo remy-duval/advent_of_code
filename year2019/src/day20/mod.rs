@@ -1,9 +1,8 @@
 use std::collections::VecDeque;
-
 use std::collections::{HashMap, HashSet};
 
 use commons::grid::{Direction, Point};
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 20: Donut Maze";
 
@@ -24,12 +23,12 @@ pub fn run(raw: String) -> Result<()> {
 
 fn first_part(maze: &Maze) -> Result<usize> {
     maze.bfs("AA", "ZZ", true)
-        .ok_or_else(|| err!("Breadth first search error for traversal without recursion"))
+        .wrap_err("Breadth first search error for traversal without recursion")
 }
 
 fn second_part(maze: &Maze) -> Result<usize> {
     maze.bfs("AA", "ZZ", false)
-        .ok_or_else(|| err!("Breadth first search error for traversal with recursion"))
+        .wrap_err("Breadth first search error for traversal with recursion")
 }
 
 /// Represent the maze to traverse in this problem.

@@ -61,7 +61,7 @@ impl<Coordinate: Integer> Point<Coordinate> {
     /// Manhattan Distance between this point and the origin.
     #[inline]
     pub fn manhattan_distance(&self) -> Coordinate {
-        self.x.abs() + self.y.abs()
+        self.x.absolute_value() + self.y.absolute_value()
     }
 }
 

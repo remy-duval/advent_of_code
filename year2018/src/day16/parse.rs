@@ -116,17 +116,17 @@ impl FromStr for Sample {
     type Err = Report;
 
     fn from_str(s: &str) -> Result<Self> {
-        let (before, instruction, after) = s
-            .lines()
-            .collect_tuple::<(_, _, _)>()
-            .ok_or_else(|| err!("Expected register instruction register for a sample, got: {s}"))?;
+        let (before, instruction, after) =
+            s.lines().collect_tuple::<(_, _, _)>().wrap_err_with(|| {
+                format!("Expected register instruction register for a sample, got: {s}")
+            })?;
 
-        let before = before
-            .strip_prefix("Before:")
-            .ok_or_else(|| err!("Expected register instruction register for a sample, got: {s}"))?;
-        let after = after
-            .strip_prefix("After:")
-            .ok_or_else(|| err!("Expected register instruction register for a sample, got: {s}"))?;
+        let before = before.strip_prefix("Before:").wrap_err_with(|| {
+            format!("Expected register instruction register for a sample, got: {s}")
+        })?;
+        let after = after.strip_prefix("After:").wrap_err_with(|| {
+            format!("Expected register instruction register for a sample, got: {s}")
+        })?;
 
         Ok(Self {
             before: before.trim().parse()?,

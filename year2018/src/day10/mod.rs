@@ -146,7 +146,7 @@ impl std::str::FromStr for Light {
                         .map(|coord| parse_int(coord.trim()))
                         .collect_tuple::<(_, _)>()
                 })
-                .ok_or_else(|| err!("Bad format for point '<X, Y>>', got {point}"))?;
+                .wrap_err_with(|| format!("Bad format for point '<X, Y>>', got {point}"))?;
 
             Ok(Point::new(x?, y?))
         }

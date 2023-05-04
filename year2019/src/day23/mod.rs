@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
@@ -10,12 +10,12 @@ const NETWORK_SIZE: usize = 50;
 pub fn run(raw: String) -> Result<()> {
     let memory = parse(&raw)?.data;
     let output = run_until_nat_packet(&memory)
-        .ok_or_else(|| err!("No NAT packet received, but the network has stopped"))?;
+        .wrap_err("No NAT packet received, but the network has stopped")?;
     println!("First NAT packet was : {output}\n");
 
     println!("Starting network with NAT ON");
     let output = run_until_duplicate_wakeup(&memory)
-        .ok_or_else(|| err!("The network stopped before sending twice the same wakeup"))?;
+        .wrap_err("The network stopped before sending twice the same wakeup")?;
     println!("Duplicate Y wake-up was : {output}");
 
     Ok(())

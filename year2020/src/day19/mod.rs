@@ -5,7 +5,7 @@ use std::rc::Rc;
 use itertools::Itertools;
 use std::collections::HashMap;
 
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 19: Monster Messages";
 
@@ -13,12 +13,12 @@ pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw);
     println!(
         "There are {} valid words in the input",
-        first_part(&data).ok_or_else(|| err!("Failed to create the parser for P1"))?
+        first_part(&data).wrap_err("Failed to create the parser for P1")?
     );
 
     println!(
         "There are {} valid words in the input after modifying the rules",
-        second_part(data).ok_or_else(|| err!("Failed to create the parser for P2"))?
+        second_part(data).wrap_err("Failed to create the parser for P2")?
     );
 
     Ok(())

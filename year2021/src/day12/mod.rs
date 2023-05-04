@@ -1,4 +1,4 @@
-use commons::{err, Result};
+use commons::{err, Result, WrapErr};
 
 pub const TITLE: &str = "Day 12: Passage Pathing";
 
@@ -37,9 +37,9 @@ fn parse(s: &str) -> Result<Paths> {
     })?;
 
     let start = caves.iter().position(|c| c.id == "start");
-    let start = start.ok_or_else(|| err!("Missing start cave"))?;
+    let start = start.wrap_err("Missing start cave")?;
     let end = caves.iter().position(|c| c.id == "end");
-    let end = end.ok_or_else(|| err!("Missing end cave"))?;
+    let end = end.wrap_err("Missing end cave")?;
     Ok(Paths { start, end, caves })
 }
 

@@ -90,7 +90,7 @@ impl std::str::FromStr for Block {
             *into = line
                 .trim()
                 .strip_prefix(prefix)
-                .ok_or_else(|| err!("Missing '{prefix}' prefix"))
+                .wrap_err_with(|| format!("Missing '{prefix}' prefix"))
                 .and_then(|s| Ok(s.trim().parse::<i32>()?))
                 .wrap_err_with(|| format!("Expected '{prefix} <NUMBER>', got '{line}'"))?;
 

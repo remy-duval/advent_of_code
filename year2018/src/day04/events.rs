@@ -63,7 +63,7 @@ impl FromStr for TimedEvent {
         let (timestamp, event) = s
             .splitn(2, ']')
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| err!("Bad format for: [<TIMESTAMP>] <EVENT>, got {}", s))?;
+            .wrap_err_with(|| format!("Bad format for: [<TIMESTAMP>] <EVENT>, got {}", s))?;
 
         Ok(Self {
             timestamp: timestamp

@@ -9,7 +9,7 @@ use std::collections::HashSet;
 
 use commons::grid::Point;
 use commons::math::gcd;
-use commons::{err, Result, WrapErr};
+use commons::{Result, WrapErr};
 use commons::{CLEAR_COMMAND, TO_TOP};
 
 pub const TITLE: &str = "Day 10: Monitoring Station";
@@ -18,7 +18,7 @@ pub fn run(raw: String) -> Result<()> {
     let mut asteroids = parse(&raw);
     let (station, station_view) = asteroids
         .find_surveillance_point()
-        .ok_or_else(|| err!("Not found any surveillance point"))?;
+        .wrap_err("Not found any surveillance point")?;
     asteroids.set_station(station);
     println!("{asteroids}");
     let asteroids_count = station_view.len();

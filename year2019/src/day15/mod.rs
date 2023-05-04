@@ -4,8 +4,8 @@ use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
 use commons::grid::{Direction, Point};
-use commons::TO_TOP;
 use commons::{err, Result};
+use commons::{WrapErr, TO_TOP};
 
 use super::int_code::{IntCodeInput, Processor, Status};
 
@@ -36,7 +36,7 @@ fn first_part(map: &HashMap<Point, Tile>) -> Result<(Point, usize)> {
         bfs(Point::default(), map, |p, _| {
             matches!(map.get(&p), Some(Tile::OxygenSystem))
         })
-        .ok_or_else(|| err!("Breadth first search failed for path to the oxygen"))?,
+        .wrap_err("Breadth first search failed for path to the oxygen")?,
     );
     let oxygen = Direction::compute_movement(Point::default(), &path);
 

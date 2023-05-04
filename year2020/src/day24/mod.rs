@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 
 use commons::grid::Point;
 use commons::parse::LineSep;
-use commons::{err, Report, Result};
+use commons::{Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 24: Lobby Layout";
 
@@ -149,7 +149,7 @@ impl FromStr for Path {
                 }),
                 _ => None,
             }
-            .ok_or_else(|| err!("Unknown direction in line '{}'", line))?;
+            .wrap_err_with(|| format!("Unknown direction in line '{line}'"))?;
 
             path.push(direction);
         }

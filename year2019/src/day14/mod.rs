@@ -1,10 +1,9 @@
+use std::collections::HashMap;
 use std::iter::Iterator;
 use std::str::FromStr;
 
-use std::collections::HashMap;
-
 use commons::parse::LineSep;
-use commons::{err, Report, Result};
+use commons::{Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 14: Space Stoichiometry";
 const ORE: &str = "ORE";
@@ -132,20 +131,15 @@ impl FromStr for Reaction {
         }
 
         let mut split = s.split("=>");
-        let ingredients = split
-            .next()
-            .ok_or_else(|| err!("Could not find the ingredients"))?;
-        let product = split
-            .next()
-            .ok_or_else(|| err!("Could not find the product"))?;
+        let ingredients = split.next().wrap_err("Could not find the ingredients")?;
+        let product = split.next().wrap_err("Could not find the product")?;
 
         let ingredients = ingredients
             .split(',')
             .map(parse_ingredient)
             .collect::<Option<HashMap<_, _>>>()
-            .ok_or_else(|| err!("Could not parse the ingredients"))?;
-        let (result, times) =
-            parse_ingredient(product).ok_or_else(|| err!("Could not parse the product"))?;
+            .wrap_err("Could not parse the ingredients")?;
+        let (result, times) = parse_ingredient(product).wrap_err("Could not parse the product")?;
 
         Ok(Self {
             result,

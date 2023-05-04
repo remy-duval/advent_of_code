@@ -1,7 +1,8 @@
-use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
-use commons::{err, Result, WrapErr};
+use itertools::Itertools;
+
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 7: Handy Haversacks";
 pub fn run(raw: String) -> Result<()> {
@@ -34,7 +35,7 @@ fn parse(raw: &str) -> Result<Rules<'_>> {
             let (bag, rules) = line
                 .split_once("bags contain")
                 .map(|(a, b)| (a.trim(), b.trim()))
-                .ok_or_else(|| err!("Missing element in the string for a rule {}", line))?;
+                .wrap_err_with(|| format!("Missing element in the string for a rule {line}"))?;
 
             let rules = if rules == "no other bags" {
                 HashMap::new()
@@ -46,8 +47,8 @@ fn parse(raw: &str) -> Result<Rules<'_>> {
                         let (number, bag) = rule
                             .split_once(' ')
                             .map(|(a, b)| (a.trim(), b.trim()))
-                            .ok_or_else(|| {
-                                err!("Missing element in the string for a rule {}", rule)
+                            .wrap_err_with(|| {
+                                format!("Missing element in the string for a rule {rule}")
                             })?;
 
                         let number = number.parse::<u32>().wrap_err_with(|| {

@@ -66,7 +66,7 @@ impl Bingo {
                 })
         });
 
-        first.ok_or_else(|| err!("No board has won after all draws !"))
+        first.wrap_err("No board has won after all draws !")
     }
 
     /// Find the score of the last board to win in the draw
@@ -93,7 +93,7 @@ impl Bingo {
             }
         });
 
-        last.ok_or_else(|| err!("No board has won after all draws !"))
+        last.wrap_err("No board has won after all draws !")
     }
 }
 

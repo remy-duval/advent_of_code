@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use itertools::Itertools;
 use std::collections::HashSet;
 
-use commons::{err, Result};
+use commons::{Result, WrapErr};
 
 pub const TITLE: &str = "Day 12: Subterranean Sustainability";
 const FIFTY_BILLION: usize = 50_000_000_000;
@@ -35,9 +35,9 @@ fn parse(s: &str) -> Result<Rules> {
     let mut lines = s.lines();
     let initial_state = lines
         .next()
-        .ok_or_else(|| err!("Missing either the initial state or the rules {s}"))?
+        .wrap_err_with(|| format!("Missing either the initial state or the rules {s}"))?
         .strip_prefix("initial state:")
-        .ok_or_else(|| err!("Bad format for the initial state {s}"))?
+        .wrap_err_with(|| format!("Bad format for the initial state {s}"))?
         .trim();
 
     let mut rules = vec![false; 32];
@@ -46,7 +46,7 @@ fn parse(s: &str) -> Result<Rules> {
             .splitn(2, "=>")
             .map(str::trim)
             .collect_tuple::<(_, _)>()
-            .ok_or_else(|| err!("Bad format for a rule {line}"))?;
+            .wrap_err_with(|| format!("Bad format for a rule {line}"))?;
 
         let index = Rules::pattern(&state(pattern));
         let active = after.chars().next().map_or(false, |c| c == '#');

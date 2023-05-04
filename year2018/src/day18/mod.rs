@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use commons::grid::Grid;
-use commons::{err, Report, Result};
+use commons::{err, Report, Result, WrapErr};
 
 pub const TITLE: &str = "Day 18: Settlers of The North Pole";
 
@@ -12,8 +12,7 @@ pub fn run(raw: String) -> Result<()> {
     let first = trees * lumberyard;
     println!("After 10 minutes: {trees} trees and {lumberyard} lumberyards: {first} resources");
 
-    let second =
-        second_part(area).ok_or_else(|| err!("Could not find the period of the system"))?;
+    let second = second_part(area).wrap_err("Could not find the period of the system")?;
     println!("After one billion minutes: {second} resources");
 
     Ok(())

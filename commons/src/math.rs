@@ -22,7 +22,7 @@ pub trait Integer:
     /// The one value of the integer type
     const ONE: Self;
     /// Get the absolute value of this integer
-    fn abs(self) -> Self;
+    fn absolute_value(self) -> Self;
     /// The modulo of this number by another
     fn remainder_euclid(self, rhs: Self) -> Self;
 }
@@ -41,8 +41,8 @@ pub trait IntegerToFloat: Integer {
 
 /// Find the Greatest Common Divisor of two integers (positive)
 pub fn gcd<Int: Integer>(first: Int, second: Int) -> Int {
-    let mut dividend = first.abs();
-    let mut divisor = second.abs();
+    let mut dividend = first.absolute_value();
+    let mut divisor = second.absolute_value();
     while divisor != Int::ZERO {
         let new_divisor = dividend.remainder_euclid(divisor);
         dividend = divisor;
@@ -94,7 +94,7 @@ macro_rules! impl_signed {
             const ONE: Self = 1;
             const ZERO: Self = 0;
             #[inline]
-            fn abs(self) -> Self {
+            fn absolute_value(self) -> Self {
                 self.abs()
             }
             #[inline]
@@ -134,7 +134,7 @@ macro_rules! impl_unsigned {
             const ONE: Self = 1;
             const ZERO: Self = 0;
             #[inline]
-            fn abs(self) -> Self {
+            fn absolute_value(self) -> Self {
                 self
             }
             #[inline]

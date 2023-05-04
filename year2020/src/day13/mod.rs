@@ -7,7 +7,7 @@ pub const TITLE: &str = "Day 13: Shuttle Search";
 
 pub fn run(raw: String) -> Result<()> {
     let data = parse(&raw)?;
-    let (bus, time) = earliest(&data).ok_or_else(|| err!("No bus to find the earliest one"))?;
+    let (bus, time) = earliest(&data).wrap_err("No bus to find the earliest one")?;
 
     println!(
         "The earliest bus to depart with is {bus} by waiting {min}, product is {product}",
@@ -16,7 +16,7 @@ pub fn run(raw: String) -> Result<()> {
         product = bus * time
     );
 
-    let timestamp = second_part(&data.lines).ok_or_else(|| err!("No bus for second part"))??;
+    let timestamp = second_part(&data.lines).wrap_err("No bus for second part")??;
 
     println!("The earliest time at which all lines will start 1min after the other is {timestamp}");
 
