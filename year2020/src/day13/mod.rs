@@ -37,16 +37,16 @@ fn parse(s: &str) -> Result<Schedule> {
         .parse()
         .wrap_err_with(|| format!("Could not parse a bus line, got {first}"))?;
 
-    let lines: Vec<Option<Timestamp>> = second
+    let lines = second
         .split(',')
         .map(|elt| match elt.trim() {
             "x" => Ok(None),
             number => number
-                .parse::<Timestamp>()
+                .parse()
                 .map(Some)
                 .wrap_err_with(|| format!("Could not parse a timestamp, got {number}")),
         })
-        .try_collect()?;
+        .collect::<Result<Vec<Option<Timestamp>>>>()?;
 
     Ok(Schedule { timestamp, lines })
 }

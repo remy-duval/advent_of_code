@@ -202,7 +202,7 @@ fn parse_line(s: &str) -> Result<Vec<u16>> {
     s.split(',')
         .filter(|l| !l.is_empty())
         .map(parse_int)
-        .try_collect()
+        .collect()
 }
 
 /// Parse the valid tickets in a string

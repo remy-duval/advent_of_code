@@ -1,7 +1,7 @@
+use std::collections::HashSet;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use itertools::Itertools;
-use std::collections::HashSet;
 
 use commons::grid::Point;
 use commons::{err, Report, Result, WrapErr};
@@ -16,7 +16,10 @@ pub fn run(raw: String) -> Result<()> {
 }
 
 fn parse(s: &str) -> Result<Message> {
-    Ok(Message::new(s.lines().map(str::parse).try_collect()?))
+    s.lines()
+        .map(str::parse)
+        .collect::<Result<Vec<_>>>()
+        .map(Message::new)
 }
 
 /// The message formed from a gathering of points of light

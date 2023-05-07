@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use commons::{Result, WrapErr};
 
 mod folder;
@@ -14,12 +12,11 @@ pub fn run(raw: String) -> Result<()> {
 }
 
 fn parse(s: &str) -> Result<Tree> {
-    Ok(Tree(
-        s.split_whitespace()
-            .map(str::parse)
-            .try_collect()
-            .wrap_err("failed to parse the tree")?,
-    ))
+    s.split_whitespace()
+        .map(str::parse)
+        .collect::<Result<Vec<_>, _>>()
+        .map(Tree)
+        .wrap_err("failed to parse the tree")
 }
 
 /// A flattened tree

@@ -52,7 +52,10 @@ impl FromStr for Events {
     type Err = Report;
 
     fn from_str(s: &str) -> Result<Self> {
-        Ok(Self::new(s.lines().map(|line| line.parse()).try_collect()?))
+        s.lines()
+            .map(str::parse)
+            .collect::<Result<Vec<_>>>()
+            .map(Self::new)
     }
 }
 

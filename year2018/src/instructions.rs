@@ -2,8 +2,9 @@ use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
-use commons::{err, Report, Result, WrapErr};
 use itertools::Itertools;
+
+use commons::{bail, ensure, err, Report, Result, WrapErr};
 
 /// The type of an integer in the system
 pub type Int = i64;
@@ -184,7 +185,7 @@ impl FromStr for Program {
 
     fn from_str(s: &str) -> Result<Self> {
         let mut ip_index = 0;
-        let instructions: Vec<Instruction> = s
+        let instructions = s
             .lines()
             .filter_map(|line| {
                 if let Some(ip) = line.strip_prefix("#ip") {
@@ -199,9 +200,9 @@ impl FromStr for Program {
                     Some(line.parse())
                 }
             })
-            .try_collect()?;
+            .collect::<Result<Vec<Instruction>>>()?;
 
-        assert!(ip_index < 6, "instruction pointer out of bounds");
+        ensure!(ip_index < 6, "instruction pointer out of bounds");
         Ok(Self {
             ip_index,
             registers: [0; 6],
@@ -258,7 +259,7 @@ impl FromStr for OpCode {
             "eqir" => Ok(Self::EqIR),
             "eqri" => Ok(Self::EqRI),
             "eqrr" => Ok(Self::EqRR),
-            other => Err(err!("Unknown op code {other}")),
+            other => bail!("Unknown op code {other}"),
         }
     }
 }

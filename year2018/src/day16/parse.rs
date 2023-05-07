@@ -141,22 +141,22 @@ impl FromStr for Program {
 
     fn from_str(s: &str) -> Result<Self> {
         let mut blocks = sep_by_empty_lines(s).peekable();
-        let samples: Vec<Sample> = blocks
+        let samples = blocks
             .peeking_take_while(|s| s.starts_with("Before:"))
             .map(str::parse)
-            .try_collect()?;
+            .collect::<Result<Vec<Sample>>>()?;
 
         // Discard empty lines until the test program
         while blocks.peek().map_or(false, |s| s.is_empty()) {
             blocks.next();
         }
 
-        let program: Vec<Instruction> = blocks
+        let program = blocks
             .next()
-            .unwrap_or("")
+            .unwrap_or_default()
             .lines()
             .map(str::parse)
-            .try_collect()?;
+            .collect::<Result<Vec<Instruction>>>()?;
 
         Ok(Self { samples, program })
     }

@@ -231,16 +231,6 @@ impl<T> Grid<T> {
         }
     }
 
-    /// The data of this Grid in a single line
-    pub fn flattened(&self) -> &[T] {
-        &self.storage
-    }
-
-    /// The mutable data of this Grid in a single line
-    pub fn flattened_mut(&mut self) -> &mut [T] {
-        &mut self.storage
-    }
-
     /// An iterator on the flattened content of the Grid
     pub fn iter(&self) -> std::slice::Iter<'_, T> {
         self.storage.iter()
@@ -300,13 +290,13 @@ impl<T: std::fmt::Display> std::fmt::Display for Grid<T> {
 
 impl<T> AsRef<[T]> for Grid<T> {
     fn as_ref(&self) -> &[T] {
-        self.flattened()
+        self.storage.as_ref()
     }
 }
 
 impl<T> AsMut<[T]> for Grid<T> {
     fn as_mut(&mut self) -> &mut [T] {
-        self.flattened_mut()
+        self.storage.as_mut()
     }
 }
 
@@ -386,7 +376,7 @@ mod tests {
         let created: Grid<usize> = Grid::new(5, 4);
         assert_eq!(created.width(), 5);
         assert_eq!(created.height(), 0);
-        assert_eq!(created.flattened(), &[]);
+        assert_eq!(created.as_ref(), &[]);
     }
 
     #[test]
@@ -395,7 +385,7 @@ mod tests {
         assert_eq!(created.width(), 5);
         assert_eq!(created.height(), 4);
         assert_eq!(
-            created.flattened(),
+            created.as_ref(),
             &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
         )
     }
@@ -405,7 +395,7 @@ mod tests {
         let created = Grid::fill(2, 2, 3);
         assert_eq!(created.width(), 2);
         assert_eq!(created.height(), 2);
-        assert_eq!(created.flattened(), &[3, 3, 3, 3])
+        assert_eq!(created.as_ref(), &[3, 3, 3, 3])
     }
 
     #[test]
@@ -413,7 +403,7 @@ mod tests {
         let created: Grid<usize> = Grid::with_default(2, 2);
         assert_eq!(created.width(), 2);
         assert_eq!(created.height(), 2);
-        assert_eq!(created.flattened(), &[0, 0, 0, 0])
+        assert_eq!(created.as_ref(), &[0, 0, 0, 0])
     }
 
     #[test]
@@ -424,7 +414,7 @@ mod tests {
         let added_line = grid.insert_default_line();
         added_line[2] = 69;
         assert_eq!(
-            grid.flattened(),
+            grid.as_ref(),
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 0, 0]
         )
     }
@@ -499,7 +489,7 @@ mod tests {
         let added_line = grid.insert_filled_line(|i| 3 * i);
         added_line[2] = 500;
         assert_eq!(
-            grid.flattened(),
+            grid.as_ref(),
             &[0, 1, 2, 3, 4, 0, 2, 4, 6, 8, 0, 3, 500, 9, 12]
         )
     }
