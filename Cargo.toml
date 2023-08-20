@@ -7,6 +7,9 @@ members = [
     "year2021"
 ]
 
+[workspace.dependencies]
+itertools = "0.11.0"
+
 [profile.release]
 lto = 'thin'
 strip = true

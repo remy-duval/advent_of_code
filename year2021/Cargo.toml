@@ -5,7 +5,5 @@ authors = ["Remy Duval <remy_duval@laposte.net>"]
 edition = "2021"
 
 [dependencies]
-itertools = "0.10.5"
-
-[dependencies.commons]
-path = "../commons"
+itertools.workspace = true
+commons.path = "../commons"
