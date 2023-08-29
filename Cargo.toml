@@ -1,10 +1,12 @@
 [workspace]
+resolver = "2"
 members = [
     "commons",
     "year2018",
     "year2019",
     "year2020",
-    "year2021"
+    "year2021",
+    "year2022"
 ]
 
 [workspace.dependencies]
