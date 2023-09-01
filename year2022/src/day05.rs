@@ -77,7 +77,7 @@ impl FromStr for Stacks {
 
                 let stack = &mut stacks[i];
                 match c {
-                    c @ 'A'..='Z' => stack.push(c),
+                    c if c.is_ascii_uppercase() => stack.push(c),
                     ' ' => (),
                     _ => return Err(err!("unknown stack letter {c}")),
                 }

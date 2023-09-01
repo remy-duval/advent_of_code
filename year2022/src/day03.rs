@@ -72,10 +72,12 @@ impl FromStr for Rucksack {
         let mut first = Compartment(0);
         let mut second = Compartment(0);
         for (i, character) in line.chars().enumerate() {
-            let priority = match character as u8 {
-                c @ b'A'..=b'Z' => c - b'A' + 27,
-                c @ b'a'..=b'z' => c - b'a' + 1,
-                _ => return Err(err!("Unknown item in sack '{character}'")),
+            let priority = if character.is_ascii_uppercase() {
+                character as u8 - b'A' + 27
+            } else if character.is_ascii_lowercase() {
+                character as u8 - b'a' + 1
+            } else {
+                return Err(err!("Unknown item in sack '{character}'"));
             };
 
             if i < mid {
