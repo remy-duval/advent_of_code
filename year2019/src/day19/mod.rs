@@ -58,14 +58,14 @@ fn find_first_square(drone: &[i64], size: i64) -> Point {
     loop {
         // Realign the point with the beam if it exited it.
         while !check_position(drone, start) {
-            start = start + Point::new(1, 0);
+            start += Point::new(1, 0);
         }
 
         // Check if we have a valid square (our position is OK, just need to check the top)
         if check_position(drone, start + Point::new(diff, -diff)) {
             return start + Point::new(0, -diff);
         }
-        start = start + Point::new(0, 1);
+        start += Point::new(0, 1);
     }
 }
 

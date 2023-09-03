@@ -226,7 +226,7 @@ impl AsteroidField {
 
         let mut current = *blockade;
         std::iter::from_fn(move || {
-            current = current + unit;
+            current += unit;
             if check_bounds(&current, max) {
                 Some(current)
             } else {

@@ -36,7 +36,7 @@ fn first_part(instructions: &[Instruction]) -> Point {
     move_ship(
         Ship::new(Direction::East.offset()),
         instructions,
-        |ship, offset| ship.position = ship.position + offset,
+        |ship, offset| ship.position += offset,
     )
     .position
 }
@@ -46,7 +46,7 @@ fn second_part(instructions: &[Instruction]) -> Point {
     move_ship(
         Ship::new(Point::new(10, -1)),
         instructions,
-        |ship, offset| ship.waypoint = ship.waypoint + offset,
+        |ship, offset| ship.waypoint += offset,
     )
     .position
 }
@@ -73,7 +73,7 @@ where
 {
     let mut ship = initial;
     instructions.iter().for_each(|inst| match *inst {
-        Instruction::Forward(n) => ship.position = ship.position + ship.waypoint.multiply(n),
+        Instruction::Forward(n) => ship.position += ship.waypoint.multiply(n),
         Instruction::Move(direction, n) => on_move(&mut ship, direction.offset().multiply(n)),
         Instruction::RotateLeft(n) => {
             ship.waypoint = (0..n).fold(ship.waypoint, |p, _| rotate_left(p));

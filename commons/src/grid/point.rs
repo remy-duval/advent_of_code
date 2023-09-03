@@ -2,7 +2,7 @@
 //! - [Point](Point): A 2D Point in a plane, used in a lot of AoC problems
 //! - [Direction](Direction): A 2D direction used to move [Point](Point)s around
 
-use std::ops::{Add, Sub};
+use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::math::{Integer, IntegerToFloat, SignedInteger};
 
@@ -105,12 +105,24 @@ impl<Coordinate: Integer> Add<Point<Coordinate>> for Point<Coordinate> {
     }
 }
 
+impl<Coordinate: Integer> AddAssign<Point<Coordinate>> for Point<Coordinate> {
+    fn add_assign(&mut self, rhs: Point<Coordinate>) {
+        *self = self.addition(&rhs);
+    }
+}
+
 impl<Coordinate: Integer> Add<&Point<Coordinate>> for Point<Coordinate> {
     type Output = Point<Coordinate>;
 
     #[inline]
     fn add(self, rhs: &Point<Coordinate>) -> Self::Output {
         self.addition(rhs)
+    }
+}
+
+impl<Coordinate: Integer> AddAssign<&Point<Coordinate>> for Point<Coordinate> {
+    fn add_assign(&mut self, rhs: &Point<Coordinate>) {
+        *self = self.addition(rhs);
     }
 }
 
@@ -123,12 +135,24 @@ impl<Coordinate: Integer> Sub<Point<Coordinate>> for Point<Coordinate> {
     }
 }
 
+impl<Coordinate: Integer> SubAssign<Point<Coordinate>> for Point<Coordinate> {
+    fn sub_assign(&mut self, rhs: Point<Coordinate>) {
+        *self = self.subtract(&rhs);
+    }
+}
+
 impl<Coordinate: Integer> Sub<&Point<Coordinate>> for Point<Coordinate> {
     type Output = Point<Coordinate>;
 
     #[inline]
     fn sub(self, rhs: &Point<Coordinate>) -> Self::Output {
         self.subtract(rhs)
+    }
+}
+
+impl<Coordinate: Integer> SubAssign<&Point<Coordinate>> for Point<Coordinate> {
+    fn sub_assign(&mut self, rhs: &Point<Coordinate>) {
+        *self = self.subtract(rhs);
     }
 }
 
@@ -222,6 +246,34 @@ mod tests {
     use std::f64::consts;
 
     use super::{Direction, Point};
+
+    #[test]
+    fn operators() {
+        let mut a = Point::new(6, -2);
+        let mut b = Point::new(43, 7);
+
+        assert_eq!(a + b, Point::new(49, 5));
+        assert_eq!(a + &b, Point::new(49, 5));
+        assert_eq!(a - b, Point::new(-37, -9));
+        assert_eq!(a - &b, Point::new(-37, -9));
+
+        a += b;
+        a += Point::new(0, 1);
+        a += Point::new(2, 0);
+        assert_eq!(a, Point::new(51, 6));
+        a -= b;
+        a -= Point::new(2, 1);
+        assert_eq!(a, Point::new(6, -2));
+
+        b += &a;
+        b += &Point::new(42, 3);
+        b += &Point::new(-6, 7);
+        assert_eq!(b, Point::new(85, 15));
+        b -= &a;
+        b -= &Point::new(-6, 7);
+        b -= &Point::new(42, 3);
+        assert_eq!(b, Point::new(43, 7));
+    }
 
     #[test]
     fn point_algebra() {

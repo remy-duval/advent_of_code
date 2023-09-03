@@ -120,12 +120,12 @@ struct Light {
 impl Light {
     /// Advance the light by one step
     pub fn advance(&mut self) {
-        self.position = self.position + self.velocity;
+        self.position += self.velocity;
     }
 
     /// Reverse the light by one step
     pub fn reverse(&mut self) {
-        self.position = self.position - self.velocity;
+        self.position -= self.velocity;
     }
 }
 
