@@ -26,6 +26,7 @@ fn first_part(monkeys: &[Monkey]) -> Count {
 }
 
 fn second_part(monkeys: &[Monkey]) -> Count {
+    // This should conserve divisibility (because all the divisor here are primes)
     let modulo_by: Item = monkeys.iter().map(|m| m.divisible).product();
     simulate(monkeys, 10000, |level| level % modulo_by)
 }
