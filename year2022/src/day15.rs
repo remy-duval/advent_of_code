@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::ops::Range;
 use std::str::FromStr;
 
@@ -25,56 +26,76 @@ pub fn run(raw: String) -> Result<()> {
 }
 
 fn first_part(sensors: &[Sensor], y: i64) -> u64 {
-    excluded_ranges(&mut Vec::new(), sensors, y, i64::MIN..i64::MAX)
+    // Compute the excluded ranges of X position for each sensor
+    sensors
+        .iter()
+        .filter_map(|sensor| {
+            let distance = (sensor.sensor - sensor.beacon).manhattan_distance() as u64;
+            let x_diff = distance.checked_sub(sensor.sensor.y.abs_diff(y))? as i64;
+            let start = sensor.sensor.x - x_diff;
+            let end = sensor.sensor.x + x_diff + 1;
+            if start <= end {
+                Some(start..end)
+            } else {
+                None
+            }
+        })
+        .sorted_unstable_by_key(|r| r.start)
+        .coalesce(|first, second| {
+            // Merge overlapping ranges as their start are now sorted
+            if first.end >= second.start {
+                Ok(first.start..second.end.max(first.end))
+            } else {
+                Err((first, second))
+            }
+        })
         .map(|range| range.end.abs_diff(range.start).saturating_sub(1))
         .sum()
 }
 
 fn second_part(sensors: &[Sensor], coordinates: Range<i64>) -> Option<i64> {
-    let mut buf = Vec::new();
-    coordinates
-        .clone()
-        .rev()
-        .find_map(
-            // Brute-force solution: check for each Y if there is a candidate X
-            |y| match excluded_ranges(&mut buf, sensors, y, coordinates.clone()).next() {
-                Some(x) if x.end < coordinates.end => Some((x.end, y)),
-                Some(x) if x.start > coordinates.start => Some((x.start - 1, y)),
-                _ => None,
-            },
-        )
-        .map(|(x, y)| {
-            println!("Distress beacon at position x={x}, y={y}");
-            x * MAX_COORDINATE + y
-        })
-}
+    // Y coordinate intersection at X=0 of lines that border each sensor exclusion zone
+    let mut upward_lines_y: BTreeSet<i64> = BTreeSet::new(); // For lines with slope 1,1
+    let mut downward_lines_y: BTreeSet<i64> = BTreeSet::new(); // For lines with slope -1,-1
+    for sensor in sensors {
+        let border = (sensor.sensor - sensor.beacon).manhattan_distance() + 1;
+        let left = sensor.sensor + Point::new(-border, 0);
+        let right = sensor.sensor + Point::new(border, 0);
+        upward_lines_y.insert(left.y - left.x);
+        downward_lines_y.insert(left.y + left.x);
+        upward_lines_y.insert(right.y - right.x);
+        downward_lines_y.insert(right.y + right.x);
+    }
 
-fn excluded_ranges<'a>(
-    buffer: &'a mut Vec<Range<i64>>, // Avoid doing too many allocations in a loop
-    sensors: &[Sensor],
-    y: i64,
-    x: Range<i64>,
-) -> impl Iterator<Item = Range<i64>> + 'a {
-    buffer.extend(sensors.iter().filter_map(|sensor| {
-        let distance = (sensor.sensor - sensor.beacon).manhattan_distance() as u64;
-        let x_diff = distance.checked_sub(sensor.sensor.y.abs_diff(y))? as i64;
-        let start = (sensor.sensor.x - x_diff).max(x.start);
-        let end = (sensor.sensor.x + x_diff + 1).min(x.end);
-        if start <= end {
-            Some(start..end)
-        } else {
-            None
-        }
-    }));
-    buffer.sort_unstable_by_key(|r| r.start);
-    buffer.drain(..).coalesce(|first, second| {
-        // Merge overlapping ranges
-        if first.end >= second.start {
-            Ok(first.start..second.end.max(first.end))
-        } else {
-            Err((first, second))
-        }
-    })
+    upward_lines_y
+        .iter()
+        .cartesian_product(downward_lines_y.iter())
+        .filter_map(|(up, down)| {
+            // Compute all intersections Y of the sensor exclusion zones border
+            // There is only 1 possible slot for the distress beacon
+            // This means it must be on 2+ of the borders of sensor exclusion zones
+            // Restrict the search space to positions where 2 exclusions borders are touching
+            let diff = down.abs_diff(*up) as i64;
+            if diff % 2 == 0 {
+                let point = Point::new(diff / 2, *up + diff / 2);
+                if coordinates.contains(&point.x) && coordinates.contains(&point.y) {
+                    Some(point)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .find(|candidate| {
+            // Check that the candidate point is actually outside the exclusion of all sensors
+            sensors.iter().all(|sensor| {
+                let min_distance = (sensor.sensor - sensor.beacon).manhattan_distance();
+                let distance = (sensor.sensor - candidate).manhattan_distance();
+                distance > min_distance
+            })
+        })
+        .map(|found| found.x * MAX_COORDINATE + found.y)
 }
 
 #[derive(Debug)]
