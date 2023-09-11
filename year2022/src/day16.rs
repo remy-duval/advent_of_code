@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::ops::BitAnd;
 use std::str::FromStr;
 
 use itertools::Itertools;
@@ -20,39 +21,33 @@ pub fn run(raw: String) -> Result<()> {
 }
 
 fn first_part(dist: &Distances) -> u32 {
-    let mut cache = HashMap::new();
-    let opened = ValveSet::EMPTY.add(dist.start);
-    dist.compute(&mut cache, dist.start, 31, opened, opened)
+    // This will compute the maximum value reached for each set of valve
+    // The overall maximum of this mapping will be the answer
+    dist.compute_max_values(30)
+        .into_values()
+        .max()
+        .unwrap_or_default()
 }
 
 fn second_part(dist: &Distances) -> u32 {
-    let mut cache = HashMap::new();
-    let all = (0..dist.to_open.len()).fold(ValveSet::EMPTY, |acc, i| acc.add(i));
-    (1..dist.to_open.len())
-        .flat_map(|i| (0..dist.to_open.len()).combinations(i))
-        .map(|e| e.into_iter().fold(ValveSet::EMPTY, |acc, i| acc.add(i)))
-        .map(|excluded| {
-            let first = dist.compute(
-                &mut cache,
-                dist.start,
-                27,
-                ValveSet::EMPTY.add(dist.start),
-                excluded,
-            );
-            let second = dist.compute(
-                &mut cache,
-                dist.start,
-                27,
-                ValveSet::EMPTY.add(dist.start),
-                excluded.xor(all),
-            );
-            first + second
+    // This time two explorations are going on simultaneously
+    // Pairs of distinct explorations (only sharing the start) can be summed to compute a duo
+    // Find the maximum value of all those pairs by just doing a cartesian product of the maxes
+    let max_values = dist.compute_max_values(26);
+    let only_start = ValveSet::EMPTY.add(dist.start);
+    max_values
+        .iter()
+        .flat_map(|(&set1, &total1)| {
+            max_values
+                .iter()
+                .filter(move |(set2, _)| (set1 & **set2) == only_start)
+                .map(move |(_, &total2)| total1 + total2)
         })
         .max()
         .unwrap_or_default()
 }
 
-#[derive(Debug)]
+/// A set of distances between all non broken valves (flow rates != 0)
 struct Distances {
     start: usize,
     to_open: Vec<Valve>,
@@ -105,48 +100,40 @@ impl Distances {
         })
     }
 
-    fn compute(
-        &self,
-        cache: &mut HashMap<(usize, u32, ValveSet, ValveSet), u32>,
-        pos: usize,
-        time_left: u32,
-        opened: ValveSet,
-        excluded: ValveSet,
-    ) -> u32 {
-        match cache.get(&(pos, time_left, opened, excluded)).copied() {
-            Some(cached) => cached,
-            None => {
-                let mut max = 0;
-                if let Some(time_left) = time_left.checked_sub(1) {
-                    let flow = self.to_open[pos].flow_rate * time_left;
-                    max = flow;
-                    for &(next, distance) in self.distances[pos].iter() {
-                        if opened.contains(next) || excluded.contains(next) {
-                            continue;
-                        }
-                        let opened = opened.add(next);
-                        if let Some(time_left) = time_left.checked_sub(distance) {
-                            let after = self.compute(cache, next, time_left, opened, excluded);
-                            max = max.max(after + flow);
-                        }
-                    }
-                }
+    /// Find the maximum value reached for each combination of valves explored in the time given
+    fn compute_max_values(&self, time_available: u32) -> HashMap<ValveSet, u32> {
+        let mut max_values = HashMap::new();
+        let mut stack = vec![(self.start, time_available, 0, ValveSet::EMPTY)];
+        while let Some((pos, time_left, current, opened)) = stack.pop() {
+            let current = current + self.to_open[pos].flow_rate * time_left;
+            let opened = opened.add(pos);
+            max_values
+                .entry(opened)
+                .and_modify(|max| *max = current.max(*max))
+                .or_insert(current);
 
-                cache.insert((pos, time_left, opened, excluded), max);
-                max
+            for &(next, time_consumed) in self.distances[pos].iter() {
+                if opened.contains(next) {
+                    continue;
+                }
+                if let Some(time_left) = time_left.checked_sub(time_consumed + 1) {
+                    stack.push((next, time_left, current, opened));
+                }
             }
         }
+
+        max_values
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct Valve {
     name: Id,
     flow_rate: u32,
     tunnels: Vec<Id>,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 struct ValveSet(u64);
 
 impl ValveSet {
@@ -159,9 +146,13 @@ impl ValveSet {
     fn contains(self, index: usize) -> bool {
         self.0 & (1 << index as u64) != 0
     }
+}
 
-    fn xor(self, other: Self) -> Self {
-        Self(self.0 ^ other.0)
+impl BitAnd for ValveSet {
+    type Output = ValveSet;
+
+    fn bitand(self, rhs: Self) -> Self {
+        Self(self.0 & rhs.0)
     }
 }
 
