@@ -96,7 +96,7 @@ impl GameState {
         loop {
             match engine.read_next_array(&mut outputs, 3) {
                 (_, Some(status)) => return status,
-                (read, _) if read == 3 => self.update((outputs[0], outputs[1], outputs[2])),
+                (3, _) => self.update((outputs[0], outputs[1], outputs[2])),
                 _ => return Status::Halted,
             }
             if show {
