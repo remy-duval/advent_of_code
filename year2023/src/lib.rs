@@ -7,8 +7,8 @@ use commons::Result;
 mod day01;
 mod day02;
 mod day03;
-// mod day04;
-// mod day05;
+mod day04;
+mod day05;
 // mod day06;
 // mod day07;
 // mod day08;
@@ -36,8 +36,8 @@ pub fn solve_problem(day: Day, input: PathBuf) -> Result<()> {
         Day::Day1 => solve_verbose(day01::TITLE, input, day01::run),
         Day::Day2 => solve_verbose(day02::TITLE, input, day02::run),
         Day::Day3 => solve_verbose(day03::TITLE, input, day03::run),
-        // Day::Day4 => solve_verbose(day04::TITLE, input, day04::run),
-        // Day::Day5 => solve_verbose(day05::TITLE, input, day05::run),
+        Day::Day4 => solve_verbose(day04::TITLE, input, day04::run),
+        Day::Day5 => solve_verbose(day05::TITLE, input, day05::run),
         // Day::Day6 => solve_verbose(day06::TITLE, input, day06::run),
         // Day::Day7 => solve_verbose(day07::TITLE, input, day07::run),
         // Day::Day8 => solve_verbose(day08::TITLE, input, day08::run),
@@ -69,8 +69,8 @@ pub fn solve_all(dir: PathBuf) -> Result<()> {
         solve_quiet(1, dir.join("01.txt"), day01::run)?;
         solve_quiet(2, dir.join("02.txt"), day02::run)?;
         solve_quiet(3, dir.join("03.txt"), day03::run)?;
-        // solve_quiet(4, dir.join("04.txt"), day04::run)?;
-        // solve_quiet(5, dir.join("05.txt"), day05::run)?;
+        solve_quiet(4, dir.join("04.txt"), day04::run)?;
+        solve_quiet(5, dir.join("05.txt"), day05::run)?;
         // solve_quiet(6, dir.join("06.txt"), day06::run)?;
         // solve_quiet(7, dir.join("07.txt"), day07::run)?;
         // solve_quiet(8, dir.join("08.txt"), day08::run)?;
