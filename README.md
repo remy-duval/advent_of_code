@@ -11,6 +11,7 @@ This is mostly a learning experience with Rust, so the solutions are probably me
 * 2020 - `advent_of_code_2020`
 * 2021 - `advent_of_code_2021`
 * 2022 - `advent_of_code_2022`
+* 2023 - `advent_of_code_2023`
 
 ### Output
 

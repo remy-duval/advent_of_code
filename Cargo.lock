@@ -43,6 +43,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "advent_of_code_2023"
+version = "0.1.0"
+dependencies = [
+ "commons",
+ "itertools",
+]
+
+[[package]]
 name = "commons"
 version = "0.1.0"
 
