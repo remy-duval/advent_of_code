@@ -4,13 +4,6 @@ const A: &str = include_str!("example.txt");
 const B: &str = include_str!("data.txt");
 
 #[test]
-fn test_chinese_remainder_theorem() {
-    let values = vec![(0, 3), (3, 4), (4, 5)];
-    let result = chinese_remainder_theorem(values).unwrap().unwrap();
-    assert_eq!(result, 39);
-}
-
-#[test]
 fn first_part_test_a() {
     let resource = parse(A).unwrap();
     let (bus, time) = earliest(&resource).unwrap();

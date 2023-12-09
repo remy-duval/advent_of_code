@@ -88,6 +88,75 @@ pub fn extended_gcd<Int: SignedInteger>(first: Int, second: Int) -> ExtendedGcd<
     current
 }
 
+#[derive(Debug)]
+pub struct NotCoPrimeError<Int> {
+    n1: Int,
+    n2: Int,
+    gcd: Int,
+}
+
+impl<Int: std::fmt::Display> std::fmt::Display for NotCoPrimeError<Int> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} and {} are not co-prime (their gcd is {})",
+            self.n1, self.n2, self.gcd
+        )
+    }
+}
+
+impl<Int: std::fmt::Debug + std::fmt::Display> std::error::Error for NotCoPrimeError<Int> {}
+
+/// Apply the [`Chinese remainder theorem`] on more than two values:
+/// * `x mod n1 == a1`
+/// * `x mod n2 == a2`
+/// * `x mod n3 == a3`
+/// * etc...
+///
+/// ### Arguments
+/// * `a_n` - An iterator over (ai, ni)
+///
+/// ### Returns
+/// None if `a_n` is empty
+/// Some(Ok(x)) if all the n are co-primes where x is positive
+/// Some(Err) if at least on the n are not co-primes
+///
+/// [`Chinese remainder theorem`]: https://en.wikipedia.org/wiki/Chinese_remainder_theorem
+pub fn chinese_remainder_theorem<Int: SignedInteger + PartialOrd>(
+    a_n: impl IntoIterator<Item = (Int, Int)>,
+) -> Option<Result<Int, NotCoPrimeError<Int>>> {
+    let mut a_n = a_n.into_iter();
+    let first = a_n.next()?;
+    let result = a_n.try_fold(first, |(a1, n1), (a2, n2)| {
+        let x = chinese_remainder_theorem_2((a1, a2), (n1, n2))?;
+        Ok((x, n1 * n2))
+    });
+
+    Some(result.map(|(x, _)| x))
+}
+
+/// Apply the [`Chinese remainder theorem`] for two values, finding the smallest `x` such that:
+/// * `x mod n1 == a1`
+/// * `x mod n2 == a2`
+///
+/// ### Returns
+/// An x (positive or negative) that satisfies the constraints
+///
+/// [`Chinese remainder theorem`]: https://en.wikipedia.org/wiki/Chinese_remainder_theorem
+pub fn chinese_remainder_theorem_2<Int: SignedInteger + PartialOrd>(
+    (a1, a2): (Int, Int),
+    (n1, n2): (Int, Int),
+) -> Result<Int, NotCoPrimeError<Int>> {
+    let ExtendedGcd { a, b, gcd } = extended_gcd(n1, n2);
+    if gcd == Int::ONE {
+        let n = n1 * n2;
+        let x = a1 * b * n2 + a2 * a * n1;
+        Ok(if x < Int::ZERO { x % n + n } else { x % n })
+    } else {
+        Err(NotCoPrimeError { n1, n2, gcd })
+    }
+}
+
 macro_rules! impl_signed {
     ($t:ty) => {
         impl Integer for $t {
@@ -278,5 +347,12 @@ mod tests {
         assert_eq!(extended_gcd::<i32>(240, 46), ExtendedGcd::new(-9, 47, 2));
         assert_eq!(extended_gcd::<i64>(240, 46), ExtendedGcd::new(-9, 47, 2));
         assert_eq!(extended_gcd::<i128>(240, 46), ExtendedGcd::new(-9, 47, 2));
+    }
+
+    #[test]
+    fn test_chinese_remainder_theorem() {
+        let values = vec![(0, 3), (3, 4), (4, 5)];
+        let result = chinese_remainder_theorem(values).unwrap().unwrap();
+        assert_eq!(result, 39);
     }
 }
