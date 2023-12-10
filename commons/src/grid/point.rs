@@ -19,6 +19,11 @@ impl<Coordinate> Point<Coordinate> {
     pub const fn new(x: Coordinate, y: Coordinate) -> Self {
         Self { x, y }
     }
+
+    #[inline]
+    pub fn tupled(self) -> (Coordinate, Coordinate) {
+        (self.x, self.y)
+    }
 }
 
 impl<Coordinate: Integer> Point<Coordinate> {
