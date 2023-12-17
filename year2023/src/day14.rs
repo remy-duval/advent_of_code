@@ -135,17 +135,6 @@ fn tilt_horizontal<const EAST: bool>(grid: &mut Grid<Tile>) {
     }
 }
 
-impl std::fmt::Display for Tile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::fmt::Write;
-        f.write_char(match self {
-            Tile::Empty => '.',
-            Tile::MovingRock => 'O',
-            Tile::FixedRock => '#',
-        })
-    }
-}
-
 fn parse(s: std::borrow::Cow<'static, str>) -> Result<Grid<Tile>> {
     let width = s.lines().next().wrap_err("empty input")?.trim().len();
     let tiles = s

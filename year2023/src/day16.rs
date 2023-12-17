@@ -57,18 +57,6 @@ enum State {
     CrossedBeams,
 }
 
-impl std::fmt::Display for State {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::fmt::Write;
-        f.write_char(match self {
-            State::Empty => '.',
-            State::HorizontalBeam => '-',
-            State::VerticalBeam => '|',
-            State::CrossedBeams => '+',
-        })
-    }
-}
-
 impl State {
     fn with_beam(self, direction: Direction) -> Self {
         match self {
