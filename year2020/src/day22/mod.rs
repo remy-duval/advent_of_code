@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use std::hash::{BuildHasher, Hash, Hasher};
+use std::hash::{BuildHasher, Hash};
 
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
@@ -83,9 +83,7 @@ impl Game {
         // At the cost of some hash collisions, but they should be rare enough
         // And since a loop has many rounds, the potential collisions should not break anything
         fn hashed(game: &Game, builder: &impl BuildHasher) -> u64 {
-            let mut hasher = builder.build_hasher();
-            game.hash(&mut hasher);
-            hasher.finish()
+            builder.hash_one(game)
         }
 
         let memoized = hashed(self, known_games.hasher());

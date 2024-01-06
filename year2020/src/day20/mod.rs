@@ -66,7 +66,7 @@ fn parse(s: &str) -> Result<Vec<Tile>> {
 
 /// From an ordered array of tiles, get the four corners and multiply their ID
 fn first_part(image: &[Tile], width: usize) -> Option<usize> {
-    let a = image.get(0)?.id as usize;
+    let a = image.first()?.id as usize;
     let b = image.get(width - 1)?.id as usize;
     let c = image.get(width * (width - 1))?.id as usize;
     let d = image.get(width * width - 1)?.id as usize;
@@ -214,7 +214,7 @@ fn match_sea_monster(array: [&str; 3]) -> impl Fn([&[char]; 3]) -> bool {
 fn find_neighbours(tiles: &[Tile], width: usize) -> Option<HashMap<Tile, [Option<Tile>; 4]>> {
     let mut mappings = HashMap::with_capacity(width * width);
     let mut stack = Vec::with_capacity(width * width);
-    stack.push(tiles.get(0).cloned()?);
+    stack.push(tiles.first().cloned()?);
 
     while let Some(tile) = stack.pop() {
         let filtered = |other: &&Tile| other.id != tile.id;
