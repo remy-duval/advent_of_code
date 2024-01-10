@@ -7,3 +7,4 @@ edition = "2021"
 [dependencies]
 itertools.workspace = true
 commons.path = "../commons"
+num-bigint = "0.4"
