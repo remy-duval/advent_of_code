@@ -28,7 +28,7 @@ mod day21;
 mod day22;
 mod day23;
 mod day24;
-// mod day25;
+mod day25;
 
 /// Dispatch to the correct problem and solve it
 pub fn solve_problem(day: Day, input: PathBuf) -> Result<()> {
@@ -57,9 +57,8 @@ pub fn solve_problem(day: Day, input: PathBuf) -> Result<()> {
         Day::Day22 => solve_verbose(day22::TITLE, input, day22::run),
         Day::Day23 => solve_verbose(day23::TITLE, input, day23::run),
         Day::Day24 => solve_verbose(day24::TITLE, input, day24::run),
-        // Day::Day25 => solve_verbose(day25::TITLE, input, day25::run),
+        Day::Day25 => solve_verbose(day25::TITLE, input, day25::run),
         Day::All => solve_all(input),
-        other => Err(commons::err!("not implemented yet: {other:?}")),
     }
 }
 
@@ -90,7 +89,7 @@ pub fn solve_all(dir: PathBuf) -> Result<()> {
         solve_quiet(22, dir.join("22.txt"), day22::run)?;
         solve_quiet(23, dir.join("23.txt"), day23::run)?;
         solve_quiet(24, dir.join("24.txt"), day24::run)?;
-        // solve_quiet(25, dir.join("25.txt"), day25::run)?;
+        solve_quiet(25, dir.join("25.txt"), day25::run)?;
         Ok(())
     }
 
